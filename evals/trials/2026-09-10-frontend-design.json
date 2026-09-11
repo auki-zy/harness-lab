@@ -1,0 +1,41 @@
+{
+  "trialId": "2026-09-10-frontend-design",
+  "capability": { "id": "frontend-design", "type": "skill" },
+  "kind": "controlled",
+  "task": {
+    "id": "page-card",
+    "fixture": "adopted/skills/frontend-design/benchmarks/tasks/page-card",
+    "description": "同一个成员卡片页任务：A 无能力直接实现；B 加载 frontend-design 技能后实现（两次独立上下文）"
+  },
+  "conditions": [
+    { "name": "A", "withCapability": false, "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html" },
+    { "name": "B", "withCapability": true, "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html" }
+  ],
+  "measures": {
+    "correctness": { "A": 1.0, "B": 1.0 },
+    "sizeKB": { "A": 12.2, "B": 14.6 },
+    "staticChecks": { "A": "0 外链/脚本；1 label；1 @media", "B": "0 外链/脚本；3 表结构；5 断点" },
+    "notes": "两版都能过静态检查、都能用；观感上用户选了 B（加载能力那版），但没有写理由"
+  },
+  "judge": ["human"],
+  "humanReview": {
+    "mode": "quick",
+    "better": "B",
+    "verdict": "up",
+    "scores": null
+  },
+  "verdict": {
+    "decision": "adopt",
+    "confidence": "medium",
+    "reason": "本条只讲这次受控对比：两版都做到任务要求、静态检查都通过、体积差别很小；用户快速人评给了赞，并选了 B（加载了能力的那版更好），没有写理由。按当时规则「≥1 次可复核试用通过 + 人评赞 → adopt」判采纳（此后规则收紧为「连续两次通过」，见 evals/schema.md 第六节）；能力级状态见 capabilities.json。"
+  },
+  "evidence": [
+    "adopted/skills/frontend-design/EVIDENCE.md",
+    "adopted/skills/frontend-design/benchmarks/SCORING.md",
+    "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html",
+    "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html"
+  ],
+  "model": "deepseek-v4-flash（两条件各一独立上下文子代理）",
+  "date": "2026-09-10",
+  "recordedAt": "2026-09-10T08:07:00+08:00"
+}

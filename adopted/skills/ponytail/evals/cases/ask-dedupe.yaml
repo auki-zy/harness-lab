@@ -1,0 +1,21 @@
+id: ask-dedupe
+title: 写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行…
+description: 用户自己出的题（A 不给技能 / B 给技能；由 agent_judge 判）
+
+input:
+  prompt: |
+    写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行一条；文件不存在时非 0 退出且 stdout 为空。只交付这一个文件，只用 Node 自带能力。
+
+constraints:
+  timeout_seconds: 600
+  max_turns: 8
+
+expect:
+  exit_code: 0
+
+judge:
+  type: agent_judge
+  model: anthropic/deepseek-v4-flash
+  criteria:
+    - "只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准）"
+    - "产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标"

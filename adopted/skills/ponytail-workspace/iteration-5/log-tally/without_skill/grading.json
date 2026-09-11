@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-log-tally.sh",
+      "passed": true,
+      "evidence": "PASS: tally.mjs 输出正确（debug1/error1/info4/warn1），空文件、坏行、缺文件都按约定处理"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

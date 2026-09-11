@@ -1,0 +1,95 @@
+{
+  "trialId": "2026-09-11-ui-ux-pro-max-skillup-3",
+  "capability": {
+    "id": "ui-ux-pro-max",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "ask-202609110857",
+    "fixture": "candidates/skills/ui-ux-pro-max-workspace/iteration-4",
+    "description": "为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false
+    },
+    {
+      "name": "B",
+      "withCapability": true
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 1,
+      "B": 1
+    },
+    "tokensIn": {
+      "A": 118148,
+      "B": 110433
+    },
+    "tokensOut": {
+      "A": 21435,
+      "B": 40076
+    },
+    "tokensTotal": {
+      "A": 139583,
+      "B": 150509
+    },
+    "tokensCached": {
+      "A": 117888,
+      "B": 111744
+    },
+    "durationSec": {
+      "A": 495.9,
+      "B": 401
+    },
+    "steps": {
+      "A": 19,
+      "B": 20
+    },
+    "toolCalls": {
+      "A": 55,
+      "B": 49
+    },
+    "toolMix": {
+      "A": "Edit 28 / Bash 20 / Write 5 / Read 2",
+      "B": "Edit 19 / Bash 14 / Read 7 / Write 5 / Grep 3 / Skill 1"
+    },
+    "staticChecks": {
+      "A": "用例 1/1 通过；断言 3/3；耗时 495.9s",
+      "B": "用例 1/1 通过；断言 3/3；耗时 401.0s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609110857；报告：candidates/skills/ui-ux-pro-max-workspace/iteration-4"
+  },
+  "judge": [
+    "auto",
+    "llm"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "ready",
+    "confidence": "medium",
+    "reason": "机器判定达标：可复核试用已通过 3 次、无退步；对照 A 1/1——采纳与否由你定（在能力详情里给结论）"
+  },
+  "evidence": [
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/result.json",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/benchmark.json",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/report.html",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/benchmark.md",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/COMMIT.txt",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/LICENSE.txt",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SKILL.md",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.json",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.md"
+  ],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-11",
+  "recordedAt": "2026-09-11T09:15:19.474Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "candidates/skills/ui-ux-pro-max-workspace/iteration-4/result.json"
+  },
+  "selfCheck": false
+}

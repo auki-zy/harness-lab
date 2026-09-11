@@ -1,0 +1,97 @@
+{
+  "trialId": "2026-09-11-ponytail-skillup-2",
+  "capability": {
+    "id": "ponytail",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "wc-cli+log-tally",
+    "fixture": "adopted/skills/ponytail-workspace/iteration-4",
+    "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/without_skill/outputs/workspace/wc.mjs"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/with_skill/outputs/workspace/wc.mjs"
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 0,
+      "B": 0
+    },
+    "sizeKB": {
+      "A": 0.7,
+      "B": 0.6
+    },
+    "tokensIn": {
+      "A": 78353,
+      "B": 77909
+    },
+    "tokensOut": {
+      "A": 2777,
+      "B": 1994
+    },
+    "tokensTotal": {
+      "A": 81130,
+      "B": 79903
+    },
+    "tokensCached": {
+      "A": 39351,
+      "B": 38633
+    },
+    "durationSec": {
+      "A": 64.3,
+      "B": 54.9
+    },
+    "steps": {
+      "A": 2,
+      "B": 3
+    },
+    "toolCalls": {
+      "A": 4,
+      "B": 5
+    },
+    "toolMix": {
+      "A": "Write 2 / Bash 2",
+      "B": "Bash 3 / Write 2"
+    },
+    "staticChecks": {
+      "A": "用例 0/2 通过；断言 1/2；耗时 36.1s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+      "B": "用例 0/2 通过；断言 1/2；耗时 23.7s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh"
+    },
+    "notes": "引擎 claude_code / 模型 claude-sonnet-5；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；产物大小 A 0.7 KB / B 0.6 KB；报告：adopted/skills/ponytail-workspace/iteration-4"
+  },
+  "judge": [
+    "auto"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "retry",
+    "confidence": "low",
+    "reason": "又是判分脚本自己的 bug，判据不成立：让判分脚本自带输入这一步是对的，但临时文件用了 `mktemp -d`——Git Bash 给的是 `/tmp/tmp.xxxx/input.txt`，Windows 上的 node 会把它解析成 `C:\\tmp\\...`，四个用例全部报 `ENOENT: no such file or directory`。产物本身是好的（四个 agent 都自报实现通过自测）。已把临时文件改成当前目录下的相对路径，重跑后再下结论。"
+  },
+  "evidence": [
+    "adopted/skills/ponytail-workspace/iteration-4/result.json",
+    "adopted/skills/ponytail-workspace/iteration-4/benchmark.json",
+    "adopted/skills/ponytail-workspace/iteration-4/report.html",
+    "adopted/skills/ponytail-workspace/iteration-4/benchmark.md",
+    "adopted/skills/ponytail-workspace/iteration-4/wc-cli/without_skill/outputs/workspace/wc.mjs",
+    "adopted/skills/ponytail-workspace/iteration-4/wc-cli/with_skill/outputs/workspace/wc.mjs"
+  ],
+  "model": "claude_code / claude-sonnet-5",
+  "date": "2026-09-11",
+  "recordedAt": "2026-09-11T02:58:33.338Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "adopted/skills/ponytail-workspace/iteration-4/result.json"
+  },
+  "selfCheck": false
+}

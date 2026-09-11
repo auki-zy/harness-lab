@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "skill_name": "ui-ux-pro-max",
+    "skill_path": "D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ui-ux-pro-max",
+    "timestamp": "2026-09-11T08:44:58Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "用 Node 写一个把 UI/UX 优先级表中的硬阈值（对比度 4.5:1、触控 44px、正文 16px、禁用 emoji 图标）落地成可判定审计输出的命令行程序",
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 26.717,
+        "tokens": 21894,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ui-ux-pro-max\\evals\\fixtures\\scripts\\check-ui-audit-priority-lint.sh",
+          "passed": true,
+          "evidence": "PASS: ui-audit.mjs 通过 5 条用例（clean-pass、violations-ordered、threshold-boundary、missing-file、bad-json）"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用 Node 写一个把 UI/UX 优先级表中的硬阈值（对比度 4.5:1、触控 44px、正文 16px、禁用 emoji 图标）落地成可判定审计输出的命令行程序",
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 25.342,
+        "tokens": 21193,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ui-ux-pro-max\\evals\\fixtures\\scripts\\check-ui-audit-priority-lint.sh",
+          "passed": true,
+          "evidence": "PASS: ui-audit.mjs 通过 5 条用例（clean-pass、violations-ordered、threshold-boundary、missing-file、bad-json）"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 26.717,
+        "stddev": 0,
+        "min": 26.717,
+        "max": 26.717
+      },
+      "tokens": {
+        "mean": 21894,
+        "stddev": 0,
+        "min": 21894,
+        "max": 21894
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 25.342,
+        "stddev": 0,
+        "min": 25.342,
+        "max": 25.342
+      },
+      "tokens": {
+        "mean": 21193,
+        "stddev": 0,
+        "min": 21193,
+        "max": 21193
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+1.4",
+      "tokens": "+701.0"
+    }
+  }
+}

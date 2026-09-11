@@ -1,0 +1,103 @@
+{
+  "trialId": "2026-09-11-ponytail-skillup-4",
+  "capability": {
+    "id": "ponytail",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "wc-cli+log-tally",
+    "fixture": "adopted/skills/ponytail-workspace/iteration-6",
+    "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs"
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 1,
+      "B": 1
+    },
+    "sizeKB": {
+      "A": 0.8,
+      "B": 0.6
+    },
+    "tokensIn": {
+      "A": 37663,
+      "B": 37429
+    },
+    "tokensOut": {
+      "A": 2716,
+      "B": 2917
+    },
+    "tokensTotal": {
+      "A": 40379,
+      "B": 40346
+    },
+    "tokensCached": {
+      "A": 18688,
+      "B": 19328
+    },
+    "durationSec": {
+      "A": 40.4,
+      "B": 40.8
+    },
+    "steps": {
+      "A": 2,
+      "B": 2
+    },
+    "toolCalls": {
+      "A": 6,
+      "B": 6
+    },
+    "toolMix": {
+      "A": "Bash 4 / Write 2",
+      "B": "Bash 4 / Write 2"
+    },
+    "staticChecks": {
+      "A": "用例 2/2 通过；断言 2/2；耗时 19.9s",
+      "B": "用例 2/2 通过；断言 2/2；耗时 18.3s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；产物大小 A 0.8 KB / B 0.6 KB；报告：adopted/skills/ponytail-workspace/iteration-6"
+  },
+  "judge": [
+    "auto",
+    "human"
+  ],
+  "humanReview": {
+    "mode": "quick",
+    "verdict": "up",
+    "scores": null,
+    "reviewedAt": "2026-09-11T08:39:50.547Z"
+  },
+  "verdict": {
+    "decision": "adopt",
+    "confidence": "medium",
+    "reason": "可复核试用已通过 3 次，无退步；对照 A 2/2"
+  },
+  "evidence": [
+    "adopted/skills/ponytail-workspace/iteration-6/result.json",
+    "adopted/skills/ponytail-workspace/iteration-6/benchmark.json",
+    "adopted/skills/ponytail-workspace/iteration-6/report.html",
+    "adopted/skills/ponytail-workspace/iteration-6/benchmark.md",
+    "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs",
+    "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs"
+  ],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-11",
+  "recordedAt": "2026-09-11T06:36:12.598Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "adopted/skills/ponytail-workspace/iteration-6/result.json"
+  },
+  "selfCheck": false
+}

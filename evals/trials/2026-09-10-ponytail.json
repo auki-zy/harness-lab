@@ -1,0 +1,40 @@
+{
+  "trialId": "2026-09-10-ponytail",
+  "capability": { "id": "ponytail", "type": "skill" },
+  "kind": "mock",
+  "task": {
+    "id": "wc-cli",
+    "fixture": "adopted/skills/ponytail/benchmarks/tasks/wc-cli",
+    "description": "固定任务：写一个只用 Node 自带的 wc.mjs（输出 lines/words/chars 的 JSON，只交付这一个文件）。A 不加载能力、B 加载 ponytail，各一次独立实现，产物与检查脚本都留在仓库里"
+  },
+  "conditions": [
+    { "name": "A", "withCapability": false, "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs" },
+    { "name": "B", "withCapability": true, "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs" }
+  ],
+  "measures": {
+    "correctness": { "A": 1.0, "B": 1.0 },
+    "sizeKB": { "A": 0.6, "B": 0.4 },
+    "staticChecks": {
+      "A": "非空代码行 19；第三方 import 0；交付文件 2（wc.mjs + test.mjs，task 明确要求只交付 wc.mjs）",
+      "B": "非空代码行 10；第三方 import 0；交付文件 1（只有 wc.mjs）"
+    },
+    "notes": "两版输出都正确（5/10/58）、缺文件都 exit 1 且 stdout 为空；差别在省不省与是否守约束：B 用不到一半的代码达成同一结果且只交付一个文件，A 多交付了任务禁止的 test.mjs，并写了未要求的 usage 分支与 try/catch（B 靠 Node 原生 ENOENT 满足缺文件条款）。B 的次要瑕疵：无参数调用会抛未捕获栈回溯（exit 1、stdout 空，仍符合口径）。"
+  },
+  "judge": ["auto", "llm"],
+  "humanReview": null,
+  "verdict": {
+    "decision": "hold",
+    "confidence": "medium",
+    "reason": "本条只讲这次 mock 试用：B 胜且达标（评审 winner=B，constraint 5/5、minimality 5/5、correctness 5/5、verifiability 3/5，confidence high）。但按规则「可复核试用只有 1 次」先挂起——再跑一次可复核试用且全过即可判 adopt。"
+  },
+  "evidence": [
+    "adopted/skills/ponytail/benchmarks/tasks/wc-cli/description.md",
+    "adopted/skills/ponytail/benchmarks/tasks/wc-cli/check.mjs",
+    "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs",
+    "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/test.mjs",
+    "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs"
+  ],
+  "model": "deepseek-v4-flash（两条件各一独立上下文子代理；auto = check.mjs，llm = 独立评审子代理）",
+  "date": "2026-09-10",
+  "recordedAt": "2026-09-10T18:05:00+08:00"
+}

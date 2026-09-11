@@ -1,0 +1,97 @@
+{
+  "trialId": "2026-09-11-ponytail-skillup",
+  "capability": {
+    "id": "ponytail",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "wc-cli+log-tally",
+    "fixture": "adopted/skills/ponytail-workspace/iteration-3",
+    "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/without_skill/outputs/workspace/wc.mjs"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/with_skill/outputs/workspace/wc.mjs"
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 0,
+      "B": 0
+    },
+    "sizeKB": {
+      "A": 0.6,
+      "B": 0.6
+    },
+    "tokensIn": {
+      "A": 78069,
+      "B": 78325
+    },
+    "tokensOut": {
+      "A": 1884,
+      "B": 1849
+    },
+    "tokensTotal": {
+      "A": 79953,
+      "B": 80174
+    },
+    "tokensCached": {
+      "A": 38419,
+      "B": 39186
+    },
+    "durationSec": {
+      "A": 117.4,
+      "B": 90.9
+    },
+    "steps": {
+      "A": 2,
+      "B": 3
+    },
+    "toolCalls": {
+      "A": 5,
+      "B": 6
+    },
+    "toolMix": {
+      "A": "Bash 3 / Write 2",
+      "B": "Bash 4 / Write 2"
+    },
+    "staticChecks": {
+      "A": "用例 0/2 通过；断言 1/2；耗时 27.8s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+      "B": "用例 0/2 通过；断言 1/2；耗时 30.3s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh"
+    },
+    "notes": "引擎 claude_code / 模型 claude-sonnet-5；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；产物大小 A 0.6 KB / B 0.6 KB；报告：adopted/skills/ponytail-workspace/iteration-3"
+  },
+  "judge": [
+    "auto"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "retry",
+    "confidence": "low",
+    "reason": "这次评测的用例配置有 bug，判据不成立（不是能力没做到，也不是能力做到了）：两条用例都把输入放在工作区里，而 agent 会自己造/清理测试文件——wc-cli 的两个 agent 都覆写了工作区的 input.txt（判分读到 2 行/25 字符的自家样例），log-tally 的 agent 清理测试文件时把 events.jsonl 删了（判分直接说「工作区里没有 events.jsonl」）。四个用例里 agent 自己都报「实现已通过自测」，产物也在。已把输入改成随用例内联、判分脚本自带同一份输入，重跑后再下结论。"
+  },
+  "evidence": [
+    "adopted/skills/ponytail-workspace/iteration-3/result.json",
+    "adopted/skills/ponytail-workspace/iteration-3/benchmark.json",
+    "adopted/skills/ponytail-workspace/iteration-3/report.html",
+    "adopted/skills/ponytail-workspace/iteration-3/benchmark.md",
+    "adopted/skills/ponytail-workspace/iteration-3/wc-cli/without_skill/outputs/workspace/wc.mjs",
+    "adopted/skills/ponytail-workspace/iteration-3/wc-cli/with_skill/outputs/workspace/wc.mjs"
+  ],
+  "model": "claude_code / claude-sonnet-5",
+  "date": "2026-09-11",
+  "recordedAt": "2026-09-11T02:53:34.340Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "adopted/skills/ponytail-workspace/iteration-3/result.json"
+  },
+  "selfCheck": false
+}

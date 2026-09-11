@@ -1,0 +1,99 @@
+{
+  "trialId": "2026-09-11-ui-ux-pro-max-skillup-2",
+  "capability": {
+    "id": "ui-ux-pro-max",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "ui-audit-priority-lint",
+    "fixture": "candidates/skills/ui-ux-pro-max-workspace/iteration-3",
+    "description": "用 Node 写一个把 UI/UX 优先级表中的硬阈值（对比度 4.5:1、触控 44px、正文 16px、禁用 emoji 图标）落地成可判定审计输出的命令行程序（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 1,
+      "B": 1
+    },
+    "sizeKB": {
+      "A": 1.8,
+      "B": 1.6
+    },
+    "tokensIn": {
+      "A": 19695,
+      "B": 20612
+    },
+    "tokensOut": {
+      "A": 1498,
+      "B": 1282
+    },
+    "tokensTotal": {
+      "A": 21193,
+      "B": 21894
+    },
+    "tokensCached": {
+      "A": 19200,
+      "B": 20224
+    },
+    "durationSec": {
+      "A": 25.3,
+      "B": 26.7
+    },
+    "steps": {
+      "A": 1,
+      "B": 1
+    },
+    "toolCalls": {
+      "A": 5,
+      "B": 6
+    },
+    "toolMix": {
+      "A": "Bash 4 / Write 1",
+      "B": "Bash 5 / Write 1"
+    },
+    "staticChecks": {
+      "A": "用例 1/1 通过；断言 2/2；耗时 25.3s",
+      "B": "用例 1/1 通过；断言 2/2；耗时 26.7s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ui-audit-priority-lint；产物大小 A 1.8 KB / B 1.6 KB；报告：candidates/skills/ui-ux-pro-max-workspace/iteration-3"
+  },
+  "judge": [
+    "auto"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "ready",
+    "confidence": "medium",
+    "reason": "机器判定达标：可复核试用已通过 2 次、无退步；对照 A 1/1——采纳与否由你定（在能力详情里给结论）"
+  },
+  "evidence": [
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/result.json",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/benchmark.json",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/report.html",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/benchmark.md",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SKILL.md",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.md",
+    "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+  ],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-11",
+  "recordedAt": "2026-09-11T08:44:58.426Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/result.json"
+  },
+  "selfCheck": false
+}

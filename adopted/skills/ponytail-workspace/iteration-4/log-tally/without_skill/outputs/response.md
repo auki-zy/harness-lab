@@ -1,0 +1,1 @@
+All cases pass. `tally.mjs` created — reads the JSONL file, counts `level` occurrences, and prints a single-line JSON object with keys sorted lexicographically; missing file/invalid JSON/missing `level` all exit 1 with stderr message, empty file prints `{}`.

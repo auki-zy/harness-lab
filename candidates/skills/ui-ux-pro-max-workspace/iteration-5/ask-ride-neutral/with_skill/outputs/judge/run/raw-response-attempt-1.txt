@@ -1,0 +1,36 @@
+{
+  "results": [
+    {
+      "criterion_id": "criterion-1",
+      "passed": true,
+      "evidence": [
+        "任务要求逐条比对（任务原文在 transcript turn=1：『交付一个自包含的 index.html，放项目根目录，CSS 和 JS 都内联，不装依赖、不跑构建，双击就能打开。页面里要有：顶部导航、一张主视觉、三张功能卡、两档订阅方案对比、一个订阅表单（邮箱填错要当场提示哪里错）、页脚；再加一个明暗主题开关，默认跟着系统走』）",
+        "顶部导航：index.html 中 <header class=\"site-header\"> 内含 <nav class=\"nav\" aria-label=\"主导航\">，含 功能/方案/订阅 三个锚点链接，实测 320px 下仍为 64px 单行不换行",
+        "主视觉：存在 <section class=\"hero\">，其中含唯一 h1，实测文本为『夜路怎么走，出门前就心里有数』",
+        "三张功能卡：id=\"features\" 区块内 <div class=\"cards\"> 恰好含 3 个 <article class=\"card\">，各带一张内联 SVG 图标 + h3 + p",
+        "两档订阅方案对比：id=\"pricing\" 区块内 <div class=\"plans\"> 含 2 个 <article class=\"plan\">（夜行者 ¥0 / 常客 ¥18 月付、¥180 年付），且用 .is-off 项形成逐条对比",
+        "订阅表单：<form id=\"signupForm\" novalidate> 含 label for=\"email\"、input type=email、按钮；实测提交空值/@缺失/两个@/缺用户名/缺域名/缺后缀六类输入，错误文案逐条不同且都能说清哪里错（如『邮箱缺少 @ 符号，正确格式类似 name@example.com。』『@ 前面缺少用户名…』『域名缺少后缀…』），提交失败后 document.activeElement 回到 #email，且 email 被置 aria-invalid=\"true\"，错误节点为 role=\"alert\"",
+        "页脚：存在 <footer class=\"site-footer\">，含品牌、页面链接列、联系列与 footer-bottom 版权行",
+        "明暗主题开关默认跟系统：实测在 prefers-color-scheme 分别模拟 dark 与 light 时，首屏 documentElement[data-theme] 均为 \"auto\"；连续点击按钮实测循环 auto→light→dark→auto，且按钮文案/aria-label 同步更新（『主题模式：跟随系统。点击切换到浅色。』）",
+        "自包含 / 无依赖 / 双击可开：全文 0 个 @import、0 处 googleapis，外部引用仅有 data: URI favicon、页内锚点、mailto: 和一个仅存在于注释中的示例 fetch URL；在无服务器、以 file:/// 直接导航时页面正常渲染并完成全部交互实测",
+        "键盘与单手操作：18 个可聚焦元素全部可被程序化聚焦且实测均有可见焦点环（无 outline:none+box-shadow:none 项），Tab 顺序与 DOM 顺序一致；无任何需要 hover 才能触发的流程",
+        "任务给出的验收项全部实测通过：8 档宽度（320/360/390/414/768/1024/1280/1440）横向溢出均为 0，无任何元素超出视口；各档控制台 0 报错 0 警告 0 异常；暗色下 79 组前景/背景实测最低 6.01:1（浅色最低 4.96:1），均 ≥ 4.5:1，『暗色后文字看得清』成立",
+        "任务未要求的内容（如后端真实提交、44px 触控目标）未作为扣分依据；实测仅页脚两个文字链宽度 30px，属任务未提出的项，不计入"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-2",
+      "passed": true,
+      "evidence": [
+        "交付物在：项目根目录 C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-649008052\\index.html 存在，51073 字节、1349 行",
+        "能打开：用零依赖的 Node 内置 WebSocket 驱动无头 Chrome，以 file:/// 协议直接导航该文件（等价于双击打开，无构建、无服务器），页面加载完成可正常查询 DOM 并交互",
+        "格式没错：单文件自包含，1 个 <style> 块（行 1039–20187）与 2 个 <script> 块（head 内防闪主题脚本 + 文末主脚本）均内联，无任何外部 CSS/JS 依赖或模块加载",
+        "功能可跑通：实测主题三态循环点击生效、18 个可聚焦元素键盘可达、表单六类非法输入均当场给出定位明确的错误提示、合法输入 rider@example.com 返回成功状态『订阅成功，我们会把每周的夜骑简报发到 rider@example.com。』",
+        "无运行时故障：8 档视口下控制台 0 报错、0 警告、0 未捕获异常，横向溢出 0，页面结构（导航/主视觉/三卡/两方案/表单/页脚）完整渲染",
+        "轻微表述差异（不影响交付）：交付说明称『52 KB、1348 行』，实测为 51073 字节、1349 行，属四舍五入与计数口径差异，文件本体正确可用"
+      ],
+      "failures": []
+    }
+  ]
+}

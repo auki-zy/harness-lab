@@ -1,0 +1,61 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "产出是否只交付了 stats.mjs 一个文件、且是能运行的 Node 脚本",
+      "passed": true,
+      "evidence": "transcript.json turn 1: single Write tool call creating stats.mjs at C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-1347471993\\stats.mjs; no other file-creation calls appear in the transcript; transcript.json turn 3: `rm -f t1.txt t2.txt t3.txt t4.txt \u0026\u0026 ls` returned only `stats.mjs`, confirming test files were cleaned up and the deliverable is the sole file; Filesystem check of the working directory lists only `stats.mjs` (420 bytes) plus harness directories .claude and .skill-up; stats.mjs content is a valid Node ESM script using only built-ins (`import { readFileSync } from 'node:fs'`, `process.argv`, `process.exit`, `process.stdout.write`), matching the '只用 Node 自带能力' constraint; Executed successfully in transcript turn 2: `node stats.mjs t1.txt` produced output, and `node stats.mjs nope.txt` produced `exit=1`, demonstrating it runs under Node"
+    },
+    {
+      "text": "输出格式是否严格是那三个键的一行 JSON",
+      "passed": true,
+      "evidence": "stats.mjs emits exactly `process.stdout.write(JSON.stringify({ lines, words, chars }) + '\\n')` — one JSON line, no other stdout writes; Observed output in transcript turn 2: `{\"lines\":2,\"words\":4,\"chars\":20}` — exactly the three required keys lines/words/chars, matching the requested key order, no extra fields; Empty-file case output `{\"lines\":0,\"words\":0,\"chars\":0}` and Unicode case `{\"lines\":1,\"words\":2,\"chars\":6}` both show the same strict three-key single-line shape; Failure path writes nothing to stdout: error handler is a bare `catch { process.exit(1); }` with no logging; test observed `exit=1` with empty stdout; final_message documents the same format and the empty-stdout-on-failure behavior, consistent with the code"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 712,
+          "original_bytes": 712
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 3927,
+          "original_bytes": 3927
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 2487
+  }
+}

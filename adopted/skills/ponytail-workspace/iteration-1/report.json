@@ -1,0 +1,95 @@
+{
+  "skill_name": "ponytail",
+  "schema_version": "v1alpha1",
+  "engine_name": "stub-local",
+  "model_name": "stub",
+  "requested_configuration": {
+    "role": "runner",
+    "engine": "stub-local",
+    "protocol": "custom",
+    "model": "stub"
+  },
+  "applied_configuration": {
+    "role": "runner",
+    "engine": "stub-local",
+    "protocol": "custom",
+    "model": "stub"
+  },
+  "start_time": "2026-09-10T18:17:41.2905863+08:00",
+  "end_time": "2026-09-10T18:17:43.8165305+08:00",
+  "case_results": [
+    {
+      "case_id": "wc-cli",
+      "title": "用最省的写法做 wc 统计",
+      "status": "PASS",
+      "duration_ms": 307,
+      "turns": 1,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+            "passed": true,
+            "evidence": "PASS: wc.mjs 输出正确（lines/words/chars = 5/10/58），缺文件时退出码非 0"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "写一个 Node 脚本 `wc.mjs`（放在当前工作目录），把 `input.txt` 统计成一行 JSON：\n\n用法：`node wc.mjs \u003c文件\u003e`，输出形如 `{\"lines\":N,\"words\":N,\"chars\":N}`，不要输出别的。\n\n口径：\n- lines = 按 \\n 切分的行数；文件以 \\n 结尾时末尾那段空行不计。\n- words = 去掉首尾空白后按连续空白切分；空文件为 0。\n- chars = 字符数（不是字节数）。\n- 文件不存在 → 错误写 stderr、退出码 1。\n- 只允许用 Node 自带能力，不允许安装依赖；只交付 `wc.mjs` 一个文件。\n",
+      "response": "wc.mjs → skipped: 参数校验与 try/catch，add when 需要自定义错误文案。"
+    },
+    {
+      "case_id": "wc-cli",
+      "title": "用最省的写法做 wc 统计",
+      "status": "PASS",
+      "duration_ms": 288,
+      "turns": 1,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+            "passed": true,
+            "evidence": "PASS: wc.mjs 输出正确（lines/words/chars = 5/10/58），缺文件时退出码非 0"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "without_skill",
+      "prompt": "写一个 Node 脚本 `wc.mjs`（放在当前工作目录），把 `input.txt` 统计成一行 JSON：\n\n用法：`node wc.mjs \u003c文件\u003e`，输出形如 `{\"lines\":N,\"words\":N,\"chars\":N}`，不要输出别的。\n\n口径：\n- lines = 按 \\n 切分的行数；文件以 \\n 结尾时末尾那段空行不计。\n- words = 去掉首尾空白后按连续空白切分；空文件为 0。\n- chars = 字符数（不是字节数）。\n- 文件不存在 → 错误写 stderr、退出码 1。\n- 只允许用 Node 自带能力，不允许安装依赖；只交付 `wc.mjs` 一个文件。\n",
+      "response": "已实现 wc.mjs，并顺手抽了一个 helpers.mjs。"
+    }
+  ],
+  "total_tokens": 0,
+  "judge_tokens": 0,
+  "overall_tokens": 0
+}

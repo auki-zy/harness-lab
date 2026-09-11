@@ -1,0 +1,81 @@
+{
+  "skill_name": "ponytail",
+  "schema_version": "v1alpha1",
+  "engine_name": "qodercli",
+  "model_name": "auto",
+  "requested_configuration": {
+    "role": "runner",
+    "engine": "qodercli",
+    "protocol": "qoder",
+    "model": "auto"
+  },
+  "applied_configuration": {
+    "role": "runner",
+    "engine": "qodercli",
+    "protocol": "qoder",
+    "model": "auto"
+  },
+  "start_time": "2026-09-10T18:56:06.8751027+08:00",
+  "end_time": "2026-09-10T18:56:09.0737971+08:00",
+  "case_results": [
+    {
+      "case_id": "wc-cli",
+      "title": "用最省的写法做 wc 统计",
+      "status": "ERROR",
+      "duration_ms": 770,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: qodercli run failed (exit 127): /usr/bin/bash: line 1: qodercli: command not found\n",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "写一个 Node 脚本 `wc.mjs`（放在当前工作目录），把 `input.txt` 统计成一行 JSON：\n\n用法：`node wc.mjs \u003c文件\u003e`，输出形如 `{\"lines\":N,\"words\":N,\"chars\":N}`，不要输出别的。\n\n口径：\n- lines = 按 \\n 切分的行数；文件以 \\n 结尾时末尾那段空行不计。\n- words = 去掉首尾空白后按连续空白切分；空文件为 0。\n- chars = 字符数（不是字节数）。\n- 文件不存在 → 错误写 stderr、退出码 1。\n- 只允许用 Node 自带能力，不允许安装依赖；只交付 `wc.mjs` 一个文件。\n",
+      "response": "/usr/bin/bash: line 1: qodercli: command not found\n"
+    },
+    {
+      "case_id": "wc-cli",
+      "title": "用最省的写法做 wc 统计",
+      "status": "ERROR",
+      "duration_ms": 295,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: qodercli run failed (exit 127): /usr/bin/bash: line 1: qodercli: command not found\n",
+      "grading": null,
+      "configuration": "without_skill",
+      "prompt": "写一个 Node 脚本 `wc.mjs`（放在当前工作目录），把 `input.txt` 统计成一行 JSON：\n\n用法：`node wc.mjs \u003c文件\u003e`，输出形如 `{\"lines\":N,\"words\":N,\"chars\":N}`，不要输出别的。\n\n口径：\n- lines = 按 \\n 切分的行数；文件以 \\n 结尾时末尾那段空行不计。\n- words = 去掉首尾空白后按连续空白切分；空文件为 0。\n- chars = 字符数（不是字节数）。\n- 文件不存在 → 错误写 stderr、退出码 1。\n- 只允许用 Node 自带能力，不允许安装依赖；只交付 `wc.mjs` 一个文件。\n",
+      "response": "/usr/bin/bash: line 1: qodercli: command not found\n"
+    },
+    {
+      "case_id": "log-tally",
+      "title": "用最省的写法统计 NDJSON 日志里各等级出现次数",
+      "status": "ERROR",
+      "duration_ms": 215,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: qodercli run failed (exit 127): /usr/bin/bash: line 1: qodercli: command not found\n",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "写一个 Node 脚本 `tally.mjs`（放在当前工作目录），统计 `events.jsonl` 里每个 level 出现的次数：\n\n用法：`node tally.mjs \u003c文件\u003e`，输出一行 JSON，键是 level、值是次数，**键按字典序升序**，不要输出别的。\n\n口径：\n- 每行是一个 JSON 对象，取它的 `level` 字段（字符串）。\n- 空文件 → 输出 `{}`。\n- 出现非 JSON 行，或某行没有 `level` 字段 → 错误写 stderr、退出码 1。\n- 文件不存在 → 错误写 stderr、退出码 1。\n- 只允许用 Node 自带能力，不允许安装依赖；只交付 `tally.mjs` 一个文件。\n",
+      "response": "/usr/bin/bash: line 1: qodercli: command not found\n"
+    },
+    {
+      "case_id": "log-tally",
+      "title": "用最省的写法统计 NDJSON 日志里各等级出现次数",
+      "status": "ERROR",
+      "duration_ms": 226,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: qodercli run failed (exit 127): /usr/bin/bash: line 1: qodercli: command not found\n",
+      "grading": null,
+      "configuration": "without_skill",
+      "prompt": "写一个 Node 脚本 `tally.mjs`（放在当前工作目录），统计 `events.jsonl` 里每个 level 出现的次数：\n\n用法：`node tally.mjs \u003c文件\u003e`，输出一行 JSON，键是 level、值是次数，**键按字典序升序**，不要输出别的。\n\n口径：\n- 每行是一个 JSON 对象，取它的 `level` 字段（字符串）。\n- 空文件 → 输出 `{}`。\n- 出现非 JSON 行，或某行没有 `level` 字段 → 错误写 stderr、退出码 1。\n- 文件不存在 → 错误写 stderr、退出码 1。\n- 只允许用 Node 自带能力，不允许安装依赖；只交付 `tally.mjs` 一个文件。\n",
+      "response": "/usr/bin/bash: line 1: qodercli: command not found\n"
+    }
+  ],
+  "total_tokens": 0,
+  "judge_tokens": 0,
+  "overall_tokens": 0
+}

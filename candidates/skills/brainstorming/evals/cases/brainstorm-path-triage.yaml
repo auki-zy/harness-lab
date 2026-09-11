@@ -1,0 +1,65 @@
+id: brainstorm-path-triage
+title: 按 brainstorming 的三条路径给请求分类，并输出该路径在动手前应产出的东西（含拿不准取重路径）
+description: 这个技能的第一条硬主张是「先分类、把分类说出来，再决定产出多重的仪式」，并明确规定拿不准时取更重的路径、隐藏复杂度要升级路径。用例分别打到三条路径的判定、interface 改动触发的路径升级、信息缺失时默认取最重路径，以及读不到输入时不产出任何东西，能直接看出实现是否真的按分类优先、重路径优先，而不是一股脑输出一个通用结果。
+
+input:
+  prompt: |
+    在空目录里写一个 Node 脚本，文件名必须是 triage.mjs，只用 Node 自带能力（不要装任何依赖，不要生成其他文件）。
+
+    它把一条「改动请求」按 brainstorming 流程分类到三条路径之一，并给出该路径在写代码之前应当产出的东西。
+
+    输入：命令行第一个参数是一个文本文件路径。文件里每行形如 key: value，可能出现的 key 有：
+    - question：这条请求是不是一个可行性问题（「能不能…」「是否可能…」），它的产出是一个答案，而不是要长期保留的代码。取值 yes / no。
+    - existing-flow：要改的那条流程是否已经存在于仓库里、可以直接读到。取值 yes / no。
+    - shared-interface：这条请求是否会重构组件之间的关系，或改动别人依赖的接口。取值 yes / no。
+
+    判定规则，按顺序命中即停：
+    1. shared-interface: yes → architectural（会动别人依赖的接口，一律按最重的路径）
+    2. 否则 question: yes → spike
+    3. 否则 existing-flow: yes → bounded
+    4. 否则（包括字段缺失、文件为空、取值不认识）→ architectural（拿不准时取更重的路径）
+
+    输出到 stdout，两行，不要多也不要少，不要有空行：
+    - 第一行是路径名，只能是 spike、bounded、architectural 三者之一；
+    - 第二行是该路径在动手前要产出的东西：spike → probe，bounded → chat-design，architectural → spec。
+
+    退出码：能正常判定一律 0；如果输入文件读不到（不存在或无法读取），退出码非 0，并且不要往 stdout 写任何内容（不要求写错误信息）。
+
+    只交付 triage.mjs 这一个文件。
+
+context:
+  files:
+    "request-spike.txt": |
+      question: yes
+      existing-flow: yes
+      shared-interface: no
+
+    "request-bounded.txt": |
+      question: no
+      existing-flow: yes
+      shared-interface: no
+
+    "request-arch.txt": |
+      question: no
+      existing-flow: no
+      shared-interface: no
+
+    "request-upgrade.txt": |
+      question: yes
+      existing-flow: yes
+      shared-interface: yes
+
+    "request-empty.txt": |
+
+
+constraints:
+  timeout_seconds: 300
+  max_turns: 4
+
+expect:
+  exit_code: 0
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-brainstorm-path-triage.sh
+  timeout_seconds: 60

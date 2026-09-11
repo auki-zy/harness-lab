@@ -1,0 +1,61 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "产出是否只交付了 stats.mjs 一个文件、且是能运行的 Node 脚本",
+      "passed": true,
+      "evidence": "transcript 中唯一一次 Write 调用创建了 C:\\\\Users\\\\yu.zhao\\\\AppData\\\\Local\\\\Temp\\\\skill-up-1129600600\\\\stats.mjs，内容是以 `#!/usr/bin/env node` 开头的 ESM 脚本，仅 import `node:fs` 的 readFileSync。; transcript turn 3 的 Bash 运行结果显示 `node stats.mjs t1.txt` 等命令成功执行并输出了 JSON，证明脚本可运行且为 Node 脚本。; 最终消息（final_message）明确说明「目录里只有 `stats.mjs`（测试文件已删）」，且 transcript 中测试用临时文件 t1.txt~t4.txt 由 `rm -f t1.txt t2.txt t3.txt t4.txt` 在同一命令中清理，未遗留其他交付文件。"
+    },
+    {
+      "text": "输出格式是否严格是那三个键的一行 JSON",
+      "passed": true,
+      "evidence": "脚本以 `process.stdout.write(JSON.stringify({ lines, words, chars: text.length }) + '\\n')` 输出，对象字面量恰好包含 lines、words、chars 三个键，无其他字段。; transcript turn 3 实际运行输出为 `{\"lines\":2,\"words\":5,\"chars\":24}`、`{\"lines\":2,\"words\":2,\"chars\":3}`、`{\"lines\":0,\"words\":0,\"chars\":0}`、`{\"lines\":3,\"words\":1,\"chars\":7}`，每个文件一行 JSON，键名与规格一致。; 错误路径只写 stderr：turn 4 结果显示 `node stats.mjs nope.txt` 与无参数调用均为 `exit=1 stdout=[]`，stdout 无额外输出；正常路径 stdout 也无其他内容。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 1499,
+          "original_bytes": 1499
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 5028,
+          "original_bytes": 5028
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 3275
+  }
+}

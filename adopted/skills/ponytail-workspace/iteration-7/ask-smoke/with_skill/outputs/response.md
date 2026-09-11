@@ -1,0 +1,16 @@
+目录里只有 `stats.mjs`，已实测验证：
+
+```
+$ node stats.mjs t1.txt     # "hello world\nfoo bar\n"
+{"lines":2,"words":4,"chars":20}
+$ node stats.mjs t2.txt     # 空文件
+{"lines":0,"words":0,"chars":0}
+$ node stats.mjs t3.txt     # "no trailing newline"
+{"lines":1,"words":3,"chars":19}
+$ node stats.mjs t4.txt     # "你好 世界\n"
+{"lines":1,"words":2,"chars":6}
+$ node stats.mjs nope.txt   # 不存在
+exit=1（stdout 为空）
+```
+
+口径：行数按 `\r\n|\r|\n` 切分，结尾换行不算额外一行；词数按空白符分词；字符数按 Unicode 码点计（中文一个字算 1）。文件读取失败（不存在/无权限/未传参数）时 `process.exit(1)`，不写任何 stdout。

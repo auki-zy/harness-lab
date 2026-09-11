@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>skill-up Report: ui-ux-pro-max</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fa; --surface: #ffffff; --border: #e5e7eb;
+      --text: #0f172a; --text-muted: #94a3b8;
+      --accent: #1051fe; --accent-hover: #0d42d4;
+      --green: #10b981; --green-bg: #d1fae5;
+      --red: #dc2626; --red-bg: #fee2e2;
+      --skip: #ca8a04; --skip-bg: #fef9c3;
+      --error-color: #ea580c; --error-bg: #fff7ed;
+      --header-bg: #0f172a; --header-text: #ffffff;
+      --radius: 6px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+
+    .header { background: var(--header-bg); color: var(--header-text); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    .header-brand { display: flex; align-items: center; gap: 0.75rem; }
+    .header-brand .logo { width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0; object-fit: contain; }
+    .header-brand .title-block { display: flex; flex-direction: column; }
+    .header h1 { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+    .header .meta { font-size: 0.8rem; opacity: 0.7; margin-top: 0.25rem; }
+    .header .progress { font-size: 0.875rem; opacity: 0.8; text-align: right; }
+
+    .summary-bar { display: flex; gap: 1rem; padding: 0.75rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; flex-shrink: 0; }
+    .summary-card { text-align: center; min-width: 80px; }
+    .summary-card .label { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .summary-card .value { font-size: 1.25rem; font-weight: bold; margin-top: 0.1rem; }
+    .clr-pass { color: var(--green); } .clr-fail { color: var(--red); }
+    .clr-skip { color: var(--skip); } .clr-error { color: var(--error-color); }
+
+    .view-tabs { display: flex; gap: 0; padding: 0 2rem; background: var(--bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .view-tab { font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 0.625rem 1.25rem; font-size: 0.8125rem; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text-muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    .cases-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+    .cases-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    .case-sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.2s ease, min-width 0.2s ease; }
+    .case-sidebar.collapsed { width: 40px; min-width: 40px; }
+    .case-sidebar.collapsed .sidebar-header-title,
+    .case-sidebar.collapsed .case-list { display: none; }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg); flex-shrink: 0; }
+    .sidebar-header-title { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
+    .sidebar-header-title .count { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.05rem 0.4rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+    .sidebar-toggle { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    .sidebar-toggle:hover { color: var(--text); border-color: var(--text-muted); background: var(--surface); }
+    .case-sidebar.collapsed .sidebar-header { padding: 0.75rem 0.25rem; justify-content: center; }
+    .case-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .case-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1rem; cursor: pointer; border-left: 3px solid transparent; font-size: 0.8125rem; transition: background 0.12s; }
+    .case-item:hover { background: var(--bg); }
+    .case-item.active { background: var(--bg); border-left-color: var(--accent); }
+    .case-item .case-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--text-muted); }
+    .case-item .case-dot.dot-pass { background: var(--green); }
+    .case-item .case-dot.dot-fail { background: var(--red); }
+    .case-item .case-dot.dot-skip { background: var(--skip); }
+    .case-item .case-dot.dot-error { background: var(--error-color); }
+    .case-item .case-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .case-item .case-index { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 0.7rem; color: var(--text-muted); flex-shrink: 0; }
+
+    .main { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); flex-shrink: 0; }
+    .section-header { font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; gap: 0.75rem; }
+    .section-body { padding: 1rem; }
+
+    .status-badge { display: inline-block; padding: 0.2rem 0.625rem; border-radius: 9999px; font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .status-badge.sb-pass { background: var(--green-bg); color: var(--green); }
+    .status-badge.sb-fail { background: var(--red-bg); color: var(--red); }
+    .status-badge.sb-skip { background: var(--skip-bg); color: var(--skip); }
+    .status-badge.sb-error { background: var(--error-bg); color: var(--error-color); }
+
+    .case-info { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; font-size: 0.875rem; }
+    .case-info .info-item { display: flex; align-items: center; gap: 0.25rem; }
+    .case-info .info-label { color: var(--text-muted); font-size: 0.75rem; }
+    .case-header { flex-wrap: wrap; }
+    .case-header-metrics { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 0.7rem; font-weight: 400; text-transform: none; letter-spacing: normal; color: var(--text-muted); }
+    .compact-metrics { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+    .compact-metrics strong { color: var(--text); font-size: 0.7rem; font-weight: 600; }
+    .compact-metrics.delta { opacity: 0.8; }
+    .metrics-divider { opacity: 0.6; }
+
+    .error-box { background: var(--error-bg); border: 1px solid var(--error-color); border-radius: 4px; padding: 0.75rem; color: var(--error-color); font-size: 0.875rem; white-space: pre-wrap; }
+
+    .grades-toggle { display: flex; align-items: center; cursor: pointer; user-select: none; }
+    .grades-toggle:hover { color: var(--accent); }
+    .grades-toggle .arrow { margin-right: 0.5rem; transition: transform 0.15s; font-size: 0.75rem; }
+    .grades-toggle .arrow.open { transform: rotate(90deg); }
+    .grades-content { display: none; margin-top: 0.75rem; }
+    .grades-content.open { display: block; }
+    .grades-summary { font-size: 0.875rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+    .grade-badge { display: inline-block; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list { list-style: none; }
+    .assertion-item { padding: 0.625rem 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem; }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status { font-weight: 600; margin-right: 0.5rem; }
+    .assertion-status.a-pass { color: var(--green); }
+    .assertion-status.a-fail { color: var(--red); }
+    .assertion-evidence { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; padding-left: 1.5rem; }
+
+    .prompt-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem; font-size: 0.875rem; color: #555; margin-bottom: 0.5rem; }
+    .prompt-box strong { color: var(--text); }
+    .response-box { background: #f8f8f8; border: 1px solid #e8e8e8; border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto; }
+    .turn-card { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; }
+    .turn-card:last-child { margin-bottom: 0; }
+    .turn-header { background: var(--bg); padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); }
+    .turn-header .turn-badge { background: var(--accent); color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.65rem; }
+    .turn-header .turn-status { margin-left: auto; font-size: 0.7rem; font-weight: 500; }
+    .turn-header .turn-status.ts-completed { color: var(--green); }
+    .turn-header .turn-status.ts-skipped { color: var(--skip); }
+    .turn-header .turn-status.ts-failed { color: var(--red); }
+    .turn-header .turn-status.ts-error { color: var(--error-color); }
+    .turn-prompt { padding: 0.75rem 1rem; background: #f0f4ff; border-bottom: 1px solid var(--border); }
+    .turn-prompt-label { font-size: 0.7rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.25rem; }
+    .turn-prompt-content { font-size: 0.85rem; color: var(--text); white-space: pre-wrap; word-wrap: break-word; }
+    .turn-response { padding: 0.75rem 1rem; background: var(--surface); }
+    .turn-response-label { font-size: 0.7rem; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.25rem; }
+    .turn-response-content { font-size: 0.85rem; color: var(--text); white-space: pre-wrap; word-wrap: break-word; max-height: 250px; overflow-y: auto; }
+    .turn-skipped-msg { padding: 0.75rem 1rem; background: var(--skip-bg); color: var(--skip); font-size: 0.8rem; font-style: italic; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .config-col { padding: 1rem; }
+    .config-col:first-child { border-right: 1px solid var(--border); }
+    .config-col h3 { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .config-col h3 .rate { font-weight: bold; margin-left: 0.5rem; }
+
+    .feedback-textarea { width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.9375rem; line-height: 1.5; resize: vertical; color: var(--text); }
+    .feedback-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+    .feedback-status { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; min-height: 1.1em; }
+
+    .benchmark-view { padding: 1.5rem 2rem; overflow-y: auto; flex: 1; }
+    .benchmark-table { border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.8125rem; width: 100%; margin-bottom: 1.5rem; }
+    .benchmark-table th, .benchmark-table td { padding: 0.625rem 0.75rem; text-align: left; border: 1px solid var(--border); }
+    .benchmark-table th { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--header-bg); color: var(--header-text); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .bm-pos { color: var(--green); font-weight: 600; }
+    .bm-neg { color: var(--red); font-weight: 600; }
+    .benchmark-empty { color: var(--text-muted); font-style: italic; text-align: center; padding: 3rem; }
+
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    .nav-btn { font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 0.5rem 1.25rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; font-size: 0.875rem; font-weight: 500; color: var(--text); transition: all 0.15s; }
+    .nav-btn:hover:not(:disabled) { background: var(--bg); border-color: var(--text-muted); }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .done-btn { font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 0.5rem 1.5rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.15s; }
+    .done-btn:hover { background: var(--bg); border-color: var(--text-muted); }
+    .done-btn.ready { border: none; background: var(--accent); color: white; font-weight: 600; }
+    .done-btn.ready:hover { background: var(--accent-hover); }
+
+    .done-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+    .done-overlay.visible { display: flex; }
+    .done-card { background: var(--surface); border-radius: 12px; padding: 2rem 3rem; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 500px; }
+    .done-card h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .done-card p { color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5; }
+    .done-card button { padding: 0.5rem 1.25rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; font-size: 0.875rem; }
+    .done-card button:hover { background: var(--bg); }
+
+    .toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: var(--header-bg); color: var(--header-text); padding: 0.625rem 1.25rem; border-radius: var(--radius); font-size: 0.875rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+    .toast.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div class="header-brand">
+        <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAANhlWElmTU0AKgAAAAgABQEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAAEyAAIAAAAUAAAAWodpAAQAAAABAAAAbgAAAAAAAABgAAAAAQAAAGAAAAABMjAyNjowNToxMiAyMDowMToxNAAABZADAAIAAAAUAAAAsJAEAAIAAAAUAAAAxKABAAMAAAABAAEAAKACAAQAAAABAAAAgKADAAQAAAABAAAAgAAAAAAyMDI2OjA1OjEyIDE5OjQ5OjM1ADIwMjY6MDU6MTIgMTk6NDk6MzUA7DChwwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABKJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOmV4aWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvIgogICAgICAgICAgICB4bWxuczpwaG90b3Nob3A9Imh0dHA6Ly9ucy5hZG9iZS5jb20vcGhvdG9zaG9wLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgICAgICAgICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIj4KICAgICAgICAgPHRpZmY6WVJlc29sdXRpb24&#43;OTY8L3RpZmY6WVJlc29sdXRpb24&#43;CiAgICAgICAgIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ&#43;CiAgICAgICAgIDx0aWZmOlhSZXNvbHV0aW9uPjk2PC90aWZmOlhSZXNvbHV0aW9uPgogICAgICAgICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24&#43;MTAyNDwvZXhpZjpQaXhlbFhEaW1lbnNpb24&#43;CiAgICAgICAgIDxleGlmOkNvbG9yU3BhY2U&#43;MTwvZXhpZjpDb2xvclNwYWNlPgogICAgICAgICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24&#43;MTAyNDwvZXhpZjpQaXhlbFlEaW1lbnNpb24&#43;CiAgICAgICAgIDxwaG90b3Nob3A6RGF0ZUNyZWF0ZWQ&#43;MjAyNi0wNS0xMlQxOTo0OTozNTwvcGhvdG9zaG9wOkRhdGVDcmVhdGVkPgogICAgICAgICA8eG1wOk1vZGlmeURhdGU&#43;MjAyNi0wNS0xMlQyMDowMToxNDwveG1wOk1vZGlmeURhdGU&#43;CiAgICAgICAgIDx4bXA6Q3JlYXRlRGF0ZT4yMDI2LTA1LTEyVDE5OjQ5OjM1PC94bXA6Q3JlYXRlRGF0ZT4KICAgICAgICAgPGRjOnRpdGxlPgogICAgICAgICAgICA8cmRmOkFsdD4KICAgICAgICAgICAgICAgPHJkZjpsaSB4bWw6bGFuZz0ieC1kZWZhdWx0Ij5sb2dvPC9yZGY6bGk&#43;CiAgICAgICAgICAgIDwvcmRmOkFsdD4KICAgICAgICAgPC9kYzp0aXRsZT4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24&#43;CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE&#43;CqvVu80AADuUSURBVHgB7X0JvF1Vee&#43;659wpd8jNHEKABAgBlEkxVkWtFbWT1OdIxaFoa/uor/oqfba2DrEO5Tk&#43;nlpbrYgW24rVpz99tfqsUCXV8gNFVOYhCQEyQ6Y7nuH9//9vfXuvfYZ7zwlTEly5Z6/pm79vDXvtfU5C&#43;EX6hQV&#43;YYHHrwV6Hq&#43;qr1y58ldKpdKTe3p6Ltu8efMDj1c7PO4C4Nhjjz2xXq//OT6vRQD09vTUbw218N7NW7b8A4Kg9ngLhMdNACxatGj&#43;vHnz3ggHvwWjfgkCICC3DxrrIXwH9fWYDTY8noLgcREAmO5fAUXfASefljqXAeBJwRB6pmv1cHlvpfRXG7du3Oh9R3KeW&#43;AI1PKoo456arnc&#43;y6M79&#43;gr2sc9fjHlDrfVVcQALBWq23H8vDhiYmJv96xY8d&#43;7z8S8yMyADDij8EU/2dw2O/CqYOa4KPjUycqGBotgDrbGQyg8RMEwns2bdr05RTvSCo3qn9Y63b00UcPwWm/31Mq/Q8odjTXeSU5laVcXStlHQYnEJ8jCrPEN9DF/cH1OeCRUcotcpjrs3z58vMwat&#43;FEXt2S1WoKeLBRz1HOFOdjYwT1Nni7Rj&#43;1kY4Ax0H3KcRVB&#43;455577iPukZBMtcNYk2XLlp1ZLpffCRVe0qSGfNesIp3Mj5yfIRVHPmcP&#43;l7ej3R6SijUwxY0/k/g/93GjRsnM/TDtNBsncNEETh&#43;eakULg6hdBGcMaJBnMqeaZY71rsLARARHUpoCg4f&#43;I7FCcEChzk2itcifzf2B/&#43;SQxx&#43;pcxMh5Ho/ZjuL4Tx34bP6mydhwJ0TGNq1UYYtROcARCTw4pKfrFI4IrAtUDtER94wLmyWq2&#43;B8vCz5zO4ZRHdQ4PkeH450HS9XDCOT5iU8nNZ80qWQuuaZeqeUOhlFeEk/LyICFflmN9L6qfmJyc/OjWrVt3pDId6uVU1UNW1iVLlpyMdf4dEPCVMHhJ63PBm&#43;iBJlKmcRbgyLW1OwKYmqkjNQsklij0CTyGgPOIzFK4EpeFerirFOrvX7Rkyeevv/76GeN0aF8TtQ89QcfGxhYODAy8uadef1MolRamEprg&#43;UaODsBwTEE0vWdNKNjGLoVJxjbRiZ0hFEk5pLodhgi&#43;NAg1mxG&#43;V6vX1mN/cFWRyqFXS61xKElXxibvlRDo7RhlJxfWeR99lNYdUZDcXcX&#43;pAPlpEcd1h2B2I8P/JnBpQEj3AhK5Gz0G4LhxH7cijLYqgD7Asrvveuuu24nzqGYEpUODfGWLl36TBh3PQQ7l7Ztldz45v&#43;iCnkNpbySkXFcn/azOiEIH5mqPTrXkYuwCImkv9hnQVTqKWFZqO3qqfdcWu&#43;pfwy3jQ86rUMlb2Gix0Y0bPCOx6h5G7hfCEf0&#43;ainYfnP6y6dDO4OEwx64uGNe94CBO0OF5Hz0QwPRlzzZW4O0U8cTNSCk0XWliDJGJkJBWTEg0hkgT0I5L8ZtfcgCL6I/JB57JxrTGEfg4QN3iimyYtgINzTh2VuZD&#43;kkfvduH60C0Bt7FxeWh0pd2ysE48axn5rRZPoyVXelMNF5xFGQRfrDujyGTeTUuTsInYOm&#43;WgwT1KfBT17VoZ&#43;4M7Nv0g638MCzTPY5aWLlr0smC7&#43;zMyIVwid6oMm/snhcMNAaoAbOVg0sl8nI3HHF10MwAFhc0ygHUZCI2ynB55kBKmc1wjEIBV8ir7DU0BRFwPGraXeEcSwhRaPwt&#43;l9x9992b2PBYpSj2o8seo/4p4PgufF6okaTFlDK0F0dGZHd0BL3UDtoNToqeBJ0ixHIjlQIuYJr6M64QJDqX80AKl5UTfgDNoNgfl4WtkO9D4&#43;Pjf7Nt27YDLuujmSciPvJsFy9evBJc3gr13wBDz/NpXpwzSdx8yNlGh2d9gjTDxyL75QABeyNxnA7RI4GUjsObHxNEohogs8y1koPtLJAmLwZnxaTMBkBIPzSTP2lyhkllYVtsvwHL4LvvvPPOrwr1UbzkUj&#43;CTI855ph5U1NTv4fzczr/GLFqwzkzPkyVpViUAWm0pK8w&#43;hIU4goObWw2/xUBUjriFbtdBrU5HVJIHC7qCbmMFtrSstPwPOtjA2ELNMPXyrXyu&#43;/YdMePHf6RzhMVHhlWuK37DTh&#43;PaivIwczgNwhA7AtTW4g2SUxDp3P5Aaj4NZiZEQxgRcdB6KhZW2RKFycH7vT5HzYRpiWswz7Is&#43;MflQtoxVlSPmIVSKreKAuWvVwAOw&#43;hecLH8RB0v0ZnUeo0KD2w8cFt3WnQ4l34D745Ro8tHDk1soAztkNRWNoCkWHyukdQELL8Zi7M1R2GDgkcx6NnCBkchAGlbyPzgBggzOFnQOJkrelvJsQAVnsb1F37qBvdwxhM9AuwdJw2R133DElZo/ApUGdh84B7&#43;EtnanOvAV3um&#43;ETqMyYguyjQZxELb7VO9tjbkbvaP2qKFwgGC4DZ4lIcA5TOr4Jl5JEKV9LjfpGLmiaR02gyNLRZnBJ9zRgL0CThOjTD8E3HoEwbcc8uHMyw8XsbPPPruvUqm8rlKrfA7ynweFBzLarexdUD6DtIKcwWLRiCmUjNeiW4ZuhRodJ5RG3hmdiJ3VjWPGK7ZnPBgyDss87ff22EwTeH&#43;ai1ZiH9LjbKTZT0iB7ze&#43;Cq&#43;1n4JN9M27d&#43;9&#43;WJ82JmJSwoNLmO6fW61V12Otf5YomOANER5pk6MrjLw4ChKYrNhCxNiUOyICe4b&#43;jG6UhUZ3eBnZeTv5DM6hMgFUED3CRDoZ/YQniwaCWYx0ySP2y6k1PB6oVEO5rw8jPI493hkIKEI6QsSjNOTFY2UExR5MDB8vl/s&#43;esstt&#43;yKIA8pe0gzAN6&#43;XTs4OPiRSrXyQUTpammfiCNTpgqlZcA19RPXYdwhbDILsTdPDocW0cl7RMPbos/Um9LJjE46Dby43UhZZrDkpQqoJ/yddQ1tNnqNJG/6angmVKvMhDqeFQ8dfVRY9fznhXq1GiZ27NRa77jUWyQzwsYg00OBwjece56NvdVLMCPse&#43;DMB34WNj60Y2XjkknRWWH16tULcHjxJkz5bwbGotmwUqO3gpOCiRQO77t&#43;4jTCpHRa9pklzaAJcA5rHmY9DZC8gp5EpugZUWKz02G5LkBtM23Us40RNFNhKQwuXRIWnXF6WPaMp4UFZ5wWRpYvDzf&#43;5fvDln&#43;7OvT2D4iP4CM/0SYP0qVwMRWOvtEV&#43;69Gzv3Bvztct3lvNwjr168vffKTn/zt/fv2vR3T/akunzutQCt2ai1DR0sYtPtaV&#43;h3wpGgqjYCCixYYV/6VC4HUE&#43;smlnzFjOueKMICjkaa8WqOTyBcJ3ofJZdPk7v9Vot9M&#43;fHxacdUpY/qxnhMVnnxn6liwJfDZcxUwwPTERapgBiMsZgxO76Z5LJ3lQJWWKYvRNLs1OaGXQAO856PzOmjVr/h5g70Mg3JmI2VGxQdX2ODi&#43;XQuGH8f083xwN6GA7RErTEmKUguqPmoMMfJxuEgnKmWdCS2CqSr4AsdIiMZxYllTUbasG/h&#43;9KyFOsEtwLShQ1kAl31m4Fo4tHd4OCw4eW046ulPC4vXPSn0rjgqhF48DuZMgKCQTaBEb29/uPmSD4X7v78hlPr7EADoQrvLLxu4AaM83gcgfr1JtNwKbCrZfmInvPLR6enpT3bzbeeOZ4Cp8ann9Pb3Pl9miYLRK/iTXIV2VYoXhYxkd62SftEhJaSYuQ3SJva5n90AMRSFWry4kM2tHEWe7NkMGxL4ZEpJQOX0GoTgGs5P77x5YcEpJ4Wlv7QOTj87DK86LoSBXoz0CmKiEuoVwy4ltCU3nRgTnwuTM95zU4tLQb1MR29BtwvOPBqCWNiAIwhKS/B538jIyJPQ9HIR6&#43;DScQBwAquHMvg2rJv0ShxJ4pfI244/ZTd1myHY7k5u7qUNomHgpHY0DE&#43;UVMyMSb5uxEg8p4FSRMELHCoSL1vjYeQaHFvu7Qsjxx4Lpz81LDvnaWH4xONDaWAgVGdmwgycHibxiQr4yBVL0Gaz6U5eOT/OAp5MBF49QYa0imYGhvQgPfxjwpKsHJflXugk7zgAuIb5LYOxzMmnBs5bm0vEIyzFbpfa9&#43;QYrWi4Y93oBm2QGWbBkK052aoLORlgVYx3OL2nXA7DK48OS9Y9OSyB44dPPimURkewlldCBet&#43;adK/HwIGGgzIG6OYXkSb6NZr2LqTUx0jH9IRh&#43;KwjJwZU6OTrbV4pYYeBIRHINBVHaeOA2A2ihJAgufCtIKXflR0lpS6zBVrBd7OOBYIwEwMKeMmRDxI3NDsIl9t6ugcjGYexw5i87bojDPC0mc/M4ydfkoojc3XEszbutrUpNZuG71RKWUJVTjW44A&#43;1qDHxWUkpH1wdTTmGTki8c86c7kdGKAgbMFELbpPXQcAhWl0jAtIyRP5W0pjojfTaAQmj1lpRSM14lndJHKDNcKYAyJkpMM1Hbe1YXDxkrAEt21Lnv5LYQy3bWUEASfXSmUar3FMYtNGpxoSnco&#43;n8ILIrmP4sxMHAUB4N1ehC/goM6GOFmwVkiUW3RkGXO&#43;08oirYAxd6XrAEi94gKJjbzlWjepNbckDhFRpZhozkZrtj4aMgm0jK4bHRyiuHT&#43;yKrV4fiXvSSMnnV66F26ONRw5MYdfH0ahzjaFAI4YWe605kWBN7lubmZOAzlvJVq8lBIuWXqjcVMJhKmDYTr6MjJt4EcSCG4YnCIcBcXD94uUADq0grLKrxKOO/zvJGyAA2W8MJJYWJ/xmNWOhG/FYzTkVw5PzAUT9qRBqYzqthA7dhyb7jrhhvD/nF8CRi3BlwG6tz49XAIkxhMVfddEAW2GcrZEIp&#43;Jd00kQdXfN09RN4WT4YpGShH7DNeOQX1O9ECbY8Kg/Ua4btJBxUAqVAZOwjpkS5lOhEkQ55NZAAJrj3wbEpbgAEiGthzPKbGrVo1zMDRU1PTOJrdHjZ&#43;8Yvh&#43;2/843DzF/45TO/fH8q4T5ebwZpO091Bna96U14OR77/T8fjojbcK6HQMhAEAxsRDryViIuCarkH0U95CWdgvJoe4Eo49eGSwaAQl6UUJ8duXzqoACiQi3KoLRPIIFzoRvhCHRU5JZXc6UTa5mCzELuyFCtuu6x9loIHAE/satjlV7GL54cPZ3p6e8P09q3h5g9/JHz/D98S7rl6A4KE7qEEkRmzpEhWDHzXgXAMggjC7iyxDd9yMnx3GHAZMKThA8gQIoWYOREFBisik3ZamXNNN&#43;mhB4CEMeZuBGmfytZOotRzhHcctvsn4rrjbGjExojvaAWzOz3kxJXBkKuIC2&#43;bOf0Lh3RoCfFEoVwK&#43;2&#43;9JVx38VvDLZ&#43;5An3sdC6Es7KJ6IgcyQ5jknBmsE8R3eQBLAiozG7K5vhOhnUyQfKNp4OoEd2O43ph86KuTi/dQXdKNRE8Q3GlokJZ&#43;0EUqGzBEKzKAtGQ0ZhmUmPshrKBR8tZO8Xho9ZefHRip6NBE/LYZ54T1r7w1yVhTgt9tXLGXqOf/IFvI9j2BgwGzQSSFdhAI1UtEYg&#43;OdxEEP3CxdhnPNhn8EBgn&#43;NFuAJulzNAV3cBMjKYarKCJVVPuSeCu2wpDAdOJns2BeYE5KSoY7am5d1JyamwyTkl3W2KTt&#43;9oVEFOfSkjQ4kKewJ8Mti4QkX/k5Y87rXhnp/P5YK3AJCcroUp0LSnzToVFMIBfzxpJTXnh64OQZYDUr7HEGp2V7nHoC4hoy8aEt1RfuIDslLZQZXrjvhIhsSO6jURQD42hKFgBy6J20jAQW1EZHLRdFb&#43;D0HiCVTsRk/BZTxSS9tbCiTl4knzpm9TTZcaViMeHLi&#43;Vl1eiqMLjsqPOnii8PS5z47zPCwB4c&#43;JTide3md4skB0Iwk8bFbRJeCBN2Zqb0iLBD0WodVUTMdPVhc/Cb9yUedRZuojfzQ5xJEQCc1Z95xANQUx6RXFKItBwkdYTPpXJFE4FYEIjwNk619reDIgzaXVMgLlsBMjbqRMiOlJAjKj17iQKmK49xlZ5wVnvSnfxaG1pwQKhNT4M2xi9HshIkAWAYDIicLAqNEQQAgGC0mBEY98sbtJGVhzWRip0vHsiWi&#43;yBR2Tu8nxHtBECbTzY50NRsDBowZq92HADZZgH8FblZpEcGmVBFhoSVUZJ&#43;CYy6NxUxUKPmHSdwiPDMSDtP1pLJwA6HBZjWY57347PmxS8La//g93XGX9HZPo1LBN7q4S5Ba7yNXy0FouPrPunGEa&#43;gIaKfGRhDup/YrrViCtW8xeAAEGUEDfz57FAYCBFJ4olGxFUWyyI096XjAEhJFYxMKciTH0mUQiblVC7HyeDbI7c0ANkBRegpXbUnDQAoOB/9cLd9QKA6PR36BofDKRe9Iaw877xQ4cEPTv6SyS6&#43;toXwJz/RY5Gc6VJS59BgjlZORwgEBotgCAYoZXI/oMDX7j7QgzIda3QIiwQ&#43;fCYhnHwKs770KjhyIU90EEERa9xS0NnKBxUAUtZEBHPnnqvK/tkSUfRShs/fswKjM9GpwHs2PPa5GBKR06TdllXhpMrkRBhddWI47c1/HMbOPNPWewxLngLSkZSvjpw&#43;4F2CZOBvPqCsus0fBQlcb47ucj9mAAaC3hICnmSwWYHnDxbYdB867C9XU/Xo3MhB8NEOluHaAKfgEqOCWLNWDioASNEUMNruTDfArBwhNNdKjxtFcCsEwikJocCPfApTooM25pGG5MKtF9wAh2KUT02FFc94TjjlD98U&#43;pYtwXqPx7l4Liu67gbgyjkYVZSVkz1v9WyEU&#43;oy5gB3LADEC&#43;04TOLIvvMfrgzj&#43;/aHE15yHt4DXIbZhkfLOKbBhlIEZQA6OSbUScL0yp1PO2tgA9JhGZhqE0&#43;QY8ThT7ixzcnOlXceADo5oYTNJKmLRXLsbAHTjEU7mLQU3BRtgWjaN6O7oi1QDNg6OOFXo3GrM9O4i&#43;sNa1/1hnDcy87H7TyOdbHZs1k8EqLBQZuTE62skzvkpKGTArTzGYHdDuLugHBc/4FTHhwM0zt2hJ9d&#43;vGw6Zv2PY4t3/p2OOGV54dVLzg3zFswho2H3SLyuEF7AhCIZiBD0ZH8LLIjNiETHHMBiTGK1mCtgHebqqGDS8cBkN8FtKZKfygIUolagza1utAKAuInSjUDo1tBQY7RKKjb&#43;CEqkKNxtN7DKDyNq05PhsFFS8Opb3hTWHzOL&#43;MNHtzb6wgYdAgfcSgDR5TO/TWsyMREIj2VeFvI5YDzAvDqOCnsxXODXf95bbjxo5eGB26/k69oic74pk3hZ5d8IGz8ylfDia94SVjza88PpT4zO1gZcc8YeVF5nhV4N3Wifsppm7zDgiLqL91Jq4vUcQBw02Oc23tH4kMJU6MNXEOznE6HGpJnyDn1NQBTMYLSckmX6lFp4tFUHPl0PA3J9X7RE5&#43;Ezd5bwuCq1WEGde3qOQzxQEfMbbE3NbkcxGmAYqkfsqhJdeBxKscSUMJLnnwF/PbPfTbcevnnQXsy9OKLHyYTJInbh/233RZufO8lYedV3w99eNDEFzmpggeBT992yykmdkn1lGbkLYkyoMyGbIk3I1nnHIUuAsCYJvK0JC2DyZm6tIRRIwmZdaOxqJc1yiizMUr66O48WQdWeVm2WsW6iw3Xcb/20nDCq38vhOEh3O9jGRAbbsTAkR7Shg78zRswIgII3tbeBr01IGi6FiO0x9miNDgvTG3aHH72sU/gLd/vIxh6Q/88/jo9ZYJkFIPkkfp6&#43;hAYvWHypp&#43;HKt4h5Hf/PHCbl0Bq5eM5VzYvGc3GK&#43;l1&#43;zCo8wCIijQyTeuZyyWpiVuITgKz2eyToqrssKn6TUANDW4mmzA53cv0mOKnsCaPhJMu&#43;INw1At&#43;Ew9/MGXjtk87cwrBgxk4iAbTFzEZNG52KcKpPQ8COoSJswAfFnGKv/f//mu49VOfDlPbt8Hx89TvFzmXoz/OYvihSwVAL14qZQQyRowiuHrgOTJxBODaWQdZO2Kxx2g4LyfTSd55AGAMZBK3oSxdZbwWSjmOtPBKcy5j0DKAS0d3UTl0RsMKTjR1PCNjVnGEO3rcmrD29y4OI6eejuP9CUqv6djmSBqYY9qCQHxIj80a&#43;SyYbMoQKXo7GDBlPBuYeeDBcPtll4VNX/86bgnxrj82f5RPMkY8YltAk28ZAYNZRPsCdLS4vyd7xQFyMCO68Jmbs0GYQDFxebOqECIMdiXg0U3qPABmuQvIGLrynseOzKmoN0ZuhpsWgJ87n4bNjUEnKYmHADV2aVOO8jrO7o962vPCCa95Y&#43;jF&#43;321SRzpwvh0NqdkW5PpUAY0jcUgAFEObTJijpFPPlwiRBxgNGxvX3944Ec3hJ9/7NKw7/bb5fgSZgN3vnQDSpqyPshQCBCwyHQRgiOahbJbPfTltiASGwiLsudqxEXicibrPHUeAJGmopqcXN7OeUnm7vFMaR8d9I&#43;tj9auWzx08mtXPdiQnfCy14eVv3k&#43;Bjicjjd95FQ6Hs6mIfUkjhQYDQoMMybNToqqoYtrt/YEcn4/3g2cCnf94xXhzn/6Am4dx0P/0JBIaw8BJDscIn40jGcIqiwI8l5woiIAinCZGaGLLTexnx0OYyqLb95omIYFwO78H7oLALcQ&#43;Nj05pJl4kuvTOCkWdZl3Wmkfe3KEVbOj7hmA6pLUnZSV5mawCvcK8LJv3NxmH/m03F3h40eZiwb7USknDFsuMHTCIel8PIEnWMHPOwHXToMDDkrcEIoY9SP37M53PI3Hw/bf/iD0DuAzZy&#43;1Jk4ljjkEc3hDncbkU6WTAHBRvUkW4asfvAHkmnJnpQANIkGaeTp8BmvDgrdBUAHBBtkbcKgkBzFlnKjeYty7y/qnYOgn3Q4&#43;qszk2HRqevCmt/549C/YlWo4pSPMmh2Jx2MdPtmLQ3KhE6&#43;0AEhergLZCI9rgYssIl8MTuUsHHb&#43;t1/C7d8&#43;pM44Nke&#43;rDD5/cFuGl0J5uIaHMvWwOJWZvqdBX/JYlOREP0JTpMOmZyvjpUKQ42tRsld7jDk4MHR8Jp1mLHAaANDKSzWyAT1plJtYJ2bXi6jhksGqRj1pAjtmgirCvNr2mR3LHPOz8c&#43;&#43;LXhZ7&#43;QX1ZQ1ZmB0c6MvpFr2GTHtdhbQdBBdOvdvn0uIAITyC81oFRP7MfG70rLg9bvomNHtp64fzM6QyC&#43;AECsIBHVJV5ySvqU49URYlcwIv4sZ2ZZgu2qBGSo1/7AIeRMqwkWLEoXPIkTJep4wBwunZQkQjhHZ3kc6G5ki3gPNio5AxO9XqHx8KaV/y3sOQZv6o3dvjihtkGyPgTPEYLxn80GQzP0a2RHkGxBPh9uhwDI5awy3/w5z8Nt33mE2HPLT/H00I4Ph3xdByNHWUUda&#43;yPUnOOWmyImcfEiAttJjzzX9cfnTHgVx8IrICXw6OVFNWKEtfz5sYtm/oOAD45UPeyzIZs1w9Fy4VuD3L5h4zAEcglIaSUU8DjHU3VAWbsXkrTwonvfZPwtCJp&#43;mRrrwI7/LgBv&#43;dBPAALQSj6V5nE29m5D9UBInlIOAVrp4&#43;5LiL2PzPXwx3X/k5bfT6cG/vI53LiMqUSuR5IcWYkmLWbxwMAP3SD51RQhoyoUECsmQG0dquxI6ye95qMymouS8dB0BGyvhro9RogEyxDLhFgYZgdNNKSTLVOWJlX9lG3ZEf2ysY&#43;fPXnI37&#43;3eE0oLFeIqH&#43;3ss9nRMXV/a4HfxSQBIJA&#43;nWTKquv1GgJC7y8paL5aPifvvCbd99hNh1/Ub9A1gbvQ4W3DNp56e53LnJfEgXJQ1MkXm/M21wsibBOa2MP0NxchwMABDdK2X&#43;CzR3&#43;RlOqAS6wk70e7k0n0AOFUKliZJnamhHgmfwsRyg&#43;kSCOvRMkMtOR1SUWzkqvhu3uAKHO68/p2hPH8R1nv7GraHjG7zGAQczTQS5ZFMJG/G1NQaA0Sy9eI8Hk7eds2/hTuu&#43;Nswuf2&#43;0DfQuNYDnbri43IX9GIXLU9eyJR7GdXWiYB5yqxWbAYpEMp0YBGVAoxVFESN/sjJz1o6&#43;ACYlax1poJR&#43;MxQs&#43;FCJz1ho&#43;7mfctLvWHViy6C83G4oyNdgyMp0vbXtupa17nygwCcrbsBDGUd&#43;SbW68G5fPXAvnD3l7HR&#43;/b/wWvhdaz3mPJBjw4ufsglWr7R0HRQ7CJLJg8Uq6khKxqMXCkeeQdKEZ8ZZxwFMQGcvoo2CzTykK0I22V6RAOAsqSC6dYr1aaVsNDeHE9klvGoBuv&#43;wjOfG8ZOWYfbPHuYQ8fSUJm5eVzLd/c4b8c1kSuBLwkataSHkzs&#43;rdt7y0/D7Z&#43;/NOy9&#43;xYc7w7I4DSqTfWgapEQjW8eKIx88SZc4p3Y1pRRjhZgbpuUBttcVtfQkRU2prQ3NbF65B4GNbFqbpDwrqkUbtCcDsA/GtrGQNRD0e6aGV3S0oduhrcXP&#43;lc&#43;BK79jqmfi0PGCXwNSkYJioKAjKJ1mYEoJyd6GHU1/GQ6J5vfinc/Y0vhOr4Xvy6Bzd6BMMFfKrIcbyE931IgzMHDoMkMwOLspAnMuWxYk2zX01IwycdTyCUOR1t5E6F7G5LRfFNgyQqLAqZHUmHHRS4i3TQMwCFZvJodUFS3jpLh1CNwgs22o5U&#43;KqUJw8OwlgQ4Ld4RheHececrG/sanmg46krp3g6mb6RZ&#43;A23uvFrb4mAvTTmL29A2F629Zwxz99Imy77ru43RvQ5o9OFw1OKfIqBMOzfknEohxEqVgRWxNVwWDB7LIzB0jbJEcLglCyQgafBoEI0DAGRlWR/BoHUBKM6kVdMgq288tBB4Cz8EBQXUJHQZG54w0migelol5OopDLLMD17&#43;3xAU/f8MJQHhqzNmzlNc2TiBLqccSrSV4386qOaYK3rzt&#43;eHW4/cq/DlO778NjYp7jQx46nH8KAgZCJJnlLGDWQYYFBmXMDShTE84SRGD8qa4nTcQXAAvNCV3Uj/CkxuR1lUVLzbq4bd2O3pPhOBHQ9eQ4Xp8rf8gBUGAgBfMWdyZbEhkLyqsPhqTgHtT86jZx2cYA6OnDs3Y&#43;vvVhiRGuZ/iRH&#43;HgPjlDU7m4AQa7/MqeXeHOr18e7v3e1zQz8HWsOp8VwOl80cOMC/4qRzkzYVlgH6XMk9mduGgDnVLZfvrVwXhnwkmqXbK7HOtlMOTJbMAmyRUdTP08CAit5ojGvsygOaGOSw9vADSyjQpIyVRPKZEIjj4povacCNv0QX&#43;N7&#43;/xHy2LD4NEo69MwvZcgBs4OkX3z2jft3EXdvjfDgc27wrzT/h1TPvzNBtw78C3d/goFwu8bQABb4c9kAuEefRNXqTOx8Pss7eA8ciZj53xCTiXqB14MExs2xIm9&#43;zGu34IBCApHOm0dp6R6tE4iC7TINbJj8mr1MlarJntaHB7JV0HVewuAEzS2Rm1gOFoLqoRSUTNUmXkcMBrDoiK8rUu/pgDaZTgKI52PbOH8fhuphwPZxFXjgL89us2hR0/3Ybp/qww9uRfxrN7PMXD1K/7/P4e7AlAZQAfWAB3mMDDSO4FvgIB8vVUrF0ywuEIAn7Rkz8QVcFGcgYPoWYOjON3gybC8mHQ2HZTuOObX8YvgY7ry6XyH0enq0pdvJLlJI5WRm1DJ23GxCBnKZsR0OCgsmkkIeCDuHQXAM65HaNZhMmc3AImJUv1BMtGzgBwNjeT1Qrv7eEIOh8hAH8rl&#43;3QpFY4dWLH3rDt2nvDga3joXdoVA9xyhjt/MZvmbeJdUz/9T6bQUDTvvgpUjKslhkYuacEXggk0dfxcgXLEQIAyw&#43;Po2cmx8MMTiIn9h4IO/D/QZ607mnhnL94arju0veFfdvvR6Di&#43;wFcHmzdAoNE8Uzh3JnURikBY10WgBCZ/YhLGLs0BQ57uklmx44xMslbY8zRLaRGGNbjSGk0hzUDAH94vxPnAfg1D3zBooK3cGv42cp6lR1wFkGQ77ppW7jn23eFqR1TYWB0FI9vEQCY9vnzrGXcBZT68MHrWRjkmuL1Zi6dDQPbRhA5mDLQ5HiUaHg9TeQpI28wsBTxmz24XxRPOriMts3X3hoGjz8tPP3id4eB4fnAifuYaCnpBjkVZbHNM3duBuMdMfd&#43;VeX8HEA2It2YkqI3zZp3GQAN3Gcl3UEnHZdYJFOU7dRMzoChaxU8AZzBIRCcjyPgKgKAM0KNHzhgcu94uG/DprDzR9sx0ofwY81jeHEDjtetHpwe13tO7wDAdM5FBGU6Xv8YBHQ8m2ASjTjuOCEdLcqRjwDjR3zx&#43;8AMuDqCso6grFcw0vtHcUJZCUNrzwin/Nb5kBGdoEh0pazAmjhFfiybvpJJtfwi&#43;RiNnkhHH8oWK7FbLNTmwHPnXQbA3AS7gSg4H1rJANICVDJFMB4n94Xqvgfxfv8Upl/sB/CpIBhm8Nm/ZW/Y&#43;cP7w8yOahgcmY&#43;3c4flfH5Lh&#43;/wlfAWbhl3A2Vt6qCu1nhYrEynwxVoxyV3VWprOJ5icBbncsAAqDPoEAA1OR7tM/2QqxyWn3QM3v0uh/HxqbD82b8ahhbip&#43;Y0CxhB6mpBbbpZaxIgak5hLEwUJdGoxE8/DATRabJZROgg634PkBioib4L0glMI7LjMo9lGo1emtm3M0w9sC30LVzJZz3mDBQq27EL31HH7zMPhfoCvuVjo5ejXD/6xC9fYKdfZs4ng3Q&#43;ZWPYI1cAYF7XKGM/&#43;8jbc1a520ebfusHUz1ngOoMAxCz0CRkmKyFo09fE44&#43;63j82hhOKYE8uGBpWHjSE8K9135PB042UtGVJLWJZTEICEK9KZPMkA2EBBlF6weE7lEFCX0oeHep4wDgLrxXG5tZmMzSlYlFGMpt6mXNKpgehTYqWpnaHya23hHCEH4HeRK/2AFH9u7BD3NP4F370XmhjimebuSkjQw24YkgvAzH87yYRb7Lb2s9KMJQmvIpS/yYyUUB3qbx&#43;eESw6kfOUazlhw4v4YZaOYAfi4W5dXrTgorTl0h3vytaNKt4sxibPWacO9//ru0pFpkw2TOlQnQBh4tHExYwQnRMYWeXMxYbkfSOpjUcQCQuJiBb8tIS7WcTRJOY7P1Rz30yhaVgkE5OA/c&#43;Z&#43;hd8kTgIv/kKE&#43;Eobxo9gDC3HPzYMdDGn&#43;2CNmbNFmMHA24Ef39lz7GQQa5WRA96bJJLIrnYIP&#43;NA53PnbnoObP/w49BR&#43;W3Ac//3L2Fg46okr8JMyw2GaZxRkwXMF8OBSUcYdCIUhTQsu8kv5eL0oibfmuUsFOBYjuLUSyhJlbekXB2iTdxwA/jYQ6XggSGsyplTNejSznMv5CYZGKOBJmN/ond6GX/G86Tuhb8UTw8j8BZhmx/D4FhswOJmnhbhrQxBgtjAMXPluAI2CDBc7IQQ9eYpAsYyiPXhB2KBJywjbUNbI57SPka6fgx/nrq&#43;E9X5FWLh6TGcIFewHSBIEtTQx528LKgjZDDq8EERFVmNF6rHPCLCnOTkScGh3yhgZNsFawMZZrKm3dUPHASB0KYqSC2UamEJJsxTyPrajbE5IgFD05HOCL2dOXoo6HezEDtz&#43;L6F//MEwcvrKMG/hCLrHdUBUn&#43;EcwKNdXjmCQRlGzabFdOTz1TEpEJWRRQEPJPsyKV82xSgGP633nO4x6itY7wdHhsKSE5eGwbEBLQkBgcFA1bN70uGKA/vrjgG5BZZpYzq6AV1zy2mfLAEkkztrNBuy6tQE4&#43;QS9ASlo2J3AZCQJG/yteh19cy05gEHIFBUgEiOiGJj8i4OCNHGhc6INUQ/pt8t14RtOIIdwLS&#43;4sQzcZo3hN0&#43;Rj&#43;GPv&#43;HDjcmc8MFPicDHBJx&#43;JTKPDoESZ4EggZPAVnnlI9hLkL6IQccFlWqJRz44AsnCKylxy8Lw8tGAFvXr4pTby4vlJNjjmdFWjYoPGcA1LPYQj/h/OoPr9TU4mKSU&#43;82ibzQ7fTbQHXUfNABYArRAF6KzlcLjEMh8S&#43;LZtfHwAvCEcbpmL&#43;JbwgcRbwN04im0dFc3Xktjl1vDFvGjg8jS9aEwfkrAOD7ADLgx&#43;UBAhyluwC20/kkDY/pbV/dBqLONV9n/GAG71X4&#43;0GjS8NR684NY6uW4oEUqGKfwafNXE74NjGDrMT9AmTUewTsw78e3CkYE9K15IFpAwZtJqJ353nL9laN4IRmt53TdT45wdlL3QVAkxxoYBuSpjsYQ4LENtpZAqlAqKzASptkKsnTgKC/eAZvifhI2OWXalNhcudN&#43;lijXR3S2yKGV13crN6usOy0c8Kx5z4/zFu9DDrAoZxdAKxNJUvycR5kClgEBmXlXYDehciYJwMBqAoS2aIN9xQGNOTojFbEoTBMaM8Gi0WEtXd47TgAcBfI22tKL6at6UvyrMtlFI5as5a2dKQnLxpZxkpfSkmUk8K8v6c8SkLIiyxFVsz0rj3HCsCsWRN&#43;NrMIHGsIR/jYcaeFVb/2&#43;rDwjGdp5uAXUGRk4AofcjBESakHx8F0OINfD6Q4a5EHXxqg/FEMPUogk0JCL/9IKiajGyvqc15sI7UE2MFoFyZkPgtYQ2fXjgOA66gEaJZBnOgURnYUp4E7kRp6GujYzOH45iyOfmKxz3tEmI345A5lKwiahwSiKi6agUgISbSQkzUf2spPnO7xxvG8seVh1bkXhuXnnKd9BR/4cPqhY0WXWGUO&#43;0QSzAzs53sFDAS7cwEcGOn/GqKMChigMVEAJgOxMmHIw1MCwyaf0s3P7DTbpLQc9WDyjgPA/W8iNLNKzFLolPNcqUJPiwoMATsqcVQVRgStFo0vc3FnjxR9K6PKKA3GzIwLcI020pc1ebs2jVlkMByz7kVh5XNeHQaXH4fRO4VvFeMnYvGPM38Nw1cjWOw9ECEb6NgqQMebU2zgs68eJh/A//HMACERJREw1qhncqFMJ6d1gVNOU1FVu0SLRBslHXlxtr4cKit1HAAZhumRVecqSDkacy5A749K&#43;4ySGSY6zev0s9NkWQ4TDbRmQYByBhQZoM4DHe7SF699ZjjmOa8Lw6tPxynfdHyWT2J0KBwfg8CCEfjwMPcANg/wdpJ6mcC8alZhGx5W7dt8O/eeSiZCFCS2WU9yjd1qaQcDbg5mdmCtLXBCvH2xywA4OIa52O0FaeqBXjRwnliO6nNX7x1eQJf53RsAEANBWBz&#43;eKOYvw42uOTEsPJZF4YFZz5Pr43xF0MlI&#43;jyMKkE5xOcB4gk4Tv&#43;jD8b8dHhUhQJDZKIj5hndtwXDmy6RQdYNgDYRRyBKCc/r/rJowc31TTRHSLiJZnhs58CRDgWM3kS4FmKXQZAe4HEw&#43;WZhaHLOqugLei0MgjbEvVbcqWZ&#43;Ty/VpnA8ewi/EDky8PSp74UXy5diCUA/wsYXykCIWNpsHxcbKOZ2MaEswAdxYdRbJKzuP5gfTAH2oxRKveHnT/411DZz1fE8PUyJMlIBkzGSEX3FbhGc5g2VkuCXNDNF8dij8jjkrY1YzS3dBwAOBDFPpA7AdekmVjUokVH0uRaJ01dFxMRuBa3TjAr&#43;moVrOmlvrDotBeG5c94TehfdgKWgGk8UsY6D&#43;fV4FT9t62g2YNA0T0&#43;5nj&#43;xxtyARhkPEhQkUimWCAYWFy/aRY2weH7br0hbNvwFT2GbpSLIIRz8bMRr3bwJoCYOQQ75kjCmQNmlu6OA8CcPwulTrqol6wwC3BB9xYIaX8bWmyu4VSP/0v3yLFPxs7&#43;d8Po6rPBmk/yJuRETvFyBqzO1ZyDmbbnu3/E596NP&#43;zEKVx9bEOZy4Hw&#43;MoYQ0SEgDvQHya23BXu/Mf345vF&#43;7G04OSoITVqQ3qMhpZjnbKQg019DZRQpZAxySSsZ5HqPXPnHQcASAGWCs9NtC1EJ7gFGFRYl4aRaqG/kROncDyrx6gfWHhcWLbuVWHBE38VI3NQa78O/aIXRIbbdiYoRWfyj2f5cjKa&#43;QhYiwH7cQSoW0KJhDrghILDCP5Y5N6brw8bv/SBML1rM75qht8KbJMiR/XS8eSsQHB40G/ncwdpzB2fYQxcW3cagdrUOw6Aaql0XX1m5kb8zt0Z3QrYhvcczTYuuPbOmTAKCVWtYE3Hq1nLznpFWPKU80N5BF8k5XcA8BYvR1IccCgTOrpCjkQf/Z8NdeMoB/F2QX3Gg1iihbyE9wwr&#43;3aHrd//Utjxg6/glyvwRjCWgUjZiMQrHU0maZ90oyiNydsATOea7NbYNCOgWf7ABf/z6fR0pfb1RnKz1VN5ZoPzvpF5A/MuwkOUi3E619X/Uu0E5KmEK4uubwajQgyAlr20TA7N6Z6PcUePf1ZY9pTXhIGjTsHajIc4GMGcv82xoAc0HdYwGKIM3OmzQ7d6CgDeBRh5GV5tdAI&#43;PBBAXsKrZrzX3/WTq8KW73wW/9XcXaEP7x/yLST3sKSPPFzS1P0MiCZnRsBWuBkNKkHdSZvioM4nl5itvj41NfVXExMTP3DYTvIGETtBCWFwcHA1IN&#43;GFyAuxA804Mdyu0gufBcoTaBxjq7hZVE6f3DZqZjuLwzDxz9To7xO58tZZiCNeN46wlgWAKRoQWDLAswQZxp9L4BVQHCF4FkA/xQgiJZevPc3ue1uOP7ysPvn30UX3grGEuA/VCFEUqejCil3P01A76UwLOdTObqb8IWkSxYgCMKZSuUW/OeX74Ljr8whOi81Stk5JiB7e3vPwWc9XhZ5XqpMV0TmBKaIZjLzBGpQvIp1vnd4WVh8&#43;svC/FPPw4ugY3AFZgJA03ayHx/9quzOt86sn7w5Q5BFhFOetDlBfqWsNrEnbL/2y2Hrf3wp1MYf0G0e9c4&#43;QiZR0iTRPLn7tRSwmd2uFqsRnnCaHQRTpKGmyAOv6O3GlP&#43;/9&#43;/ffynaH2TfwaRmDt1TKfUP9l9Q7im/HYFwcqNi3ZNzDLcQ52AmmAUG421dT&#43;9gGDvp18OiM1&#43;JR7ZHaxbwUc7bOBlTUzbQ&#43;PyWbYUZgTDsi6MQZcenA/QXg8Cn9T23bQj3fvfTYfz&#43;m23E40UCdzwReMfgyaZ3zR3eVDSLQHkBf/yjXuZ/1RQXXs8IoEB&#43;mOrxfKryhenp6fdiyr8t7T&#43;Yci71wWAXcRYODg2&#43;CW/gvhmCLlRXEuFF0LlqZhx5QgaCSWu4rYMvh49eh98KeC3W&#43;TO1Sy/jdI/G0qkcC3Q0ncEiyhKBVXy4xXenWd1AJQ2XADRySSAuy/zhiKkdm8J9//5ZfOnk/yGWKnK&#43;aADIaBGbZXMnr9bi7Ta1EzZLLBqYaGTtLEQwhkKaNOtVqxsw8tcfOHDgO2nfQykXuTwUShF3YGDgZJyX/wUC4QK8SYNdUdS0U9qypIlFTL6kwVHfv2gtpvvXhOFVz8avfODmhes8YH1&#43;EEZ0vE7n2KFRTCrmLM4GnAnkOIcFInHlH5aBwy951vDdv90//ka4f8Pfh&#43;m99&#43;vWTi&#43;cAdCdqZ&#43;HJQ6RSQSsYshF97ERSd0&#43;tcc268loxaplGRoRMeqrlY3T1dpfje/bdzkA8Pu3D18qSvPw0eVG8VzcKazH55ldkYUHOCXyRpvrfHlwcVh4ykvD2Mn/JfQMLsKLl5MY7Ty6McO7M6wue/GHQHUvT7/Y41wQzABiECAA3HHuvx5&#43;nwDvGRzY9GN8nfwzYf/m6/AKGb5FrOmeJHLnZ3yB7OWWepIvEnEbk1rIvFVCM46w92PkfxJT/ocx6re1AnuobW24P1SyGX7f4NAQ7hRwx1AqHT/3ZGDrYaU2Dcf14/TuBWHhE14ZesfwmBb38xzBHHW6hYPkFF4fjuasDMOhqp//Uyf/eyfUcXLXwzNbtvG0h7Qw39N5fOePo76yb3vY9oMvhJ03fBX88OxAZ/nsJxpzIltZdFj2tpgLoNUl0ki7RK2AZ7MVp3t89ewrlVrlL&#43;H4n6Q4D3fZNHq4qTbTWzZv3ryLsUm8CGYc9WmyCKapDve01TBv2dlh0RNeHQaWPzlOqVjnUZKz5Gxak6LbyGZJ7/zFTZ16uP4TFh9ux&#43;p8iqPpPy4a2g/wnh7371hm9uCV863/cTme49&#43;tn4rVN4tIt8HBDAT9kQkLSXLYpKmpaPjEo7MtGQujhT3e9fi8e9&#43;&#43;fV0d6DitbvOiBt1idwnf3z98en9vz7vgkZemqHznjt&#43;7752/Oiw89YIwfMyvwHn4ifa4zmstBwINJWPhImOrwiDw4IgwcgxuFTngEQAKHDJUUNjOm7u9Mt4Mntp2a7j/msvCvruvsfUfv/ZhDqaraB7iE1kl9ansMqgHF/cnYVmOON6d5qKb9FM&#43;jPr7sMn94N69D34KsPjhgUcnJWI8OgzJZWho6IVQ&#43;l34PIX/r0&#43;pbyyMnfhbYfTEF&#43;FXu/ilSt7P06mwIy86rqPjYh0F34BxurfDHTqKH/MEjczzIj7V08jnPEBYBgUe1PCeftePrsR0fyV&#43;dPJByMDfBCYWuUQ&#43;njPG2KwLe61fslk1DwBJnuN7t&#43;dO35QBXKhPVus9n5mZmroEhzlbHO7Ryk3bR4tbkQ9WhYE3DB99zlsXnf5fV5aHj8NuF&#43;/h8SlLts7HINBxnYwFCmyztdvex4N34GQqwrrOAQDD2Z8Oq2rUswjTc0OH9gN3/0fY9sO/CxPbf67Htmynb&#43;V&#43;FoRqucqknldVdkcqZ5/FXXS/8SNuu0R5cIT7TSCs37t377Xt4B7p9lStR5pXS/pn/NGWYyZ3bnwrHP8GOGKQR7tM8oOPZlQ02ugHShxzM34MAHWwC50KCOJwH2B7gR48uJnZfXfYcd3nwt47cRuN8wM&#43;xRM54uqPF1GQDCaH1aN/czhyInJM3Lj5jMDZywPC2xyOOOj9GS7v2bNnz0Ed3zqthyNPVHg4yB08jbXnX72up9y3Hlb8DRkby4BSXN9ZljG1pgMCklN4OcELWRtnAsWBdvdVPKV74OavYbrnj0Pu0FM8fSlE8IYkNzc4Xzw1laBEoQDKizIWkVIHa9mKvR4E3s8cL4/sxPUj5XLfJ3bv3r3XKDy211SXx1aSyP3kC65&#43;ea1efid&#43;eu00nv7ZkoDRFR1hu33zBY3qCsjhGO3q4cyBMyjev0/c/yP8YNSn8JtBN6AJbfxJN0Ixcuwv4rDq1GI/ZWJT5vwiDLuVRCfH9eYkx5cLwufxeT9G/Z1J&#43;2NenFXqx0q6k19/zWh9IrwRxn8LHLa0hsMfeiFzGoPB/uIIjGro1g5dmO6r&#43;7eGXT/9h7Dntm/gnnoc6z9u9zxgmAsld7loJwo7Lzmf7YRHIKg9CQi1J3gEjNJ461U8vsVDm&#43;95w6GUN8h6KIkWwtoLvnMCXnD5c1j0tRy69gOPEJl/PiNAZHMWDK&#43;T5&#43;mw965vh103fj5M77sH7/3jUS3bHY65VXglcoPDUI9WIV2u7WlqCgDRwCWCsZ//sATcjvv59&#43;F&#43;/gr08lXSQzJFVQ9J2TKh1r766mfhSfx6ePi5WhL8TV5s9ph4wsepfWrXzWHXDTjCvZf39Hyww/fyzKFynGBzlb2NNDzRefxjYn/LALDupqtwQ9gD3h/DqP9fcP6uJqBDrCG3xiEmWJM4L7&#43;yvHZgxatgZDxo6l9bxy2jnglguud9/J6bvxweuA3P6adxT8/pHreOFh/mUCnqQxvEU0envDwoPG8KgCRAUjyUOQf8E0b9ezDd39zQd8hWD58AiCZ84sv/dVGtb&#43;S/Y5T9EXyxYP&#43;WDWHnT/4uTO&#43;5ze7pMRvQefoXtXNnuhca62xvCggGS8P0b3AETs3Gcp2vYb0b9/PfIszhlFJNDie5w&#43;m/f&#43;Mp23/40XfsuumK3&#43;7pqWKDzyNcc7wNUrm0wVmstlY5bZdLYY1IASXd1Mk&#43;GZwBbUb9EuzsL0MnTrEOv9TaGoeRHgMDvS/oKfXxWPkZjcpkznJ9FCDmWL9nd9dmsCCSO94RAZVs8gBwADB/g8e0H8LTuq0OdTjmjTY7HHWgzP1DI0Ovw0uBb4MjVzUp0cKpmcMjsAVC6nqUo3U8SATaE76K19/&#43;8sEHH/xxE5/DsOFICQCZfnh4mK&#43;q/wkcdhEcjN/w9pQ61tqaAiAO8cZ2BYFFwo/xggYf037NqR4J&#43;REVAO4QBMJZeI37nXD7i5td3zoAHLdFfj/aPoQnmH&#43;7bdu2Ay36D&#43;umIzIA3CNDo0O/VaqXuD94Mtv0wIYFad1edQYNZpEp4F2Gd&#43;75mHYz0Y7EZEdkR6Jm0Am/MH7rkiVLroATd8GjZ&#43;Bx8agt7K2cb2284qHNt/C62IW4rftbbPT2HKHmkVqtLHFE6ouXD47t6&#43;v7M8wCv4sBPqBjm0RTGgLbgJsw&#43;t&#43;zd//eL7KadP&#43;ieKRYYP78&#43;U8bnT//m6Ojo3V&#43;5o/OZ75z/sjI2xcuXDh2pOj5Cz1mt0DPyNjY&#43;XD8DaOj8z&#43;PoFgzO/gveo9UC3T1Xfo5jPC4WU7nsMMj371&#43;/frSNddcc8FVV12Frwg9tunKK6/s37Bhw59ed911Q4&#43;tJAfH/f8DquSt0fZ8PWMAAAAASUVORK5CYII=" alt="skill-up logo">
+        <div class="title-block">
+          <h1>Eval Report: <span id="skill-name"></span></h1>
+          <div class="meta" id="header-meta"></div>
+        </div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="summary-bar" id="summary-bar"></div>
+
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" data-view="cases" onclick="switchView('cases')">Cases</button>
+      <button class="view-tab" data-view="benchmark" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <div class="view-panel active" id="panel-cases">
+      <div class="cases-layout">
+        <aside class="case-sidebar" id="case-sidebar">
+          <div class="sidebar-header">
+            <div class="sidebar-header-title">
+              <span>Cases</span>
+              <span class="count" id="case-count">0</span>
+            </div>
+            <button type="button" class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">&#9664;</button>
+          </div>
+          <div class="case-list" id="case-list"></div>
+        </aside>
+        <div class="cases-main">
+      <div class="main">
+        <div class="section">
+          <div class="section-header case-header">Case <span class="status-badge" id="case-badge"></span><span class="case-header-metrics" id="case-header-metrics"></span></div>
+          <div class="section-body"><div class="case-info" id="case-info"></div></div>
+        </div>
+        <div class="section" id="prompt-section" style="display:none;">
+          <div class="section-header">Prompt</div>
+          <div class="section-body"><div class="prompt-box" id="prompt-text"></div></div>
+        </div>
+        <div class="section" id="error-section" style="display:none;">
+          <div class="section-header">Error</div>
+          <div class="section-body"><div class="error-box" id="error-text"></div></div>
+        </div>
+        <div class="section" id="response-section" style="display:none;">
+          <div class="section-header">Response</div>
+          <div class="section-body" id="response-body"></div>
+        </div>
+        <div class="section" id="grades-section" style="display:none;">
+          <div class="section-header">
+            <div class="grades-toggle" onclick="toggleGrades()">
+              <span class="arrow" id="grades-arrow">&#9654;</span> Formal Grades
+            </div>
+          </div>
+          <div class="grades-content" id="grades-content"></div>
+        </div>
+        <div class="section">
+          <div class="section-header">Your Feedback</div>
+          <div class="section-body">
+            <textarea class="feedback-textarea" id="feedback" placeholder="What do you think of this result? Any issues, suggestions, or things that look great?"></textarea>
+            <div class="feedback-status" id="feedback-status"></div>
+          </div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+        <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+        <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved.</p>
+      <div><button onclick="closeDoneDialog()">OK</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var DATA = {"skill_name":"ui-ux-pro-max","engine_name":"claude_code","model_name":"deepseek-v4-flash","protocol":"anthropic","requested_model":"deepseek-v4-flash","applied_model":"deepseek-v4-flash","observed_model":"","start_time":"2026-09-11T17:31:24+08:00","evaluation_wall_time":"2018.3s","agent_tokens":465754,"judge_tokens":207961,"overall_tokens":673715,"summary":{"total":2,"passed":2,"failed":0,"skipped":0,"errors":0,"pass_rate":"100%"},"cases":[{"id":"ask-202609110857","title":"为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，…","status":"PASS","agent_duration_ms":325161,"agent_duration":"325.2s","input_tokens":81872,"output_tokens":34331,"agent_tokens":116203,"judge_duration_ms":195423,"judge_duration":"195.4s","judge_input_tokens":78754,"judge_output_tokens":2931,"judge_tokens":81685,"turns":6,"grading":{"expectations":[{"text":"expect.exit_code","passed":true,"evidence":"all checks passed"},{"text":"只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准）","passed":true,"evidence":"用户任务（transcript idx 0）要求交付单文件 index.html（内联 CSS/JS、零依赖），页面含导航、Hero、三张功能卡、定价对比、订阅表单（校验＋就近错误提示）、页脚，并支持明暗主题＋跟随系统偏好。交付的 index.html（54,228 字节，1532 行）结构逐项对得上：\u003cheader\u003e/\u003cnav aria-label=主导航\u003e、.hero（h1 + lead + actions + 路线预览卡）、section#features 下三张 .card、section#pricing 下三档 .plan 六项能力逐项对照、form#subscribe-form（email/route/terms 三个 .field，各自带 .field__error 就地提示）、\u003cfooter\u003e。; 独立用 headless Chrome 直接以 file:///C:/Users/yu.zhao/AppData/Local/Temp/skill-up-1917392857/index.html 打开：控制台 0 error / 0 warning（含纯键盘走查期间与表单出错状态期间）。; 375x812 与 1440x900、light 与 dark 四种组合下 document.documentElement.scrollWidth 分别为 375 / 375 / 1440 / 1440，与 innerWidth 相等；越界元素计数为 0；触发表单全部错误态（长中文错误文案）后仍为 375/1440，无横向滚动。; 自行按 WCAG 公式遍历所有叶子文本节点计算对比度（正文 4.5:1、大字号 3:1）：375/1440 × light/dark 四种组合下不达标项均为 0（正文 token 例如浅色 --text-muted #4B5670 on #F6F8FC ≈ 6.8:1，深色 #A9B3CE on #0B1020 ≈ 9.0:1）。; 用真实键盘事件（Input.dispatchKeyEvent Tab）在 375px 下走查：共 19 个焦点停留点，覆盖 skip-link、品牌、两个导航链接、主题切换按钮、Hero 两个 CTA、三档定价按钮、邮箱、路线、条款勾选框、提交按钮、四个页脚链接，随后回绕到 body（走完）；每个停留点的焦点环为 solid 3px rgb(11, 87, 208)，勾选框的环落在其 44×44 包裹层 .check__hit 上，无缺失。; 主题：模拟 prefers-color-scheme:dark 加载后 data-theme=dark / data-mode=system；系统切回 light 时页面实时跟随变为 light；点击主题切换按钮后变为 dark 且显示出「跟随系统外观」复位按钮。; 模拟 prefers-reduced-motion: reduce 后 body/.card 的 transitionDuration 降为 1e-06s，scroll-behavior=auto（动效已响应减弱设置）。; 颜色 token 检查：剥离 :root 与 [data-theme=\"dark\"] 两个令牌块后，样式表内剩余 #hex 为 0、rgba() 为 0，全表 189 处 var(--…)；body 规则为 font-size:16px / line-height:1.5。; 图标检查：无任何 emoji 字符（扫描无 pictograph 码位），共 41 处内联 \u003csvg\u003e；错误提示图标用内联 data:image/svg+xml 掩码实现，仍为 SVG 且不依赖外部文件。; 表单行为验证：邮箱格式错误/路线过短/未勾选条款时，三处就地提示分别出现且 aria-invalid=true、焦点落到第一个出错字段；全部合法提交后显示成功状态并清空字段。; 触控目标实测：主题按钮 44×44、导航链接 48×44、页脚链接 60×44、输入框 293×48（375px）/574×48（1440px）、跳过链接 132×44；条款勾选框本体为 24×24，外有 44×44 包裹层（实测该包裹层自身不可点，wrapperClickToggles=false，但同排关联 \u003clabel\u003e 可点，375px 下 label 为 259×45），即触控断点下该控件的有效可点区域达到 ≥44×44。"},{"text":"产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标","passed":true,"evidence":"工作目录（C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-1917392857）当前只有一个交付文件 index.html（54,228 字节），无 README、说明文件、审计脚本或截图残留（find . -maxdepth 1 -type f 仅 ./index.html）。; 零依赖零构建可验证：全文件无 \u003cscript src\u003e、无 \u003clink href\u003e 外链；正则扫描到的绝对 URL 只有内联 data URI 里的 SVG 命名空间字符串 http://www.w3.org/2000/svg，无任何网络请求；直接用 file:// 协议在 headless Chrome 中打开渲染正常，控制台无输出。; 输出格式即任务要求的单文件 index.html，内联 \u003cstyle\u003e 与内联 \u003cscript\u003e 各就位（2 个 script 块，node --check 语法通过），双击即开可用。; 未附加多余解释：最终回复仅一行「全部通过。看一眼实际渲染。」，交付物内只有常规代码注释（区块注释与行内说明），没有面向用户的说明文档或额外产物。; 未要求的防御代码未构成冗余：仅有的守卫是 localStorage 的 try/catch、matchMedia 的 addEventListener/addListener 回退与若干 null 判断，直接服务于任务明写的「打开无控制台报错」验收项（file:// 场景下 localStorage 可能抛错），且实测控制台确实干净；未引入任何未被要求的功能、库或文件。"}],"summary":{"passed":3,"failed":0,"total":3,"pass_rate":1}},"configuration":"with_skill","prompt":"为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，浏览器双击即开。页面含导航、Hero、三张功能卡、定价对比、订阅表单（校验＋就近错误提示）、页脚，并支持明暗主题切换与跟随系统偏好。375px 宽不得横向滚动，Tab 能走完全部交互且焦点环清晰，触控目标≥44×44px，正文对比度≥4.5:1，图标只用内联 SVG 不用 emoji，正文 16px／行高 1.5，动效响应 prefers-reduced-motion，颜色走语义 token 不散写色值。验收：打开无控制台报错，375px 与 1440px 均不破版，切主题与纯键盘走查后文字仍清晰可读。\n","response":"全部通过。看一眼实际渲染。","baseline":{"id":"ask-202609110857","title":"为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，…","status":"FAIL","agent_duration_ms":267852,"agent_duration":"267.9s","input_tokens":68428,"output_tokens":25388,"agent_tokens":93816,"judge_duration_ms":228855,"judge_duration":"228.9s","judge_input_tokens":74392,"judge_output_tokens":5853,"judge_tokens":80245,"turns":11,"grading":{"expectations":[{"text":"expect.exit_code","passed":true,"evidence":"all checks passed"},{"text":"只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准）","passed":true,"evidence":"Turn-1 task (transcript msg 0) requires: single-file index.html with inline CSS/JS, zero dependencies, double-click to open; nav / hero / three feature cards / pricing comparison / subscribe form with validation and inline errors / footer; light-dark theme toggle plus follow-system preference; no horizontal scroll at 375px; full Tab traversal with clear focus ring; touch targets \u003e=44x44; body contrast \u003e=4.5:1; inline SVG icons only, no emoji; body 16px / line-height 1.5; motion respects prefers-reduced-motion; semantic color tokens.; Single file / inline / zero deps: index.html is 1192 lines, 40334 bytes; regex scan for src=/href= (non-#) / http(s):// / @import returns nothing; 26 inline \u003csvg\u003e, 0 \u003cimg\u003e elements. Loading the pristine index.html directly over file:// renders correctly with no JS/console errors in headless Chrome.; All required sections present: \u003cnav class=\"site-nav\" aria-label=\"主导航\"\u003e (index.html:675), hero (696), three \u003carticle class=\"card\"\u003e feature cards (785/799/815), three-plan pricing comparison (841/862/892), \u003cform id=\"subscribe-form\" novalidate\u003e (946) with per-field inline \u003cp class=\"field-error\" role=\"alert\"\u003e (955/966/975), \u003cfooter class=\"site-footer\"\u003e (997).; Theme support: dark tokens on :root (21), [data-theme=\"light\"] (47), @media (prefers-color-scheme: light) :root:not([data-theme]) (74), toggle button #theme-toggle (681). My own render confirms: with no data-theme the page renders light (bodyBg rgb(245,247,252)), clicking the toggle sets data-theme=dark and bodyBg rgb(11,16,32), clicking again returns to light with no horizontal overflow.; 375px and 1440px both verified independently in headless Chrome via real iframe viewports: 375 -\u003e innerWidth 375, scrollWidth 360, horizOverflow false, console errors []; 1440 -\u003e scrollWidth 1425, horizOverflow false, console errors []. Full-page screenshots at 375x3200 and 1440x2600 show no clipping, overlap or broken layout.; Full Tab traversal and clear focus ring: probe tabOrder = skip-link -\u003e brand -\u003e 3 nav links -\u003e #theme-toggle -\u003e 2 hero buttons -\u003e 3 plan buttons -\u003e input#email -\u003e select#city -\u003e input#consent -\u003e submit -\u003e 6 footer links; :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px } (index.html:138-142).; Touch targets: probe shows all a/button/select/input measure \u003e=44x44 at both viewports; the only sub-44 box is the 24x24 checkbox, whose hit area is extended to 44x44 by .field--check input[type=checkbox]::before { inset: -10px } (556-560) inside a row with min-height 48px (538); the two 22.5px-tall boxes are plain text labels (邮箱地址/通勤城市), not standalone interactive targets.; Contrast computed myself: lowest is the light-theme link color #0f766e on #f5f7fc = 5.11:1; others range 6.54-16.93:1 (light body 16.67:1, light muted 7.01:1, dark body 16.93:1, dark muted 9.37:1), all \u003e=4.5:1.; Icons and typography: 26 inline \u003csvg\u003e, zero characters in the emoji range (Unicode \u003e0x1F000 set is empty); body { font-size: 16px; line-height: 1.5 } (index.html:121-122); @media (prefers-reduced-motion: reduce) neuters animations/transitions (647-652).; Semantic tokens: scanning outside the three token blocks for hex/rgb()/named colors matches only `white-space: nowrap` (line 70), i.e. component styles do not hardcode color values.; Form behavior meets spec: empty submit produces 3 inline messages (email/city/consent), sets aria-invalid and focuses the email field; a malformed email yields the format message; a valid submit shows the role=\"status\" success panel and focuses it; the reset button restores the form and clears stale errors."},{"text":"产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标","passed":false,"evidence":"The usability half is satisfied: loading the delivered file over file:// yields no JS/console errors, no horizontal overflow at 375px or 1440px, working form validation, theme toggle and success panel, and all CSS/JS is inline with zero external requests (the output format matches the requested single index.html).; However the output carries substantial unrequested baggage in the form of extra files: the task only asked to deliver index.html, yet the transcript records the agent writing 10 auxiliary files into the delivery directory C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-3392319838\\: _check.js (msg 10-11 Write results), _probe.js (msg 23/36), _test.html, _frame375.html, _frame1440.html (msg 36-41), _dark.html (msg 44), and shot-375-light.png / shot-375-dark.png / shot-1440-light.png / shot-1440-dark.png (msg 45 output 'shot harnesses written ... shot-1440-dark.png: 372136 bytes'). As of the last transcript step these files were still in the delivery directory; the directory now holds only index.html because the run was cleaned up afterwards, so this observation is grounded in the transcript.; Unrequested defensive code is present in the deliverable: duplicated overflow-x: clip on both html and body (index.html:111 and 116), which the agent itself described as 'one defensive tweak to the overflow guard' (msg 4); two try { localStorage... } catch (e) {} blocks in the theme bootstrap and toggle handler (index.html:11-15, 1070); a matchMedia mq.addEventListener/addListener dual-branch legacy fallback (1078-1079); and if (toggle) / if (form) / if (again) null guards for #theme-toggle, #subscribe-form and #subscribe-again, which all always exist in the same file (1064/1160/1177).; Delivery behavior also drifted from 'hand over the artifact': the only user-facing text at the end is a status sentence ('All checks pass at real 375px and 1440px viewports with zero console errors. Now let me look at it visually — full-page shots at both widths, light and dark.'), and the transcript ends mid-verification while reading screenshots, so the user was never actually given a delivery statement. | Failures: Ten unrequested auxiliary files were written into the delivery directory (_check.js, _probe.js, _test.html, _frame375.html, _frame1440.html, _dark.html, four shot-*.png), violating the requirement to deliver only index.html as a single file.; index.html contains unrequested defensive code: a duplicated overflow-x guard, try/catch around localStorage, a legacy matchMedia addListener fallback, and null checks for elements that necessarily exist.; The final response never delivered the result; it is a mid-task progress note about taking screenshots, and the run ended during verification with no user-facing handover."}],"summary":{"passed":2,"failed":1,"total":3,"pass_rate":0.6666666666666666}},"configuration":"without_skill","prompt":"为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，浏览器双击即开。页面含导航、Hero、三张功能卡、定价对比、订阅表单（校验＋就近错误提示）、页脚，并支持明暗主题切换与跟随系统偏好。375px 宽不得横向滚动，Tab 能走完全部交互且焦点环清晰，触控目标≥44×44px，正文对比度≥4.5:1，图标只用内联 SVG 不用 emoji，正文 16px／行高 1.5，动效响应 prefers-reduced-motion，颜色走语义 token 不散写色值。验收：打开无控制台报错，375px 与 1440px 均不破版，切主题与纯键盘走查后文字仍清晰可读。\n","response":"All checks pass at real 375px and 1440px viewports with zero console errors. Now let me look at it visually — full-page shots at both widths, light and dark."}},{"id":"ask-ride-neutral","title":"我们做了个给夜骑通勤的人用的「骑行路线规划」小网站，现在要一页介绍页，手机上扫码就能看。交付一个自包含的 index.h…","status":"PASS","agent_duration_ms":318730,"agent_duration":"318.7s","input_tokens":89420,"output_tokens":29769,"agent_tokens":119189,"judge_duration_ms":77234,"judge_duration":"77.2s","judge_input_tokens":43334,"judge_output_tokens":2697,"judge_tokens":46031,"turns":14,"grading":{"expectations":[{"text":"expect.exit_code","passed":true,"evidence":"all checks passed"},{"text":"只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）","passed":true,"evidence":"任务要求逐条比对（任务原文在 transcript turn=1：『交付一个自包含的 index.html，放项目根目录，CSS 和 JS 都内联，不装依赖、不跑构建，双击就能打开。页面里要有：顶部导航、一张主视觉、三张功能卡、两档订阅方案对比、一个订阅表单（邮箱填错要当场提示哪里错）、页脚；再加一个明暗主题开关，默认跟着系统走』）; 顶部导航：index.html 中 \u003cheader class=\"site-header\"\u003e 内含 \u003cnav class=\"nav\" aria-label=\"主导航\"\u003e，含 功能/方案/订阅 三个锚点链接，实测 320px 下仍为 64px 单行不换行; 主视觉：存在 \u003csection class=\"hero\"\u003e，其中含唯一 h1，实测文本为『夜路怎么走，出门前就心里有数』; 三张功能卡：id=\"features\" 区块内 \u003cdiv class=\"cards\"\u003e 恰好含 3 个 \u003carticle class=\"card\"\u003e，各带一张内联 SVG 图标 + h3 + p; 两档订阅方案对比：id=\"pricing\" 区块内 \u003cdiv class=\"plans\"\u003e 含 2 个 \u003carticle class=\"plan\"\u003e（夜行者 ¥0 / 常客 ¥18 月付、¥180 年付），且用 .is-off 项形成逐条对比; 订阅表单：\u003cform id=\"signupForm\" novalidate\u003e 含 label for=\"email\"、input type=email、按钮；实测提交空值/@缺失/两个@/缺用户名/缺域名/缺后缀六类输入，错误文案逐条不同且都能说清哪里错（如『邮箱缺少 @ 符号，正确格式类似 name@example.com。』『@ 前面缺少用户名…』『域名缺少后缀…』），提交失败后 document.activeElement 回到 #email，且 email 被置 aria-invalid=\"true\"，错误节点为 role=\"alert\"; 页脚：存在 \u003cfooter class=\"site-footer\"\u003e，含品牌、页面链接列、联系列与 footer-bottom 版权行; 明暗主题开关默认跟系统：实测在 prefers-color-scheme 分别模拟 dark 与 light 时，首屏 documentElement[data-theme] 均为 \"auto\"；连续点击按钮实测循环 auto→light→dark→auto，且按钮文案/aria-label 同步更新（『主题模式：跟随系统。点击切换到浅色。』）; 自包含 / 无依赖 / 双击可开：全文 0 个 @import、0 处 googleapis，外部引用仅有 data: URI favicon、页内锚点、mailto: 和一个仅存在于注释中的示例 fetch URL；在无服务器、以 file:/// 直接导航时页面正常渲染并完成全部交互实测; 键盘与单手操作：18 个可聚焦元素全部可被程序化聚焦且实测均有可见焦点环（无 outline:none+box-shadow:none 项），Tab 顺序与 DOM 顺序一致；无任何需要 hover 才能触发的流程; 任务给出的验收项全部实测通过：8 档宽度（320/360/390/414/768/1024/1280/1440）横向溢出均为 0，无任何元素超出视口；各档控制台 0 报错 0 警告 0 异常；暗色下 79 组前景/背景实测最低 6.01:1（浅色最低 4.96:1），均 ≥ 4.5:1，『暗色后文字看得清』成立; 任务未要求的内容（如后端真实提交、44px 触控目标）未作为扣分依据；实测仅页脚两个文字链宽度 30px，属任务未提出的项，不计入"},{"text":"产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到","passed":true,"evidence":"交付物在：项目根目录 C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-649008052\\index.html 存在，51073 字节、1349 行; 能打开：用零依赖的 Node 内置 WebSocket 驱动无头 Chrome，以 file:/// 协议直接导航该文件（等价于双击打开，无构建、无服务器），页面加载完成可正常查询 DOM 并交互; 格式没错：单文件自包含，1 个 \u003cstyle\u003e 块（行 1039–20187）与 2 个 \u003cscript\u003e 块（head 内防闪主题脚本 + 文末主脚本）均内联，无任何外部 CSS/JS 依赖或模块加载; 功能可跑通：实测主题三态循环点击生效、18 个可聚焦元素键盘可达、表单六类非法输入均当场给出定位明确的错误提示、合法输入 rider@example.com 返回成功状态『订阅成功，我们会把每周的夜骑简报发到 rider@example.com。』; 无运行时故障：8 档视口下控制台 0 报错、0 警告、0 未捕获异常，横向溢出 0，页面结构（导航/主视觉/三卡/两方案/表单/页脚）完整渲染; 轻微表述差异（不影响交付）：交付说明称『52 KB、1348 行』，实测为 51073 字节、1349 行，属四舍五入与计数口径差异，文件本体正确可用"}],"summary":{"passed":3,"failed":0,"total":3,"pass_rate":1}},"configuration":"with_skill","prompt":"我们做了个给夜骑通勤的人用的「骑行路线规划」小网站，现在要一页介绍页，手机上扫码就能看。交付一个自包含的 index.html，放项目根目录，CSS 和 JS 都内联，不装依赖、不跑构建，双击就能打开。页面里要有：顶部导航、一张主视觉、三张功能卡、两档订阅方案对比、一个订阅表单（邮箱填错要当场提示哪里错）、页脚；再加一个明暗主题开关，默认跟着系统走。\n我自己平时主要用键盘操作，手机上也是单手刷，所以别让我非用鼠标才能走完整个流程。\n验收很朴素：手机上打开不出现横向拖动、不破版，电脑上打开也不难看；控制台别报错；切到暗色之后文字还得看得清。\n","response":"交付完成：`index.html`（52 KB，1348 行，单文件自包含，双击即可打开）。\n\n**关于技能包**：`ui-ux-pro-max` 只导入了 `SKILL.md`，它依赖的 `scripts/` 和 `references/` 没有随包进来，所以搜索工具跑不了。我按 SKILL.md 里那份优先级表（无障碍 → 触控 → 布局 → 表单反馈）来做，没有引用任何未经验证的数据库结果。\n\n**我没有靠眼看来验收**，而是用 Node 内置 WebSocket 驱动无头 Chrome 实测了一遍（零依赖）：\n\n| 验收项 | 实测结果 |\n|---|---|\n| 横向拖动 | 320 / 360 / 390 / 414 / 768 / 1024 / 1280 / 1440px 八档，`scrollWidth` 全部等于视口宽，溢出 **0px**，无超宽元素 |\n| 导航不破版 | 最窄 320px 下仍是 64px 单行（专门为 320–360 加了紧凑档位，主题按钮在该区间收成图标但仍带 `aria-label`） |\n| 控制台 | 八档全部无报错、无警告、无异常 |\n| 暗色可读性 | 深浅两套各 15 组前景/背景实测，**全部 ≥ 4.5:1**，最低 4.96（页脚版权），正文 16.72 |\n| 触控 | 无小于 44px 的可点元素，无重叠 |\n| 键盘 | 18 个可聚焦元素全部有可见焦点环，Tab 顺序 = DOM 顺序 |\n\n**过程中实测揪出并修掉的三个真问题**：\n1. 320px 下导航会挤到第二行，被固定高度裁掉 → 改 `min-height` + 加紧凑断点\n2. 浅色 eyebrow 标签对比度 **4.49:1**，差 0.01 不达标 → 把浅色 accent 从 `#B45309` 调到 `#A34A08`，顺带把主按钮从 5.02 提到 5.93\n3. 吸顶导航差点被 `overflow-x: clip` 破坏 —— 专门验证过，各个滚动位置 `headerTop` 稳定为 0，没问题\n\n**表单校验**（跑了 25 个用例）能逐条说清错在哪：缺 `@`、多个 `@`、`@` 前没用户名、`@` 后没域名、域名没后缀、后缀太短/含数字、域名有连续点号或首尾连字符、用户名点号位置不对、含空格……提交失败会把焦点送回输入框，提示用 `role=\"alert\"` 播报。\n\n**两件事需要你知道：**\n\n1. **表单目前不发任何请求。** 纯前端校验 + 本地成功提示。接入后端的位置我在 JS 里用 `// === 接入后端的位置 ===` 标好了，换成 `fetch` 即可。所以现在那个\"订阅成功\"只是演示。\n2. **主题开关是三态**（跟随系统 → 浅色 → 深色 → 循环），不是二态。你说\"默认跟着系统走\"，二态开关一旦点过就回不到跟随系统了，所以留了三态；按钮上的文字会跟着变（自动/浅色/深色）。如果你想要纯二态，我改掉。\n\n另外页脚的联系邮箱我填的是占位符 `hello@nightride.example`，方案价格（¥0 / ¥18 月付、¥180 年付）和功能清单也是我拟的——这些是产品信息，得你确认。","baseline":{"id":"ask-ride-neutral","title":"我们做了个给夜骑通勤的人用的「骑行路线规划」小网站，现在要一页介绍页，手机上扫码就能看。交付一个自包含的 index.h…","status":"ERROR","agent_duration_ms":603206,"agent_duration":"603.2s","input_tokens":122331,"output_tokens":14215,"agent_tokens":136546,"judge_duration_ms":0,"judge_duration":"0.0s","judge_input_tokens":0,"judge_output_tokens":0,"judge_tokens":0,"turns":26,"error":"agent execution failed: claude-code run failed: context deadline exceeded (case timeout 600s via case.constraints.timeout_seconds)","configuration":"without_skill","prompt":"我们做了个给夜骑通勤的人用的「骑行路线规划」小网站，现在要一页介绍页，手机上扫码就能看。交付一个自包含的 index.html，放项目根目录，CSS 和 JS 都内联，不装依赖、不跑构建，双击就能打开。页面里要有：顶部导航、一张主视觉、三张功能卡、两档订阅方案对比、一个订阅表单（邮箱填错要当场提示哪里错）、页脚；再加一个明暗主题开关，默认跟着系统走。\n我自己平时主要用键盘操作，手机上也是单手刷，所以别让我非用鼠标才能走完整个流程。\n验收很朴素：手机上打开不出现横向拖动、不破版，电脑上打开也不难看；控制台别报错；切到暗色之后文字还得看得清。\n","response":"JS 通读没问题。清掉我所有的验证脚本，只留交付文件："}}]};
+    var feedbackMap = {};
+    var currentIndex = 0;
+    var visitedCases = {};
+
+    function init() {
+      document.getElementById("skill-name").textContent = DATA.skill_name;
+      var meta = "Engine: " + DATA.engine_name;
+      if (DATA.protocol) meta += " | Protocol: " + DATA.protocol;
+      if (DATA.requested_model) meta += " | Requested model: " + DATA.requested_model;
+      if (DATA.applied_model) meta += " | Applied model: " + DATA.applied_model;
+      else if (DATA.requested_model) meta += " | Applied model: none (local/default selection)";
+      else if (DATA.model_name) meta += " | Model: " + DATA.model_name;
+      meta += " | Observed model: " + (DATA.observed_model || "unknown");
+      meta += " | Started: " + DATA.start_time + " | Evaluation wall time: " + DATA.evaluation_wall_time;
+      meta += " | Tested agent tokens: " + fmtInteger(DATA.agent_tokens);
+      meta += " | Judge tokens: " + fmtInteger(DATA.judge_tokens);
+      meta += " | Overall tokens: " + fmtInteger(DATA.overall_tokens);
+      document.getElementById("header-meta").textContent = meta;
+
+      var sb = document.getElementById("summary-bar");
+      var s = DATA.summary;
+      sb.innerHTML = sumCard("Total", s.total, "") + sumCard("Passed", s.passed, "clr-pass") +
+        sumCard("Failed", s.failed, "clr-fail") + sumCard("Skipped", s.skipped, "clr-skip") +
+        sumCard("Errors", s.errors, "clr-error") + sumCard("Pass Rate", s.pass_rate, "");
+
+      if (DATA.benchmark) {
+        document.getElementById("view-tabs").style.display = "flex";
+        renderBenchmark();
+      }
+
+      renderCaseList();
+
+      try {
+        fetch("/api/feedback").then(function(r) { return r.json(); }).then(function(d) {
+          if (d.reviews) { for (var i = 0; i < d.reviews.length; i++) feedbackMap[d.reviews[i].run_id] = d.reviews[i].feedback; }
+          showCase(0);
+        }).catch(function() { showCase(0); });
+      } catch(e) { showCase(0); }
+
+      var ta = document.getElementById("feedback");
+      var timer = null;
+      ta.addEventListener("input", function() {
+        clearTimeout(timer);
+        document.getElementById("feedback-status").textContent = "";
+        timer = setTimeout(function() { saveCurrentFeedback(); }, 800);
+      });
+    }
+
+    function sumCard(label, value, cls) {
+      return '<div class="summary-card"><div class="label">' + label + '</div><div class="value ' + cls + '">' + value + '</div></div>';
+    }
+
+    function renderCaseList() {
+      var list = document.getElementById("case-list");
+      var count = document.getElementById("case-count");
+      if (!list || !DATA.cases) return;
+      count.textContent = DATA.cases.length;
+      var html = "";
+      for (var i = 0; i < DATA.cases.length; i++) {
+        var c = DATA.cases[i];
+        var status = (c.status || "").toLowerCase();
+        var label = c.title || c.id || ("Case " + (i + 1));
+        html += '<div class="case-item" data-idx="' + i + '" onclick="showCase(' + i + ')" title="' + esc(label) + '">' +
+          '<span class="case-dot dot-' + status + '"></span>' +
+          '<span class="case-name">' + esc(label) + '</span>' +
+          '<span class="case-index">#' + (i + 1) + '</span>' +
+          '</div>';
+      }
+      list.innerHTML = html;
+    }
+
+    function updateCaseListActive() {
+      var items = document.querySelectorAll("#case-list .case-item");
+      for (var i = 0; i < items.length; i++) {
+        if (parseInt(items[i].getAttribute("data-idx"), 10) === currentIndex) {
+          items[i].classList.add("active");
+          if (items[i].scrollIntoView) items[i].scrollIntoView({ block: "nearest" });
+        } else {
+          items[i].classList.remove("active");
+        }
+      }
+    }
+
+    function toggleSidebar() {
+      var sb = document.getElementById("case-sidebar");
+      var btn = document.getElementById("sidebar-toggle");
+      var collapsed = sb.classList.toggle("collapsed");
+      btn.innerHTML = collapsed ? "&#9654;" : "&#9664;";
+    }
+
+    function navigate(delta) {
+      var ni = currentIndex + delta;
+      if (ni >= 0 && ni < DATA.cases.length) showCase(ni);
+    }
+
+    function showCase(index) {
+      if (typeof index !== "number" || index < 0 || index >= DATA.cases.length) return;
+      if (index !== currentIndex) { try { saveCurrentFeedback(); } catch (e) {} }
+      currentIndex = index;
+      var c = DATA.cases[index];
+      document.getElementById("progress").textContent = (index + 1) + " of " + DATA.cases.length;
+
+      var badge = document.getElementById("case-badge");
+      badge.textContent = c.status;
+      badge.className = "status-badge sb-" + c.status.toLowerCase();
+
+      var info = '<div class="info-item"><span class="info-label">Case:</span> <strong>' + esc(c.id) + '</strong></div>';
+      if (c.title) info += '<div class="info-item"><span class="info-label">Title:</span> ' + esc(c.title) + '</div>';
+      info += '<div class="info-item"><span class="info-label">Turns:</span> ' + c.turns + '</div>';
+      document.getElementById("case-info").innerHTML = info;
+      document.getElementById("case-header-metrics").innerHTML = renderCompactMetrics(c);
+
+      var promptSec = document.getElementById("prompt-section");
+      if (c.turn_results && c.turn_results.length > 0) {
+        promptSec.style.display = "none";
+      } else if (c.prompt) {
+        promptSec.style.display = "block";
+        document.getElementById("prompt-text").textContent = c.prompt;
+      } else {
+        promptSec.style.display = "none";
+      }
+
+      var errSec = document.getElementById("error-section");
+      if (c.error) { errSec.style.display = "block"; document.getElementById("error-text").textContent = c.error; }
+      else { errSec.style.display = "none"; }
+
+      renderResponse(c);
+      renderGrades(c);
+
+      document.getElementById("feedback").value = feedbackMap[c.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+      document.getElementById("prev-btn").disabled = index === 0;
+      document.getElementById("next-btn").disabled = index === DATA.cases.length - 1;
+
+      visitedCases[index] = true;
+      if (Object.keys(visitedCases).length >= DATA.cases.length) document.getElementById("done-btn").classList.add("ready");
+
+      updateCaseListActive();
+
+      var main = document.querySelector(".main");
+      if (main) main.scrollTop = 0;
+    }
+
+    function renderCompactMetrics(c) {
+      var baseline = c.baseline || null;
+      var primaryLabel = c.configuration === "without_skill" ? "Without Skill" : (baseline ? "With Skill" : "Result");
+      var html = compactMetric(primaryLabel, c);
+      if (baseline) {
+        html += compactMetric("Without Skill", baseline);
+        html += '<span class="compact-metrics delta"><strong>Delta</strong>' +
+          '<span>Agent ' + formatDurationDelta(c.agent_duration_ms - baseline.agent_duration_ms) +
+          ' / ' + formatIntegerDelta(c.agent_tokens - baseline.agent_tokens) + ' tokens</span></span>';
+      }
+      return html;
+    }
+
+    function compactMetric(label, c) {
+      var agentTitle = "Input: " + fmtInteger(c.input_tokens) + ", Output: " + fmtInteger(c.output_tokens);
+      var html = '<span class="compact-metrics"><strong>' + label + '</strong>' +
+        '<span class="metrics-divider">·</span><span title="' + agentTitle + '">Agent ' +
+        c.agent_duration + ' / ' + fmtInteger(c.agent_tokens) + ' tokens</span>';
+      if (c.judge_duration_ms || c.judge_tokens) {
+        var judgeTitle = "Input: " + fmtInteger(c.judge_input_tokens) + ", Output: " + fmtInteger(c.judge_output_tokens);
+        html += '<span class="metrics-divider">·</span><span title="' + judgeTitle + '">Judge ' +
+          c.judge_duration + ' / ' + fmtInteger(c.judge_tokens) + ' tokens</span>';
+      }
+      return html + '</span>';
+    }
+
+    function fmtInteger(value) {
+      return Number(value || 0).toLocaleString("en-US");
+    }
+
+    function formatIntegerDelta(value) {
+      return (value > 0 ? "+" : "") + fmtInteger(value);
+    }
+
+    function formatDurationDelta(valueMs) {
+      var seconds = valueMs / 1000.0;
+      return (seconds > 0 ? "+" : "") + seconds.toFixed(1) + "s";
+    }
+
+    function renderResponse(c) {
+      var section = document.getElementById("response-section");
+      var body = document.getElementById("response-body");
+      var header = section.querySelector(".section-header");
+
+      
+      if (c.turn_results && c.turn_results.length > 0) {
+        section.style.display = "block";
+        header.textContent = "Conversation (" + c.turn_results.length + " turns)";
+        var html = '<div style="padding: 1rem;">';
+        for (var i = 0; i < c.turn_results.length; i++) {
+          var tr = c.turn_results[i];
+          var statusCls = "ts-" + (tr.status || "completed");
+          html += '<div class="turn-card">';
+          html += '<div class="turn-header"><span class="turn-badge">Turn ' + tr.turn_number + '</span>';
+          html += '<span class="turn-status ' + statusCls + '">' + esc(tr.status || "completed") + '</span></div>';
+          html += '<div class="turn-prompt"><div class="turn-prompt-label">Prompt</div>';
+          html += '<div class="turn-prompt-content">' + esc(tr.content || "") + '</div></div>';
+          if (tr.status === "skipped") {
+            html += '<div class="turn-skipped-msg">This turn was skipped' + (tr.reason ? ': ' + esc(tr.reason) : '') + '</div>';
+          } else if (tr.response) {
+            html += '<div class="turn-response"><div class="turn-response-label">Response</div>';
+            html += '<div class="turn-response-content">' + esc(tr.response) + '</div></div>';
+          }
+          html += '</div>';
+        }
+        html += '</div>';
+        body.innerHTML = html;
+        return;
+      }
+
+      
+      if (!c.response && !(c.baseline && c.baseline.response)) { section.style.display = "none"; return; }
+      section.style.display = "block";
+      header.textContent = "Response";
+      if (c.baseline) {
+        var html = '<div class="comparison">';
+        html += '<div class="config-col"><h3>With Skill';
+        if (c.grading) html += ' <span class="rate clr-pass">' + Math.round(c.grading.summary.pass_rate * 100) + '%</span>';
+        html += '</h3>';
+        if (c.response) html += '<div class="response-box">' + esc(c.response) + '</div>';
+        html += '</div>';
+        html += '<div class="config-col"><h3>Without Skill';
+        if (c.baseline.grading) html += ' <span class="rate clr-fail">' + Math.round(c.baseline.grading.summary.pass_rate * 100) + '%</span>';
+        html += '</h3>';
+        if (c.baseline.response) html += '<div class="response-box">' + esc(c.baseline.response) + '</div>';
+        html += '</div></div>';
+        body.innerHTML = html;
+      } else {
+        body.innerHTML = '<div style="padding: 1rem;"><div class="response-box">' + esc(c.response) + '</div></div>';
+      }
+    }
+
+    function renderGrades(c) {
+      var section = document.getElementById("grades-section");
+      var content = document.getElementById("grades-content");
+
+      
+      var hasGrading = c.grading || (c.baseline && c.baseline.grading);
+      var hasTurnFailures = !hasGrading && c.turn_results && c.turn_results.some(function(tr) { return tr.status === "failed" || tr.status === "error"; });
+
+      if (!hasGrading && !hasTurnFailures) { section.style.display = "none"; return; }
+      section.style.display = "block";
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      var html = '<div style="padding: 1rem;">';
+      if (hasGrading) {
+        if (c.baseline) {
+          html += '<div class="comparison">';
+          html += '<div class="config-col"><h3>With Skill</h3>' + renderGradingBlock(c.grading) + '</div>';
+          html += '<div class="config-col"><h3>Without Skill</h3>' + renderGradingBlock(c.baseline.grading) + '</div>';
+          html += '</div>';
+        } else {
+          html += renderGradingBlock(c.grading);
+        }
+      } else {
+        
+        html += renderTurnFailuresAsGrades(c.turn_results);
+      }
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function renderTurnFailuresAsGrades(turns) {
+      var failed = turns.filter(function(tr) { return tr.status === "failed" || tr.status === "error"; });
+      var passed = turns.filter(function(tr) { return tr.status === "completed"; });
+      var total = failed.length + passed.length;
+      var rate = total === 0 ? 0 : Math.round((passed.length / total) * 100);
+      var badgeClass = rate === 100 ? "grade-pass" : "grade-fail";
+      var html = '<div class="grades-summary"><span class="grade-badge ' + badgeClass + '">' + rate + '%</span>';
+      html += '<span>' + passed.length + ' passed, ' + failed.length + ' failed of ' + total + ' (post-condition checks)</span></div>';
+      html += '<ul class="assertion-list">';
+      for (var i = 0; i < turns.length; i++) {
+        var tr = turns[i];
+        if (tr.status === "failed" || tr.status === "error") {
+          html += '<li class="assertion-item"><span class="assertion-status a-fail">\u2717</span>';
+          html += '<span>Turn ' + tr.turn_number + ' post-condition</span>';
+          if (tr.reason) html += '<div class="assertion-evidence">' + esc(tr.reason) + '</div>';
+          html += '</li>';
+        } else if (tr.status === "completed") {
+          html += '<li class="assertion-item"><span class="assertion-status a-pass">\u2713</span>';
+          html += '<span>Turn ' + tr.turn_number + ' post-condition</span>';
+          html += '</li>';
+        }
+      }
+      html += '</ul>';
+      return html;
+    }
+
+    function renderGradingBlock(g) {
+      if (!g) return '<div style="color: var(--text-muted); font-style: italic;">No grading data</div>';
+      var s = g.summary;
+      var passRate = Math.round(s.pass_rate * 100) + "%";
+      var bc = s.pass_rate >= 0.8 ? "grade-pass" : s.pass_rate >= 0.5 ? "" : "grade-fail";
+      var html = '<div class="grades-summary"><span class="grade-badge ' + bc + '">' + passRate + '</span>';
+      html += '<span>' + s.passed + ' passed, ' + s.failed + ' failed of ' + s.total + '</span></div>';
+      html += '<ul class="assertion-list">';
+      for (var i = 0; i < g.expectations.length; i++) {
+        var exp = g.expectations[i];
+        var sc = exp.passed ? "a-pass" : "a-fail";
+        var icon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item"><span class="assertion-status ' + sc + '">' + icon + '</span>';
+        html += '<span>' + esc(exp.text) + '</span>';
+        if (exp.evidence) html += '<div class="assertion-evidence">' + esc(exp.evidence) + '</div>';
+        html += '</li>';
+      }
+      html += '</ul>';
+      return html;
+    }
+
+    function toggleGrades() {
+      document.getElementById("grades-content").classList.toggle("open");
+      document.getElementById("grades-arrow").classList.toggle("open");
+    }
+
+    function saveCurrentFeedback() {
+      var c = DATA.cases[currentIndex];
+      var text = document.getElementById("feedback").value;
+      if (text.trim() === "") { delete feedbackMap[c.id]; } else { feedbackMap[c.id] = text; }
+      var reviews = [];
+      for (var rid in feedbackMap) {
+        if (feedbackMap[rid].trim()) reviews.push({ run_id: rid, feedback: feedbackMap[rid], timestamp: new Date().toISOString() });
+      }
+      fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews: reviews, status: "in_progress" })
+      }).then(function() { document.getElementById("feedback-status").textContent = "Saved"; })
+       .catch(function() { document.getElementById("feedback-status").textContent = "Will download on submit"; });
+    }
+
+    function showDoneDialog() {
+      var c = DATA.cases[currentIndex];
+      var text = document.getElementById("feedback").value;
+      if (text.trim() === "") { delete feedbackMap[c.id]; } else { feedbackMap[c.id] = text; }
+      var reviews = [], ts = new Date().toISOString();
+      for (var i = 0; i < DATA.cases.length; i++) {
+        reviews.push({ run_id: DATA.cases[i].id, feedback: feedbackMap[DATA.cases[i].id] || "", timestamp: ts });
+      }
+      var payload = JSON.stringify({ reviews: reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload })
+        .then(function() { document.getElementById("done-overlay").classList.add("visible"); })
+        .catch(function() {
+          var blob = new Blob([payload], { type: "application/json" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a"); a.href = url; a.download = "feedback.json"; a.click();
+          URL.revokeObjectURL(url);
+          document.getElementById("done-overlay").classList.add("visible");
+        });
+    }
+
+    function closeDoneDialog() {
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    function switchView(view) {
+      var tabs = document.querySelectorAll(".view-tab");
+      var panels = document.querySelectorAll(".view-panel");
+      for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+      for (var i = 0; i < panels.length; i++) panels[i].classList.remove("active");
+      document.querySelector('.view-tab[data-view="' + view + '"]').classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    function renderBenchmark() {
+      var bm = DATA.benchmark;
+      if (!bm || !bm.run_summary) return;
+      var container = document.getElementById("benchmark-content");
+      var rs = bm.run_summary;
+      var html = "<h2 style='font-family: Inter, system-ui, -apple-system, sans-serif; margin-bottom: 1rem;'>Benchmark Summary</h2>";
+      html += '<table class="benchmark-table"><thead><tr><th>Metric</th><th>With Skill</th>';
+      if (rs.without_skill) html += '<th>Without Skill</th>';
+      if (rs.delta) html += '<th>Delta</th>';
+      html += '</tr></thead><tbody>';
+      html += bmRow("Pass Rate", rs.with_skill.pass_rate, rs.without_skill ? rs.without_skill.pass_rate : null, rs.delta ? rs.delta.pass_rate : null, true);
+      html += bmRow("Time (s)", rs.with_skill.time_seconds, rs.without_skill ? rs.without_skill.time_seconds : null, rs.delta ? rs.delta.time_seconds : null, false);
+      html += bmRow("Tokens", rs.with_skill.tokens, rs.without_skill ? rs.without_skill.tokens : null, rs.delta ? rs.delta.tokens : null, false);
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function bmRow(label, ws, wos, delta, pct) {
+      var html = '<tr><td><strong>' + label + '</strong></td><td>' + fmtStat(ws, pct) + '</td>';
+      if (wos !== null) html += '<td>' + fmtStat(wos, pct) + '</td>';
+      if (delta !== null) html += '<td class="' + deltaClass(delta) + '">' + fmtDelta(delta, pct) + '</td>';
+      return html + '</tr>';
+    }
+
+    function fmtStat(sv, pct) {
+      if (!sv) return "\u2014";
+      var m = pct ? (sv.mean * 100).toFixed(0) + "%" : sv.mean.toFixed(1);
+      var s = pct ? (sv.stddev * 100).toFixed(0) + "%" : sv.stddev.toFixed(1);
+      return m + " \u00b1 " + s;
+    }
+
+    function fmtDelta(val, pct) {
+      if (val == null) return "\u2014";
+      if (pct) return (val >= 0 ? "+" : "") + (val * 100).toFixed(0) + "%";
+      return (val >= 0 ? "+" : "") + val.toFixed(1);
+    }
+
+    function deltaClass(val) {
+      if (val > 0) return "bm-pos";
+      if (val < 0) return "bm-neg";
+      return "";
+    }
+
+    function showToast(msg) {
+      var t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("visible");
+      setTimeout(function() { t.classList.remove("visible"); }, 2000);
+    }
+
+    function esc(text) {
+      var div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.target.tagName === "TEXTAREA") return;
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); navigate(-1); }
+      else if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); navigate(1); }
+    });
+
+    init();
+  </script>
+</body>
+</html>

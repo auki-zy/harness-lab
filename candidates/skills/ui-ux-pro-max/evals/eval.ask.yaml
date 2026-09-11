@@ -1,0 +1,57 @@
+schema_version: v1alpha1
+
+# 用户自己出的题（由 tools/gen-eval.mjs --from-prompt 生成）。
+# A = 只给这段提示词；B = 提示词 + 技能正文（benchmark.enabled 控制）。
+# 判分用 LLM 裁判（agent_judge），走内部网关。
+
+environment:
+  type: none
+  env:
+    TZ: UTC
+
+mcp:
+  servers: []
+
+skills:
+  - source: local_path
+    path: .
+
+engine:
+  name: claude_code
+  model:
+    name: auto
+
+cases:
+  files: 
+    - evals/cases/ask-202609110857.yaml
+    - evals/cases/ask-ride-neutral.yaml
+  defaults:
+    # 整页级任务本来就慢：600 秒会把"做得慢"直接变成 ERROR（A 侧 26 轮撞上过，603 秒被杀）
+    timeout_seconds: 900
+    max_turns: 12
+    collect_artifacts:
+      # 页面就是视觉类技能的产物：不收上来，台账里连"打开产物"都没有（原来只收 mjs/js/ts/md）
+      - "**/*.html"
+      - "**/*.htm"
+      - "**/*.css"
+      - "**/*.mjs"
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.py"
+      - "**/*.md"
+      - "**/*.txt"
+      - "**/*.json"
+
+benchmark:
+  enabled: true
+
+judge:
+  type: agent_judge
+  model: anthropic/deepseek-v4-flash
+  criteria:
+    - "只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准）"
+    - "产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标"
+
+report:
+  formats: [json, html]
+  artifacts: [transcript]

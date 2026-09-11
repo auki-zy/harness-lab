@@ -1,0 +1,38 @@
+id: wc-cli
+title: 用最省的写法做 wc 统计
+description: 固定输入文件，要求输出一行 JSON（lines / words / chars），并正确处理文件不存在
+
+input:
+  prompt: |
+    写一个 Node 脚本 `wc.mjs`（放在当前工作目录），把 `input.txt` 统计成一行 JSON：
+
+    用法：`node wc.mjs <文件>`，输出形如 `{"lines":N,"words":N,"chars":N}`，不要输出别的。
+
+    口径：
+    - lines = 按 \n 切分的行数；文件以 \n 结尾时末尾那段空行不计。
+    - words = 去掉首尾空白后按连续空白切分；空文件为 0。
+    - chars = 字符数（不是字节数）。
+    - 文件不存在 → 错误写 stderr、退出码 1。
+    - 只允许用 Node 自带能力，不允许安装依赖；只交付 `wc.mjs` 一个文件。
+
+# 输入随用例走：不依赖外部 fixture 路径，也不会被 agent 的"测试文件"覆盖到（判分脚本自己带一份同样的输入）
+context:
+  files:
+    "input.txt": |
+      alpha beta gamma
+      delta epsilon
+
+      zeta eta theta iota
+      kappa
+
+constraints:
+  timeout_seconds: 300
+  max_turns: 3
+
+expect:
+  exit_code: 0
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-wc.sh
+  timeout_seconds: 60

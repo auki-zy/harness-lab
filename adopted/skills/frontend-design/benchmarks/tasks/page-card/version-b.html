@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>团队成员 · 设计中心</title>
+<style>
+:root{
+  /* 色板：档案用纸 + 单一蓝黑主色，状态用半调网点区分 */
+  --chalk:#F2F3F0;
+  --form:#E0E2DC;
+  --paper:#FCFCFA;
+  --ink:#191D1C;
+  --ink-soft:#4A5251;
+  --mist:#5C6664;
+  --petrol:#12414C;
+  --petrol-ink:#0B2A31;
+  --teal:#1C6B62;
+  --crimson:#93303E;
+
+  --serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,"Songti SC","Source Han Serif SC","Noto Serif CJK SC",serif;
+  --sans:"Segoe UI",system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --mono:"Cascadia Mono",Consolas,"SFMono-Regular",Menlo,"Noto Sans Mono CJK SC",monospace;
+
+  --rule:1px solid var(--form);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+
+html{
+  -webkit-text-size-adjust:100%;
+  color-scheme:light;
+}
+
+/* 只给读屏软件的文本：视觉上不占位，但语义完整 */
+.visually-hidden{
+  position:absolute !important;
+  width:1px;
+  height:1px;
+  margin:-1px;
+  padding:0;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+  border:0;
+}
+
+body{
+  margin:0;
+  padding:34px 22px 70px;
+  background:var(--chalk);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.62;
+  font-variant-numeric:tabular-nums;
+}
+
+/* 正文与说明文字不靠太宽的行长 —— 西文衬线约 62 字符处断行 */
+.register{width:100%;max-width:872px;margin:0 auto;min-width:0}
+
+/* ── 页头：台账封面。左侧标题块，右侧唯一的实心动作 ── */
+.masthead{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:20px 28px;
+  align-items:end;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--ink);
+}
+.masthead h1{
+  margin:0 0 6px;
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:clamp(30px,5.4vw,44px);
+  line-height:1.08;
+  letter-spacing:-.012em;
+}
+.subtitle{
+  margin:0;
+  max-width:44ch;
+  color:var(--ink-soft);
+  font-size:15px;
+}
+.subtitle .count{font-family:var(--mono);font-size:.94em;color:var(--ink)}
+
+/* 邀请成员：整页唯一强调动作，用硬投影代替常见的柔和卡片阴影 */
+.invite{
+  appearance:none;
+  display:inline-block;
+  padding:10px 18px 11px;
+  border:1px solid var(--petrol);
+  border-radius:0;
+  background:var(--petrol);
+  color:#F7FAF9;
+  font:inherit;
+  font-size:15px;
+  line-height:1.25;
+  letter-spacing:.01em;
+  cursor:pointer;
+  box-shadow:4px 4px 0 var(--petrol-ink);
+  transition:background-color 120ms linear,transform 120ms linear,box-shadow 120ms linear;
+}
+.invite:hover{background:var(--petrol-ink)}
+.invite:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--petrol-ink)}
+
+/* ── 工具区：搜索。字段名放在框外，不做框内浮动标签 ── */
+.toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,300px);
+  gap:12px 28px;
+  align-items:baseline;
+  padding:20px 0 18px;
+  border-bottom:var(--rule);
+}
+.hint{margin:0;max-width:40ch;color:var(--ink-soft);font-size:14px}
+.hint b{font-weight:600;color:var(--ink)}
+.field-label{
+  display:block;
+  margin-bottom:6px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  letter-spacing:.02em;
+  color:var(--mist);
+}
+.field{position:relative;min-width:0}
+.field svg{
+  position:absolute;
+  left:11px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  color:var(--mist);
+}
+.field input{
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:9px 12px 9px 36px;
+  border:1px solid var(--form);
+  border-radius:0;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:15px;
+  line-height:1.4;
+}
+.field input::placeholder{color:var(--mist)}
+
+/* 唯一允许的圆角：搜索框，让“可输入”一眼可辨 */
+.field input{border-radius:2px}
+
+/* ── 花名册：真实 table 结构，列名即表头 —— 每张成员卡 = 一条台账行 ── */
+.roster{
+  width:100%;
+  table-layout:fixed;
+  border-collapse:collapse;
+  margin:0;
+  background:var(--paper);
+  border-bottom:1px solid var(--ink);
+}
+.roster col.col-who{width:46%}
+.roster col.col-role{width:20%}
+.roster col.col-mail{width:22%}
+.roster col.col-state{width:12%}
+
+.roster thead th{
+  padding:18px 16px 9px 0;
+  border-bottom:var(--rule);
+  text-align:left;
+  vertical-align:top;
+  font-family:var(--mono);
+  font-size:12.5px;
+  font-weight:400;
+  letter-spacing:.02em;
+  color:var(--mist);
+}
+.roster thead th:first-child{padding-left:22px}
+.roster thead th:last-child{padding-right:0}
+
+.roster tbody tr{border-bottom:var(--rule)}
+.roster tbody tr:last-child{border-bottom:0}
+
+.roster td{
+  padding:22px 16px 22px 0;
+  vertical-align:top;
+  min-width:0;
+  overflow-wrap:break-word;
+}
+.roster td:first-child{padding-left:22px}
+.roster td:last-child{padding-right:0}
+
+/* 姓名与邮箱一眼可分：衬线名 + 等宽地址，长度不同也不串行 */
+.who{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:14px;
+  align-items:center;
+}
+.member-name{
+  margin:0;
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:21px;
+  line-height:1.2;
+  color:var(--ink);
+}
+.member-mail{
+  margin:3px 0 0;
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--ink-soft);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* 头像占位：方章式字块，不用渐变圆 */
+.stamp{
+  display:grid;
+  place-items:center;
+  width:46px;
+  height:46px;
+  flex:0 0 auto;
+  border:1px solid var(--ink);
+  background:var(--paper);
+  box-shadow:inset -3px -3px 0 var(--chalk);
+  font-family:var(--serif);
+  font-size:24px;
+  font-weight:600;
+  line-height:1;
+  color:var(--ink);
+}
+
+.member-role{
+  font-family:var(--serif);
+  font-size:16px;
+  line-height:1.45;
+  color:var(--ink);
+}
+
+/* 状态：字 + 几何记号，颜色只是第三重线索 */
+.state{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+  font-size:14.5px;
+  line-height:1.4;
+}
+.state .mark{flex:0 0 auto;width:11px;height:11px}
+.state .mark .ring{stroke:currentColor;stroke-width:1.6;fill:none}
+.state .mark .dot{fill:currentColor}
+.state-active .mark{color:var(--petrol)}
+.state-active .mark .ring{display:none}
+.state-active .state-text{color:var(--petrol)}
+.state-remote .mark{color:var(--teal)}
+.state-remote .mark .ring{stroke-dasharray:2.6 2.3}
+.state-remote .state-text{color:var(--teal)}
+.state-leave .mark{color:var(--crimson)}
+.state-leave .mark .dot{transform:scale(.46);transform-origin:50% 50%}
+.state-leave .state-text{color:var(--crimson)}
+
+/* 状态词表：把记号的含义写在纸上，不让人猜 */
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 26px;
+  margin:12px 0 0;
+  padding:0;
+  list-style:none;
+  font-size:13.5px;
+  color:var(--ink-soft);
+}
+.legend li{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.legend .mark{flex:0 0 auto;width:11px;height:11px}
+.legend .mark .ring{stroke:currentColor;stroke-width:1.6;fill:none}
+.legend .mark .dot{fill:currentColor}
+.legend .state-active{color:var(--petrol)}
+.legend .state-active .mark .ring{display:none}
+.legend .state-remote{color:var(--teal)}
+.legend .state-remote .mark .ring{stroke-dasharray:2.6 2.3}
+.legend .state-leave{color:var(--crimson)}
+.legend .state-leave .mark .dot{transform:scale(.46);transform-origin:50% 50%}
+
+/* ── 空态：明确的下一步，不是气氛图 ── */
+.empty{
+  margin-top:34px;
+  padding:28px 22px 26px;
+  border:1px dashed var(--mist);
+  border-radius:0;
+  background:none;
+}
+.empty-title{
+  margin:0 0 7px;
+  font-family:var(--serif);
+  font-size:21px;
+  font-weight:600;
+  line-height:1.3;
+}
+.empty-text{margin:0;max-width:52ch;color:var(--ink-soft);font-size:15px}
+.empty-action{margin:16px 0 0}
+.empty .invite{box-shadow:3px 3px 0 var(--petrol-ink)}
+
+/* 键盘焦点：全局可见，不在任何容器里被裁掉 */
+:where(a,button,input):focus-visible{
+  outline:2px solid var(--petrol);
+  outline-offset:2px;
+}
+
+/* 悬停只做背景变化，不做整卡上浮 */
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  .roster tbody tr{transition:background-color 120ms linear}
+  .roster tbody tr:hover{background:var(--chalk)}
+}
+
+/* ── 窄屏：职位与邮箱折回成员名下，整页保持单列 ── */
+@media (max-width:700px){
+  .roster thead th:nth-child(2),
+  .roster thead th:nth-child(3){display:none}
+  .roster td.cell-role,
+  .roster td.cell-mail{
+    display:block;
+    padding:0 0 0 60px;
+  }
+  .roster td.cell-role{padding-bottom:4px}
+  .roster td.cell-mail{padding-bottom:0}
+  .roster td.cell-state{padding-top:12px;padding-left:60px}
+  .roster tbody td:first-child{padding-bottom:0}
+  .roster tbody tr:last-child td{padding-bottom:22px}
+  .member-mail{white-space:normal;overflow:visible;text-overflow:clip}
+}
+
+@media (max-width:480px){
+  body{padding:24px 18px 56px}
+  .masthead{grid-template-columns:minmax(0,1fr);align-items:start;gap:16px}
+  .masthead .invite{justify-self:start}
+  .toolbar{grid-template-columns:minmax(0,1fr);gap:14px}
+  .roster thead th:first-child,
+  .roster td:first-child{padding-left:16px}
+  .member-name{font-size:19px}
+  .stamp{width:42px;height:42px;font-size:22px}
+  .roster td.cell-role,
+  .roster td.cell-mail,
+  .roster td.cell-state{padding-left:56px}
+  .state{white-space:normal}
+}
+
+/* 打印：花名册本来就是能打出来的东西 */
+@media print{
+  body{background:#fff;padding:0}
+  .toolbar,.invite{display:none}
+  .roster,.empty{border-color:#000}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+
+<main class="register">
+
+  <header class="masthead">
+    <div>
+      <h1>团队成员</h1>
+      <p class="subtitle">
+        设计中心当前在册 <b class="count">3</b> 人，其中 <b class="count">1</b> 人休假、
+        <b class="count">1</b> 人远程。名单按入职先后排列。
+      </p>
+    </div>
+    <button class="invite" type="button">邀请成员</button>
+  </header>
+
+  <div class="toolbar">
+    <p class="hint">搜索会同时匹配<b>姓名、职位和邮箱</b>；清空搜索框可看到全部成员。</p>
+    <div class="field">
+      <label class="field-label" for="member-search">搜索成员</label>
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <circle cx="7" cy="7" r="4.4" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+        <line x1="10.4" y1="10.4" x2="14" y2="14" stroke="currentColor" stroke-width="1.5"></line>
+      </svg>
+      <input id="member-search" type="search" name="member-search"
+             placeholder="输入姓名、职位或邮箱" autocomplete="off">
+    </div>
+  </div>
+
+  <table class="roster">
+    <colgroup>
+      <col class="col-who">
+      <col class="col-role">
+      <col class="col-mail">
+      <col class="col-state">
+    </colgroup>
+    <caption class="visually-hidden">设计中心在册成员：姓名、职位、邮箱与当前状态</caption>
+    <thead>
+      <tr>
+        <th scope="col">成员</th>
+        <th scope="col">职位</th>
+        <th scope="col">邮箱</th>
+        <th scope="col">状态</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="cell-who">
+          <div class="who">
+            <span class="stamp" aria-hidden="true">林</span>
+            <p class="member-name">林昭</p>
+          </div>
+        </td>
+        <td class="cell-role member-role">设计总监</td>
+        <td class="cell-mail"><span class="visually-hidden">邮箱：</span><span class="member-mail">lin.zhao@studio-atlas.cn</span></td>
+        <td class="cell-state">
+          <span class="state state-leave">
+            <svg class="mark" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+              <circle class="ring" cx="6" cy="6" r="4.4"></circle>
+              <circle class="dot" cx="6" cy="6" r="3.3"></circle>
+            </svg>
+            <span class="state-text">休假</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="cell-who">
+          <div class="who">
+            <span class="stamp" aria-hidden="true">陈</span>
+            <p class="member-name">陈屿</p>
+          </div>
+        </td>
+        <td class="cell-role member-role">高级交互设计师</td>
+        <td class="cell-mail"><span class="visually-hidden">邮箱：</span><span class="member-mail">chen.yu@studio-atlas.cn</span></td>
+        <td class="cell-state">
+          <span class="state state-remote">
+            <svg class="mark" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+              <circle class="ring" cx="6" cy="6" r="4.4"></circle>
+            </svg>
+            <span class="state-text">远程</span>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="cell-who">
+          <div class="who">
+            <span class="stamp" aria-hidden="true">苏</span>
+            <p class="member-name">苏澈</p>
+          </div>
+        </td>
+        <td class="cell-role member-role">产品设计师</td>
+        <td class="cell-mail"><span class="visually-hidden">邮箱：</span><span class="member-mail">su.che@studio-atlas.cn</span></td>
+        <td class="cell-state">
+          <span class="state state-active">
+            <svg class="mark" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+              <circle class="ring" cx="6" cy="6" r="4.4"></circle>
+              <circle class="dot" cx="6" cy="6" r="4.4"></circle>
+            </svg>
+            <span class="state-text">在职</span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ul class="legend">
+    <li class="state-active">
+      <svg class="mark" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+        <circle class="dot" cx="6" cy="6" r="4.4"></circle>
+      </svg>
+      在职：可随时分配新项目
+    </li>
+    <li class="state-remote">
+      <svg class="mark" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+        <circle class="ring" cx="6" cy="6" r="4.4"></circle>
+      </svg>
+      远程：异地协作，时区为 UTC+8
+    </li>
+    <li class="state-leave">
+      <svg class="mark" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+        <circle class="ring" cx="6" cy="6" r="4.4"></circle>
+        <circle class="dot" cx="6" cy="6" r="3.3"></circle>
+      </svg>
+      休假：请假中，暂不排期
+    </li>
+  </ul>
+
+  <section class="empty" aria-labelledby="empty-title">
+    <h2 class="empty-title" id="empty-title">暂无更多成员</h2>
+    <p class="empty-text">
+      设计中心目前在册 3 人，已全部显示。如果名单缺人，说明对方还没有加入这个团队空间。
+    </p>
+    <p class="empty-action">
+      <button class="invite" type="button">邀请成员</button>
+    </p>
+  </section>
+
+</main>
+
+</body>
+</html>

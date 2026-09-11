@@ -1,0 +1,77 @@
+/* 断点：1040px 收窄台账行，700px 单列。样式覆盖顺序放在最后。*/
+
+@media (max-width: 1080px) {
+  .masthead {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .masthead__side {
+    justify-items: start;
+    padding-top: 0;
+    text-align: left;
+  }
+
+  .row {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .row__side {
+    grid-column: 2;
+    padding-top: 12px;
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 24px 16px 48px;
+  }
+
+  .masthead__h1 {
+    font-size: 27px;
+  }
+
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+
+  .row__side {
+    grid-column: auto;
+  }
+
+  .trials {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .facet {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .verdict {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .kv__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .record-drawer .ant-drawer-body,
+  .record-drawer .ant-drawer-header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}

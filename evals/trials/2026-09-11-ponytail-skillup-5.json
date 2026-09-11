@@ -1,0 +1,114 @@
+{
+  "trialId": "2026-09-11-ponytail-skillup-5",
+  "capability": {
+    "id": "ponytail",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "ask-dedupe",
+    "fixture": "adopted/skills/ponytail-workspace/iteration-8",
+    "description": "写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 0,
+      "B": 1
+    },
+    "sizeKB": {
+      "A": 0.8,
+      "B": 2.8
+    },
+    "tokensIn": {
+      "A": 18382,
+      "B": 17645
+    },
+    "tokensOut": {
+      "A": 1321,
+      "B": 536
+    },
+    "tokensTotal": {
+      "A": 19703,
+      "B": 18181
+    },
+    "tokensCached": {
+      "A": 18176,
+      "B": 17408
+    },
+    "durationSec": {
+      "A": 18.8,
+      "B": 15.7
+    },
+    "steps": {
+      "A": 1,
+      "B": 1
+    },
+    "toolCalls": {
+      "A": 3,
+      "B": 3
+    },
+    "toolMix": {
+      "A": "Bash 2 / Write 1",
+      "B": "Bash 2 / Write 1"
+    },
+    "staticChecks": {
+      "A": "用例 0/1 通过；断言 2/3；耗时 18.8s；未过：产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标",
+      "B": "用例 1/1 通过；断言 3/3；耗时 15.7s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-dedupe；产物大小 A 0.8 KB / B 2.8 KB；报告：adopted/skills/ponytail-workspace/iteration-8"
+  },
+  "judge": [
+    "auto",
+    "llm",
+    "human"
+  ],
+  "humanReview": {
+    "mode": "quick",
+    "verdict": "up",
+    "scores": null,
+    "reviewedAt": "2026-09-11T07:30:29.557Z"
+  },
+  "verdict": {
+    "decision": "adopt",
+    "confidence": "medium",
+    "reason": "可复核试用已通过 4 次，无退步；对照 A 0/1"
+  },
+  "evidence": [
+    "adopted/skills/ponytail-workspace/iteration-8/result.json",
+    "adopted/skills/ponytail-workspace/iteration-8/benchmark.json",
+    "adopted/skills/ponytail-workspace/iteration-8/report.html",
+    "adopted/skills/ponytail-workspace/iteration-8/benchmark.md",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/check.mjs",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/description.md",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/input.txt",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-a/test.mjs",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/COMMIT.txt",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/LICENSE.txt",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/SKILL.md",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/SOURCE.md",
+    "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+  ],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-11",
+  "recordedAt": "2026-09-11T06:43:35.490Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "adopted/skills/ponytail-workspace/iteration-8/result.json"
+  },
+  "selfCheck": false
+}

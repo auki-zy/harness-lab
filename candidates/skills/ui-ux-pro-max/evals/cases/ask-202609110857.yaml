@@ -1,0 +1,21 @@
+id: ask-202609110857
+title: 为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，…
+description: 用户自己出的题（A 不给技能 / B 给技能；由 agent_judge 判）
+
+input:
+  prompt: |
+    为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，浏览器双击即开。页面含导航、Hero、三张功能卡、定价对比、订阅表单（校验＋就近错误提示）、页脚，并支持明暗主题切换与跟随系统偏好。375px 宽不得横向滚动，Tab 能走完全部交互且焦点环清晰，触控目标≥44×44px，正文对比度≥4.5:1，图标只用内联 SVG 不用 emoji，正文 16px／行高 1.5，动效响应 prefers-reduced-motion，颜色走语义 token 不散写色值。验收：打开无控制台报错，375px 与 1440px 均不破版，切主题与纯键盘走查后文字仍清晰可读。
+
+constraints:
+  timeout_seconds: 600
+  max_turns: 8
+
+expect:
+  exit_code: 0
+
+judge:
+  type: agent_judge
+  model: anthropic/deepseek-v4-flash
+  criteria:
+    - "只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准）"
+    - "产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标"

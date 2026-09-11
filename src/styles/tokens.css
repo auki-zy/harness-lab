@@ -1,0 +1,48 @@
+/* 设计 token：色板、字体、结论语气映射。
+   方向与理由见 docs/design-docs/2026-09-10-lab-ui-direction.md。
+   色板只负责强化，文案本身必须能独立读懂。*/
+:root {
+  --ink: #17191b;
+  --ink-2: #3a4147;
+  --slate: #5c6670;
+  --paper: #eef0ec;
+  --sheet: #f7f8f5;
+  --card: #fbfbf9;
+  --wash: #f2f3ef;
+  --line: #d5dad2;
+  --line-soft: #e4e8e1;
+
+  --petrol: #1d4e48;
+  --petrol-ink: #12332f;
+  --petrol-wash: #e2ebe6;
+  --jade: #1d6b57;
+  --ochre: #8f6414;
+  --seal: #ae3b2c;
+  --azure: #2f5d8a;
+  --grey-tone: #7a828a;
+
+  --font-sans: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", system-ui,
+    -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+/* 结论语气：印章、台账行色条、结论说明共用同一组映射 */
+[data-tone="adopt"] {
+  --tone: var(--jade);
+}
+/* 机器判定达标、等人拍板：用偏冷的蓝，和"采纳"（玉色）分开——一眼看出是"还没定" */
+[data-tone="ready"] {
+  --tone: var(--azure);
+}
+[data-tone="hold"] {
+  --tone: var(--ochre);
+}
+[data-tone="reject"] {
+  --tone: var(--seal);
+}
+[data-tone="retry"] {
+  --tone: #5b6672;
+}
+[data-tone="none"] {
+  --tone: var(--grey-tone);
+}

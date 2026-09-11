@@ -1,0 +1,64 @@
+{
+  "trialId": "2026-09-10-ponytail-skillup",
+  "capability": {
+    "id": "ponytail",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "wc-cli+log-tally",
+    "fixture": "adopted/skills/ponytail-workspace/iteration-2",
+    "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false
+    },
+    {
+      "name": "B",
+      "withCapability": true
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 0,
+      "B": 0
+    },
+    "durationSec": {
+      "A": 0.5,
+      "B": 1
+    },
+    "steps": {
+      "A": 0,
+      "B": 0
+    },
+    "staticChecks": {
+      "A": "用例 0/2 通过；耗时 0.3s",
+      "B": "用例 0/2 通过；耗时 0.8s"
+    },
+    "notes": "引擎 qodercli / 模型 auto；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；报告：adopted/skills/ponytail-workspace/iteration-2"
+  },
+  "judge": [
+    "auto"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "retry",
+    "confidence": "low",
+    "reason": "这次评测本身报错了（不是能力没做到）：agent execution failed: qodercli run failed (exit 127): /usr/bin/bash: line 1: qodercli: command not found——先修配置或环境再跑；这一次不算对能力的结论"
+  },
+  "evidence": [
+    "adopted/skills/ponytail-workspace/iteration-2/result.json",
+    "adopted/skills/ponytail-workspace/iteration-2/benchmark.json",
+    "adopted/skills/ponytail-workspace/iteration-2/report.html",
+    "adopted/skills/ponytail-workspace/iteration-2/benchmark.md"
+  ],
+  "model": "qodercli / auto",
+  "date": "2026-09-10",
+  "recordedAt": "2026-09-10T11:17:42.925Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "adopted/skills/ponytail-workspace/iteration-2/result.json"
+  }
+}

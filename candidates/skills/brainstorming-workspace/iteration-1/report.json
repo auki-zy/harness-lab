@@ -1,0 +1,95 @@
+{
+  "skill_name": "brainstorming",
+  "schema_version": "v1alpha1",
+  "engine_name": "claude_code",
+  "model_name": "deepseek-v4-flash",
+  "requested_configuration": {
+    "role": "runner",
+    "engine": "claude_code",
+    "protocol": "anthropic",
+    "model": "deepseek-v4-flash"
+  },
+  "applied_configuration": {
+    "role": "runner",
+    "engine": "claude_code",
+    "protocol": "anthropic",
+    "model": "deepseek-v4-flash"
+  },
+  "start_time": "2026-09-11T15:52:22.8822202+08:00",
+  "end_time": "2026-09-11T15:53:30.2023382+08:00",
+  "case_results": [
+    {
+      "case_id": "brainstorm-path-triage",
+      "title": "按 brainstorming 的三条路径给请求分类，并输出该路径在动手前应产出的东西（含拿不准取重路径）",
+      "status": "PASS",
+      "duration_ms": 35285,
+      "turns": 1,
+      "input_tokens": 22525,
+      "output_tokens": 706,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\brainstorming\\evals\\fixtures\\scripts\\check-brainstorm-path-triage.sh",
+            "passed": true,
+            "evidence": "PASS: triage.mjs 通过 6 条用例（feasibility-question-is-spike、existing-flow-is-bounded、new-project-is-architectural、shared-interface-upgrades-to-architectural、empty-input-takes-heavier-path、missing-file-produces-nothing）"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "在空目录里写一个 Node 脚本，文件名必须是 triage.mjs，只用 Node 自带能力（不要装任何依赖，不要生成其他文件）。\n\n它把一条「改动请求」按 brainstorming 流程分类到三条路径之一，并给出该路径在写代码之前应当产出的东西。\n\n输入：命令行第一个参数是一个文本文件路径。文件里每行形如 key: value，可能出现的 key 有：\n- question：这条请求是不是一个可行性问题（「能不能…」「是否可能…」），它的产出是一个答案，而不是要长期保留的代码。取值 yes / no。\n- existing-flow：要改的那条流程是否已经存在于仓库里、可以直接读到。取值 yes / no。\n- shared-interface：这条请求是否会重构组件之间的关系，或改动别人依赖的接口。取值 yes / no。\n\n判定规则，按顺序命中即停：\n1. shared-interface: yes → architectural（会动别人依赖的接口，一律按最重的路径）\n2. 否则 question: yes → spike\n3. 否则 existing-flow: yes → bounded\n4. 否则（包括字段缺失、文件为空、取值不认识）→ architectural（拿不准时取更重的路径）\n\n输出到 stdout，两行，不要多也不要少，不要有空行：\n- 第一行是路径名，只能是 spike、bounded、architectural 三者之一；\n- 第二行是该路径在动手前要产出的东西：spike → probe，bounded → chat-design，architectural → spec。\n\n退出码：能正常判定一律 0；如果输入文件读不到（不存在或无法读取），退出码非 0，并且不要往 stdout 写任何内容（不要求写错误信息）。\n\n只交付 triage.mjs 这一个文件。\n",
+      "response": "已交付 `triage.mjs`（目录里原有的 `request-*.txt` 我没有动；测试用的临时文件已清理）。\n\n实现要点：\n- 逐行按第一个 `:` 切分 key/value，value 归一化为小写后与 `yes` 精确比较——`YES` 之类的大小写差异能识别，`maybe`、缺失字段、空文件一律不命中。\n- 按顺序短路：`shared-interface: yes` → architectural；否则 `question: yes` → spike；否则 `existing-flow: yes` → bounded；其余落 architectural。\n- 判定成功时 stdout 恰好两行（路径 + 产物），退出码 0。\n- 读不到文件或没给参数时 `process.exit(1)`，stdout 保持空。\n\n实测结果：\n\n| 输入 | 输出 | 退出码 |\n|---|---|---|\n| `request-spike.txt` | spike / probe | 0 |\n| `request-bounded.txt` | bounded / chat-design | 0 |\n| `request-arch.txt` | architectural / spec | 0 |\n| `request-upgrade.txt`（shared-interface 与 question 同时 yes） | architectural / spec | 0 |\n| `request-empty.txt`（空文件） | architectural / spec | 0 |\n| 未知 key / 空值 / 值不识别 | architectural / spec | 0 |\n| 文件不存在 | （无输出） | 1 |\n| 无参数 | （无输出） | 1 |\n\n只用了 `node:fs` 的 `readFileSync`，无依赖、无额外文件。"
+    },
+    {
+      "case_id": "brainstorm-path-triage",
+      "title": "按 brainstorming 的三条路径给请求分类，并输出该路径在动手前应产出的东西（含拿不准取重路径）",
+      "status": "PASS",
+      "duration_ms": 26623,
+      "turns": 2,
+      "input_tokens": 19678,
+      "output_tokens": 1478,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 2,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\brainstorming\\evals\\fixtures\\scripts\\check-brainstorm-path-triage.sh",
+            "passed": true,
+            "evidence": "PASS: triage.mjs 通过 6 条用例（feasibility-question-is-spike、existing-flow-is-bounded、new-project-is-architectural、shared-interface-upgrades-to-architectural、empty-input-takes-heavier-path、missing-file-produces-nothing）"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "without_skill",
+      "prompt": "在空目录里写一个 Node 脚本，文件名必须是 triage.mjs，只用 Node 自带能力（不要装任何依赖，不要生成其他文件）。\n\n它把一条「改动请求」按 brainstorming 流程分类到三条路径之一，并给出该路径在写代码之前应当产出的东西。\n\n输入：命令行第一个参数是一个文本文件路径。文件里每行形如 key: value，可能出现的 key 有：\n- question：这条请求是不是一个可行性问题（「能不能…」「是否可能…」），它的产出是一个答案，而不是要长期保留的代码。取值 yes / no。\n- existing-flow：要改的那条流程是否已经存在于仓库里、可以直接读到。取值 yes / no。\n- shared-interface：这条请求是否会重构组件之间的关系，或改动别人依赖的接口。取值 yes / no。\n\n判定规则，按顺序命中即停：\n1. shared-interface: yes → architectural（会动别人依赖的接口，一律按最重的路径）\n2. 否则 question: yes → spike\n3. 否则 existing-flow: yes → bounded\n4. 否则（包括字段缺失、文件为空、取值不认识）→ architectural（拿不准时取更重的路径）\n\n输出到 stdout，两行，不要多也不要少，不要有空行：\n- 第一行是路径名，只能是 spike、bounded、architectural 三者之一；\n- 第二行是该路径在动手前要产出的东西：spike → probe，bounded → chat-design，architectural → spec。\n\n退出码：能正常判定一律 0；如果输入文件读不到（不存在或无法读取），退出码非 0，并且不要往 stdout 写任何内容（不要求写错误信息）。\n\n只交付 triage.mjs 这一个文件。\n",
+      "response": "交付完成：`triage.mjs`（目录里原有的 `request-*.txt` 是既有文件，我没有改动、也没有新建其他文件）。\n\n实现要点：\n- 只用了 `node:fs`，无依赖。\n- 解析每行第一个 `:` 之前的 key 和之后的值，均 trim；key 与值大小写不敏感，兼容 CRLF；空行和无冒号的行跳过；重复 key 以最后一次为准。\n- 判定严格按顺序短路：`shared-interface: yes` → architectural；否则 `question: yes` → spike；否则 `existing-flow: yes` → bounded；其余（字段缺失、空文件、无法识别的取值如 `maybe`）→ architectural。\n- 读不到文件（不存在、无权限、是目录、缺参数）时先于任何输出退出码 1，stdout 保持为空。\n\n验证结果（全部符合规则）：\n\n| 输入 | 输出 | 退出码 |\n|---|---|---|\n| `question: no / existing-flow: yes / shared-interface: no` | bounded / chat-design | 0 |\n| `question: yes / existing-flow: yes / shared-interface: no` | spike / probe | 0 |\n| `question: yes / existing-flow: yes / shared-interface: yes` | architectural / spec | 0 |\n| 三字段全 no | architectural / spec | 0 |\n| 空文件 | architectural / spec | 0 |\n| `question: maybe`（不认识的值） | architectural / spec | 0 |\n| 文件不存在 / 无参数 / 传入目录 | 无输出 | 1 |\n\n注意 `request-spike.txt` 这类输入（question 与 existing-flow 同时为 yes）会命中第 2 条规则落在 spike，而不是 bounded——这正是\"按顺序命中即停\"的预期行为。"
+    }
+  ],
+  "total_tokens": 44387,
+  "judge_tokens": 0,
+  "overall_tokens": 44387
+}

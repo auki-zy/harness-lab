@@ -1,0 +1,46 @@
+已交付 `dedupe.mjs`（目录下仅此一个文件）：
+
+```js
+#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+
+const file = process.argv[2];
+
+if (!file) {
+  process.stderr.write('usage: node dedupe.mjs <file>\n');
+  process.exit(1);
+}
+
+let text;
+try {
+  text = readFileSync(file, 'utf8');
+} catch (err) {
+  process.stderr.write(`dedupe: ${err.message}\n`);
+  process.exit(1);
+}
+
+const lines = text.split(/\r?\n/);
+// A trailing newline produces a final empty element that is not a real line.
+if (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
+
+const seen = new Set();
+const out = [];
+for (const line of lines) {
+  if (seen.has(line)) continue;
+  seen.add(line);
+  out.push(line);
+}
+
+if (out.length > 0) process.stdout.write(out.join('\n') + '\n');
+```
+
+行为要点：
+- **顺序**：`Set` 记录已见行，首次出现顺序即为输出顺序。
+- **失败路径**：读文件失败（不存在、是目录、无权限）时错误写 **stderr**，`exit 1`，stdout 一个字节都不写——所以重定向拿到的也是空文件。
+- **换行**：按 `/\r?\n/` 切分，CRLF 文件不会残留 `\r`。末尾换行带来的空元素被丢弃，因此 `a\nb\n` 输出两行而不是三行。
+- 无参数也走同一条非 0 退出路径。
+- 只用 `node:fs`，无第三方依赖。
+
+实测：`b a b c a` → `b a c`；CRLF 文件正确；空行作为普通行参与去重保留；文件不存在时 `exit=1` 且 stdout 为空。
+
+一点需要你确认的取舍：内容完全为空（0 字节）的文件输出为空且 exit 0，与"文件不存在"区分开——如果你希望空文件也算异常，我改一行即可。

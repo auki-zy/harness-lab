@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-11",
+  "capabilities": [
+    {
+      "id": "frontend-design",
+      "type": "skill",
+      "source": {
+        "repo": "anthropics/skills",
+        "path": "skills/frontend-design/SKILL.md",
+        "license": "Apache-2.0"
+      },
+      "localPath": "adopted/skills/frontend-design",
+      "status": "adopted",
+      "priorEvidence": "受控对比 page-card（A 不加载能力 / B 加载能力）：两版都达标、无退步；用户快速人评赞并选了 B",
+      "addedAt": "2026-09-10",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "ui-design"
+        ],
+        "stage": "adopted",
+        "source": "official"
+      },
+      "summary": "值得用：做界面时的视觉方向与审美主张。采纳依据：受控对比（page-card，A/B）通过，用户人评赞并选了 B（加载能力那版）。",
+      "description": "新建界面或重塑现有界面时，给出有辨识度、有意图的视觉设计指引：在审美方向与字体排版上给建议，让设计选择不落进「一眼像模板默认样式」。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译",
+      "howToUse": "harness-tool add frontend-design"
+    },
+    {
+      "id": "ponytail",
+      "type": "skill",
+      "source": {
+        "repo": "DietrichGebert/ponytail",
+        "path": "skills/ponytail/SKILL.md",
+        "license": "MIT"
+      },
+      "localPath": "adopted/skills/ponytail",
+      "status": "adopted",
+      "priorEvidence": "mock 试用 wc-cli（2026-09-10）：A 不加载能力 19 行 / 多交付一个被禁止的文件；B 加载 ponytail 10 行、只交付 wc.mjs，两版输出都正确，独立 LLM 评审 B 胜（constraint 与 minimality 各 5/5 vs 2/5） ｜ 2026-09-11 skill-up（wc-cli + log-tally，走内部网关）：先有两次环境/判据问题记 retry（引擎没装、判分输入被 agent 覆盖），修好后连续两次 4/4 全过 → adopt ｜ 2026-09-11 skill-up(ask-dedupe)：A 0/1 / B 1/1 → adopt",
+      "addedAt": "2026-09-10",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "code-quality"
+        ],
+        "stage": "adopted",
+        "source": "community"
+      },
+      "description": "强制给出「真能跑的最省方案」——最简单、最短、最小。化身见过一切的资深开发者：先问这件事到底要不要做（YAGNI），能用标准库就不自己写，能用平台原生能力就不引依赖，一行能解决就不写五十行。有 lite / full（默认）/ ultra 三档强度；任何编码任务都适用，非编码请求（常识问答、写文章、翻译、摘要）不要用。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（触发词清单缩写为「任何编码任务／非编码请求不要用」，原文见该文件）",
+      "summary": "值得用：skill-up 可复核试用连续全过，用例无退步。",
+      "howToUse": "harness-tool add ponytail"
+    },
+    {
+      "id": "ui-ux-pro-max",
+      "type": "skill",
+      "source": {
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+        "path": ".claude/skills/ui-ux-pro-max/SKILL.md",
+        "license": "MIT",
+        "commit": "7f69fed6a2717900085f1bc3b263721f8ba025e2"
+      },
+      "localPath": "candidates/skills/ui-ux-pro-max",
+      "status": "adopted",
+      "priorEvidence": "2026-09-11 skill-up(ui-audit-priority-lint)：A 1/1 / B 1/1 → hold ｜ 2026-09-11 skill-up(ui-audit-priority-lint)：A 1/1 / B 1/1 → ready ｜ 2026-09-11 skill-up(ask-202609110857)：A 1/1 / B 1/1 → ready ｜ 2026-09-11 skill-up(ask-202609110857+ask-ride-neutral)：A 0/2 / B 2/2 → ready",
+      "addedAt": "2026-09-11",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "ui-design"
+        ],
+        "stage": "adopted",
+        "source": "community"
+      },
+      "description": "面向 Web、移动端与桌面端的 UI/UX 设计知识库。做界面设计、搭建、评审或修复时使用：页面、组件、设计系统、无障碍、交互、响应式布局、字体排印、色彩、图表，以及具体技术栈下的 UI 实现。本地可检索的数据：79 套可检索风格（50 套启用）、192 套产品配色与推理画像、74 组字体搭配、119 条 UX 准则、105 个图标、17 个 GSAP 预设、25 种图表类型、22 个技术栈。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（原文见 candidates/skills/ui-ux-pro-max/SKILL.md）",
+      "summary": "值得用：你自己确认采纳了。",
+      "howToUse": "harness-tool add ui-ux-pro-max",
+      "humanDecision": {
+        "verdict": "adopt",
+        "reviewedAt": "2026-09-11"
+      }
+    },
+    {
+      "id": "brainstorming",
+      "type": "skill",
+      "source": {
+        "repo": "obra/superpowers",
+        "path": "skills/brainstorming/SKILL.md",
+        "license": "MIT",
+        "commit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
+      },
+      "localPath": "candidates/skills/brainstorming",
+      "status": "trialing",
+      "priorEvidence": "2026-09-11 skill-up(brainstorm-path-triage)：A 1/1 / B 1/1 → hold",
+      "addedAt": "2026-09-11",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "planning"
+        ],
+        "stage": "trialing",
+        "source": "community"
+      },
+      "description": "任何创作性工作开工前都必须先用它——做新功能、搭组件、加能力、改行为都算。在动手实现之前，先把用户意图、需求与设计探清楚。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（原文见该文件）",
+      "summary": "待观察：skill-up 一次可复核试用全过，再来一次通过即可采纳。",
+      "howToUse": "harness-tool add brainstorming"
+    }
+  ],
+  "note": "候选池按需精简：未采纳的在 candidates/，已采纳的移到 adopted/；两边都用 harness-tool add <名字> 装进项目。",
+  "schemaNote": "每个能力都要有 description（一句话说明）、summary（一句话结论）与 tags（取值见 evals/tags.json）。"
+}

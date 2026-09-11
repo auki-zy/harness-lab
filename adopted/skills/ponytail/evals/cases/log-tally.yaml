@@ -1,0 +1,40 @@
+id: log-tally
+title: 用最省的写法统计 NDJSON 日志里各等级出现次数
+description: 另一条固定任务（与 wc-cli 不同）：解析 NDJSON、按字段分组计数，空文件与坏行都要有确定行为
+
+input:
+  prompt: |
+    写一个 Node 脚本 `tally.mjs`（放在当前工作目录），统计 `events.jsonl` 里每个 level 出现的次数：
+
+    用法：`node tally.mjs <文件>`，输出一行 JSON，键是 level、值是次数，**键按字典序升序**，不要输出别的。
+
+    口径：
+    - 每行是一个 JSON 对象，取它的 `level` 字段（字符串）。
+    - 空文件 → 输出 `{}`。
+    - 出现非 JSON 行，或某行没有 `level` 字段 → 错误写 stderr、退出码 1。
+    - 文件不存在 → 错误写 stderr、退出码 1。
+    - 只允许用 Node 自带能力，不允许安装依赖；只交付 `tally.mjs` 一个文件。
+
+# 输入随用例走；判分脚本另带一份同样的输入，避免 agent 清理/覆盖工作区文件影响判分
+context:
+  files:
+    "events.jsonl": |
+      {"ts":"2026-09-10T09:00:01Z","level":"info","msg":"server started"}
+      {"ts":"2026-09-10T09:00:02Z","level":"warn","msg":"slow query 1.2s"}
+      {"ts":"2026-09-10T09:00:03Z","level":"info","msg":"request ok"}
+      {"ts":"2026-09-10T09:00:04Z","level":"error","msg":"upstream 502"}
+      {"ts":"2026-09-10T09:00:05Z","level":"info","msg":"request ok"}
+      {"ts":"2026-09-10T09:00:06Z","level":"debug","msg":"cache hit"}
+      {"ts":"2026-09-10T09:00:07Z","level":"info","msg":"request ok"}
+
+constraints:
+  timeout_seconds: 300
+  max_turns: 3
+
+expect:
+  exit_code: 0
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-log-tally.sh
+  timeout_seconds: 60

@@ -1,0 +1,1 @@
+All checks pass at real 375px and 1440px viewports with zero console errors. Now let me look at it visually — full-page shots at both widths, light and dark.

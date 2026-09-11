@@ -1,0 +1,33 @@
+# Skill Benchmark: ponytail
+
+**Date**: 2026-09-11T06:43:35Z
+**Evals**: 写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行… (1 runs each per configuration)
+
+## Summary
+
+| Metric | With Skill | Without Skill | Delta |
+|--------|-----------|--------------|-------|
+| Pass Rate | 100% ± 0% | 67% ± 0% | +0.33 |
+
+## Per-Case Results
+
+### 写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行… (with_skill)
+
+- **Pass Rate**: 100% (3/3)
+
+| Expectation | Result | Evidence |
+|-------------|--------|----------|
+| expect.exit_code | ✅ | all checks passed |
+| 只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准） | ✅ | 任务要求（transcript turn 1）："写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行一条；文件不存在时非 0 退出且 stdout 为空。只交付这一个文件，只用 Node 自带能力。"; 读文件并去重保序：脚本用 Set 记录已见行、按首次出现顺序 push 到 out（final_message 第 26-32 行），未排序、未依赖任何外部库。; 打印到 stdout 一行一条：`process.stdout.write(out.join('\n') + '\n')`（final_message 第 34 行），且实测 `b a b c a` → 输出 b/a/c（transcript turn 3，t1 段）。; 文件不存在时非 0 退出且 stdout 为空：transcript turn 3 实测 "--- missing file exit=1 stdout=[]"，即 catch 分支写 stderr、exit(1)、stdout 无任何字节；final_message 第 37-39 行也明确说明该失败路径。; 只交付这一个文件：transcript turn 3-4 中删除 t1/t2/t3.txt 后 `ls` 输出仅 "dedupe.mjs"，目录下无多余产物。; 只用 Node 自带能力：脚本唯一 import 为 `node:fs`，无第三方依赖（final_message 第 5 行）。; 未额外添加任务未要求的功能（无排序选项、无原地改写、无统计输出等），实现范围与任务描述一致。 |
+| 产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标 | ✅ | 可直接运行：脚本以 `#!/usr/bin/env node` 开头、ESM import，实测在目标目录 `node dedupe.mjs t1.txt` 正常执行且 exit=0（transcript turn 3）。; 输出格式正确：`b a b c a` → `b\na\nc\n`（transcript turn 3）；CRLF 输入经 `od -c` 验证输出为 `x \n y \n`，无残留 `\r`；含空行的文件输出 `a \n \n b \n`，无多余空行（transcript turn 3 的 t2/t3 段）。; 错误路径输出正确：文件不存在时 `exit=1` 且 `stdout=[]`（transcript turn 3），满足"非 0 退出且 stdout 为空"。; 无额外文件：测试用的 t1/t2/t3.txt 已被删除，`ls` 仅剩 dedupe.mjs（transcript turns 3-4），交付物就是用户要的单个文件。; 无未要求的防御代码膨胀：脚本共 34 行，唯一的参数校验（无参数时 usage + exit 1，final_message 第 9-12 行）与任务要求的失败语义一致（无参数时 readFileSync(undefined) 本也会走非 0 退出、stdout 为空的路径），未引入重试、日志框架、配置项等无关代码。; 无第三方依赖或额外配置文件（package.json、测试文件等均未生成），目录内容即 `ls` 显示的 dedupe.mjs 一项。; 说明文字为交付摘要（行为要点与实测结果）而非代码内多余注释；脚本内仅一条解释性注释用于说明丢弃末尾空元素的必要性（final_message 第 23 行），属于保证输出格式正确的必要说明。 |
+
+### 写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行… (without_skill)
+
+- **Pass Rate**: 67% (2/3)
+
+| Expectation | Result | Evidence |
+|-------------|--------|----------|
+| expect.exit_code | ✅ | all checks passed |
+| 只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准） | ✅ | 任务要求（user turn 1）："写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行一条；文件不存在时非 0 退出且 stdout 为空。只交付这一个文件，只用 Node 自带能力。"; 交付文件存在且唯一：Write 工具创建 C:\Users\yu.zhao\AppData\Local\Temp\skill-up-612417982\dedupe.mjs；随后 `ls` 输出仅为 `dedupe.mjs`（测试用 t.txt/t2.txt/t3.txt 已 rm 删除），满足"只交付这一个文件"。; 只用 Node 自带能力：脚本仅 `import { readFileSync } from 'node:fs';`，无第三方依赖。; 按行去重且保持首次出现顺序：使用 `const seen = new Set()` 遍历 `lines`，`if (seen.has(line)) continue; seen.add(line); out.push(line);`，即首次出现顺序输出。; 打印到 stdout 一行一条：`process.stdout.write(out.join('\n') + '\n')`，实测输入 `b\na\nb\n\nA\n a\na` 输出 `b / a / (空行) / A / ' a'`，重复的 b、a 已去除且保留首现顺序。; 文件不存在时非 0 退出且 stdout 为空：实测 `out=$(node dedupe.mjs nope.txt 2>/dev/null); echo "exit=$? stdout=[$out]"` 得到 `exit=1 stdout=[]`，非零退出且 stdout 为 0 字节。; 脚本可运行：全部实测命令（正常输入、CRLF 输入 `od -c` 得 `x \n y \n`、空文件 exit=0、缺参数 exit=1）均成功执行，无报错。 |
+| 产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标 | ❌ | 产出本身可运行、格式正确（同 criterion-1 的实测结果），且目录下无额外文件（`ls` 仅 dedupe.mjs）。; 存在未要求的防御代码：`if (!file) { process.stderr.write('usage: node dedupe.mjs <file>\n'); process.exit(1); }` —— 任务只要求"文件不存在时非 0 退出"，未要求缺参数分支，且无此分支时 readFileSync(undefined) 也会被 catch 走 exit 1，属于冗余防御。; 存在未要求的防御代码：`if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);` —— BOM 剥离是任务外自行添加的兼容处理，用户未要求。; 存在任务未要求的输出行为：读取失败时额外向 stderr 写 `dedupe: cannot read ${file}: ${err.message}`（任务只约束 stdout 与退出码），实测"no arg"分支也额外打印 usage 文本。; 最终回复（final_message）通篇是未被要求的实现说明与实测报告："实现要点"5 条 + "实测结果"段落，用户只要求交付 `dedupe.mjs` 这一个文件，未要求任何解释或测试汇报。 | Failures: 含未要求的防御代码：缺参数 argv 守卫 + usage 输出、BOM (0xfeff) 剥离。; 含任务未要求的额外输出：读取失败/缺参数时向 stderr 打印自定义提示与 usage。; 交付后有未被要求的多段解释（实现要点与实测结果汇报），属多余的解释。 |
+

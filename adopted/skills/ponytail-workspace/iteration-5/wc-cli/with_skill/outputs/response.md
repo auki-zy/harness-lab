@@ -1,0 +1,1 @@
+All cases check out: normal file, missing file (stderr + exit 1), empty file, no trailing newline, and Unicode content all produce correct results per the spec. `wc.mjs` is ready in the working directory, using only Node built-ins.

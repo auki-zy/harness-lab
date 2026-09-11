@@ -1,0 +1,30 @@
+```json
+{
+  "results": [
+    {
+      "criterion_id": "criterion-1",
+      "passed": true,
+      "evidence": [
+        "transcript.json turn 1: single Write tool call creating stats.mjs at C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-1347471993\\stats.mjs; no other file-creation calls appear in the transcript",
+        "transcript.json turn 3: `rm -f t1.txt t2.txt t3.txt t4.txt && ls` returned only `stats.mjs`, confirming test files were cleaned up and the deliverable is the sole file",
+        "Filesystem check of the working directory lists only `stats.mjs` (420 bytes) plus harness directories .claude and .skill-up",
+        "stats.mjs content is a valid Node ESM script using only built-ins (`import { readFileSync } from 'node:fs'`, `process.argv`, `process.exit`, `process.stdout.write`), matching the '只用 Node 自带能力' constraint",
+        "Executed successfully in transcript turn 2: `node stats.mjs t1.txt` produced output, and `node stats.mjs nope.txt` produced `exit=1`, demonstrating it runs under Node"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-2",
+      "passed": true,
+      "evidence": [
+        "stats.mjs emits exactly `process.stdout.write(JSON.stringify({ lines, words, chars }) + '\\n')` — one JSON line, no other stdout writes",
+        "Observed output in transcript turn 2: `{\"lines\":2,\"words\":4,\"chars\":20}` — exactly the three required keys lines/words/chars, matching the requested key order, no extra fields",
+        "Empty-file case output `{\"lines\":0,\"words\":0,\"chars\":0}` and Unicode case `{\"lines\":1,\"words\":2,\"chars\":6}` both show the same strict three-key single-line shape",
+        "Failure path writes nothing to stdout: error handler is a bare `catch { process.exit(1); }` with no logging; test observed `exit=1` with empty stdout",
+        "final_message documents the same format and the empty-stdout-on-failure behavior, consistent with the code"
+      ],
+      "failures": []
+    }
+  ]
+}
+```

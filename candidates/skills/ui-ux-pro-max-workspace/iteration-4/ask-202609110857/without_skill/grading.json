@@ -1,0 +1,61 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准）",
+      "passed": true,
+      "evidence": "交付形态符合要求：index.html 单文件、内联 \u003cstyle\u003e/\u003cscript\u003e、零依赖零构建（index.html:10 仅一个 data: URI favicon，index.html:22/890 为内联 style/script）；写文件后与收尾 ls -la 均显示目录内只有 index.html（transcript turn 5 / turn 128）; 页面结构齐全：粘性导航 .site-nav（index.html:505-511）、Hero 含路线示意 SVG 与三项数据（index.html:531-599）、恰好三张功能卡（index.html:610/623/634）、三档定价含 tick/dash 包含与不包含对照（index.html:657-743）、订阅表单（邮箱+城市+同意条款，index.html:760-815）、四栏页脚（index.html:842-888）; 明暗主题切换 + 跟随系统均实现：matchMedia 监听 + localStorage + 手动切换，实测 before/after light→dark、aria-label 同步、太阳/月亮图标切换、无存储时跟随系统（index.html:11-21,894-937；transcript turn 92 主题切换 PASS）; 375px / 1440px 不破版为真实视口实测：CDP + Emulation.setDeviceMetricsOverride 得 scrollWidth=375/375 与 1440/1440，无溢出元素，8/8 组合汇总全通过（transcript turn 120）; 纯键盘走查达标：27 个可达元素、DOM 顺序连续（skip-link 打头），焦点环实测 outline 3px solid / offset 2px / :focus-visible 命中，浅色 rgb(67,56,202)、深色 rgb(169,182,255)（transcript turn 82）; 触控目标：页脚两字链接与句内隐私链接补 min-width/min-height:44px（transcript turn 75/77），复测『小触控目标: 无』；复选框本体 24×24 但由 ≥44px 的关联 label 提供 245×60 实际热区（transcript turn 82 实测行）; 对比度与排版达标：16 项配对全部 ≥4.5:1（正文 16.95:1，最紧 5.72:1，final_message）；body 计算样式 16px / 行高 24px（transcript turn 82）；图标全部内联 SVG，符号类字符检出为『无』（transcript turn 123）; 动效响应 prefers-reduced-motion：强制 reduce 下动画与过渡变为 1e-06s、scroll-behavior 变 auto，且动效结束后 8/8 组合 opacity 全为 1，内容不会永久不可见（transcript turn 120 与 turn 113）; 颜色走语义 token：:root 与 :root[data-theme=\"dark\"] 两套 token（index.html:26-95），样式表正文不外散色值；验收『打开无控制台报错』在 8/8 组合实测为零错误（transcript turn 120）"
+    },
+    {
+      "text": "产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标",
+      "passed": true,
+      "evidence": "产出可直接使用：单个 46986 字节的 index.html，无外链资源、无构建步骤，浏览器双击即开（transcript turn 5 的 Write 内容与最终 ls -la 的 46986 字节文件）; 格式与语法正确：自检显示 2 个内联脚本语法 OK、无未闭合标签、无嵌套错误、无重复 id、无内联 style 属性、文件 43.2 KB（transcript turn 123）; 无额外文件残留：临时 harness（verify.js / browser-test.js / cdp-test.mjs / .selftest.html / .wrapper.html 等）在收尾时被删除，turn 128 与最终目录列表均只剩 index.html（transcript turn 127/128）; 实际可运行已被端到端跑通：headless Chrome + CDP 下表单空提交/格式错/合法提交、失焦校验、主题切换均按预期执行，8/8 组合无控制台报错（transcript turn 120 汇总『8 / 8 个组合全项通过』）; 防御性代码量小且与实际运行环境相关，未影响使用：仅 localStorage 的 try/catch（index.html:15,902-907，因要求 file:// 双击打开）与少量 getElementById null 守卫（index.html:941,973,1000 等），无 polyfill、无兜底布局、无额外页面或构建产物"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 3576,
+          "original_bytes": 3576
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 193564,
+          "original_bytes": 193564
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 5479
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "metadata": {
+    "skill_name": "ponytail",
+    "skill_path": "D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail",
+    "timestamp": "2026-09-11T02:58:33Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法做 wc 统计",
+      "configuration": "with_skill",
+      "run_number": 4,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "time_seconds": 23.675,
+        "tokens": 39300,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+          "passed": false,
+          "evidence": "FAIL: 运行 wc.mjs 出错：Error: cannot read file \"/tmp/tmp.eAoqN8dU7P/input.txt\": ENOENT: no such file or directory, open 'C:\\tmp\\tmp.eAoqN8dU7P\\input.txt'"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法统计 NDJSON 日志里各等级出现次数",
+      "configuration": "with_skill",
+      "run_number": 4,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "time_seconds": 31.246,
+        "tokens": 40603,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-log-tally.sh",
+          "passed": false,
+          "evidence": "FAIL: 运行 tally.mjs 出错：Error: cannot read file '/tmp/tmp.Zf31DcEzVS/events.jsonl': ENOENT: no such file or directory, open 'C:\\tmp\\tmp.Zf31DcEzVS\\events.jsonl'"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法做 wc 统计",
+      "configuration": "without_skill",
+      "run_number": 4,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "time_seconds": 36.064,
+        "tokens": 41656,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+          "passed": false,
+          "evidence": "FAIL: 运行 wc.mjs 出错：Error: cannot read file '/tmp/tmp.y0mXtOldaE/input.txt': ENOENT: no such file or directory, open 'C:\\tmp\\tmp.y0mXtOldaE\\input.txt'"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法统计 NDJSON 日志里各等级出现次数",
+      "configuration": "without_skill",
+      "run_number": 4,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "time_seconds": 28.24,
+        "tokens": 39474,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-log-tally.sh",
+          "passed": false,
+          "evidence": "FAIL: 运行 tally.mjs 出错：Error: cannot read file \"/tmp/tmp.t0IC1bX95L/events.jsonl\": ENOENT: no such file or directory, open 'C:\\tmp\\tmp.t0IC1bX95L\\events.jsonl'"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.5,
+        "stddev": 0,
+        "min": 0.5,
+        "max": 0.5
+      },
+      "time_seconds": {
+        "mean": 27.4605,
+        "stddev": 3.785499999999999,
+        "min": 23.675,
+        "max": 31.246
+      },
+      "tokens": {
+        "mean": 39951.5,
+        "stddev": 651.5,
+        "min": 39300,
+        "max": 40603
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.5,
+        "stddev": 0,
+        "min": 0.5,
+        "max": 0.5
+      },
+      "time_seconds": {
+        "mean": 32.152,
+        "stddev": 3.912000000000001,
+        "min": 28.24,
+        "max": 36.064
+      },
+      "tokens": {
+        "mean": 40565,
+        "stddev": 1091,
+        "min": 39474,
+        "max": 41656
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "-4.7",
+      "tokens": "-613.5"
+    }
+  }
+}

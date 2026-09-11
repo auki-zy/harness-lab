@@ -1,0 +1,87 @@
+id: ui-audit-priority-lint
+title: 用 Node 写一个把 UI/UX 优先级表中的硬阈值（对比度 4.5:1、触控 44px、正文 16px、禁用 emoji 图标）落地成可判定审计输出的命令行程序
+description: 这条任务把该技能里最硬、最可判定的设计主张（优先级 1 对比度 4.5:1、优先级 2 触控 44×44、优先级 4 禁止 emoji 当图标、优先级 6 正文 16px）直接编码成验收条件：只有真的按阈值和 >= 边界语义实现，干净输入才输出 PASS、临界值 16/44 才不会被误判为违规；同时固定顺序的精确 stdout 和「有违规仍退出 0、坏输入非 0 且不污染 stdout」把「按优先级输出、失败要干净」这两点也变成机器可判定的行为。
+
+input:
+  prompt: |
+    在当前目录里创建唯一交付文件 ui-audit.mjs（只允许用 Node 内置能力，不要装任何依赖）。运行方式：node ui-audit.mjs <json文件路径>。
+
+    程序读取该 JSON 文件，按下面 4 条规则审计 UI 规格，把违规项逐行写到 stdout。
+
+    输入 JSON 结构（字段都存在）：
+    {
+      "fontPx": 数字,        // 正文基准字号
+      "touchPx": 数字,       // 触控目标边长
+      "icons": ["字符串", ...],   // 图标列表，可能是空数组
+      "colors": [ { "name": "字符串", "fg": "#rrggbb", "bg": "#rrggbb" }, ... ]
+    }
+
+    审计规则（阈值即 UI/UX 优先级表里的硬性检查）：
+    1. 对比度：对 colors 中每一项，按标准 WCAG 对比度公式（相对亮度，比值 = (L亮+0.05)/(L暗+0.05)）计算 fg 与 bg 的对比度，小于 4.5 记为违规。
+    2. 字号：fontPx 小于 16 记为违规。
+    3. 触控目标：touchPx 小于 44 记为违规。
+    4. 图标：icons 里任一字符串只要含有码点 >= 0x1F000 的字符（即被当作 emoji 使用），就记为该图标违规。
+
+    stdout 输出格式（固定顺序，每行一条，行尾不要多余空格，不要表头、空行、统计或任何其它文字）：
+    1. 对比度违规：按 colors 数组的原始顺序，每项一行： contrast <name>
+    2. 字号违规：若 fontPx < 16，输出一行： font <fontPx>（直接输出 JSON 里的数值）
+    3. 触控违规：若 touchPx < 44，输出一行： touch <touchPx>（直接输出 JSON 里的数值）
+    4. 图标违规：按 icons 数组的原始顺序，每项一行： emoji <该图标原字符串>
+    若一条违规都没有，只输出一行： PASS
+
+    退出码：只要成功读到文件且 JSON 解析成功，就打印上述内容并退出码 0（有违规也是 0）；文件不存在/读不到，或 JSON 解析失败，一律退出码非 0，并且 stdout 不能输出任何内容。
+
+    只交付 ui-audit.mjs 这一个文件。
+
+context:
+  files:
+    "clean.json": |
+      {
+        "fontPx": 17,
+        "touchPx": 48,
+        "icons": ["gear", "home", "chart"],
+        "colors": [
+          { "name": "body", "fg": "#111827", "bg": "#ffffff" },
+          { "name": "muted", "fg": "#4b5563", "bg": "#ffffff" },
+          { "name": "cta", "fg": "#ffffff", "bg": "#005fcc" }
+        ]
+      }
+
+    "issues.json": |
+      {
+        "fontPx": 14,
+        "touchPx": 32,
+        "icons": ["gear", "🚀", "📊"],
+        "colors": [
+          { "name": "body", "fg": "#999999", "bg": "#ffffff" },
+          { "name": "heading", "fg": "#000000", "bg": "#ffffff" },
+          { "name": "badge", "fg": "#ffdd00", "bg": "#ffffff" },
+          { "name": "cta", "fg": "#ffffff", "bg": "#005fcc" }
+        ]
+      }
+
+    "edge.json": |
+      {
+        "fontPx": 16,
+        "touchPx": 44,
+        "icons": ["gear"],
+        "colors": [
+          { "name": "body", "fg": "#000000", "bg": "#ffffff" }
+        ]
+      }
+
+    "broken.json": |
+      { "fontPx": 14, "colors": [ }
+
+
+constraints:
+  timeout_seconds: 300
+  max_turns: 4
+
+expect:
+  exit_code: 0
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-ui-audit-priority-lint.sh
+  timeout_seconds: 60

@@ -1,0 +1,168 @@
+{
+  "metadata": {
+    "skill_name": "ponytail",
+    "skill_path": "D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail",
+    "timestamp": "2026-09-11T03:02:24Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法做 wc 统计",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 48.213,
+        "tokens": 41927,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+          "passed": true,
+          "evidence": "PASS: wc.mjs 输出正确（lines/words/chars = 5/10/58），空文件 0/0/0，缺文件时退出码非 0"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法统计 NDJSON 日志里各等级出现次数",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 37.262,
+        "tokens": 41524,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-log-tally.sh",
+          "passed": true,
+          "evidence": "PASS: tally.mjs 输出正确（debug1/error1/info4/warn1），空文件、坏行、缺文件都按约定处理"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法做 wc 统计",
+      "configuration": "without_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 45.992,
+        "tokens": 39502,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+          "passed": true,
+          "evidence": "PASS: wc.mjs 输出正确（lines/words/chars = 5/10/58），空文件 0/0/0，缺文件时退出码非 0"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用最省的写法统计 NDJSON 日志里各等级出现次数",
+      "configuration": "without_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 39.411,
+        "tokens": 41229,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-log-tally.sh",
+          "passed": true,
+          "evidence": "PASS: tally.mjs 输出正确（debug1/error1/info4/warn1），空文件、坏行、缺文件都按约定处理"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 42.7375,
+        "stddev": 5.4755,
+        "min": 37.262,
+        "max": 48.213
+      },
+      "tokens": {
+        "mean": 41725.5,
+        "stddev": 201.5,
+        "min": 41524,
+        "max": 41927
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 42.701499999999996,
+        "stddev": 3.290499999999998,
+        "min": 39.411,
+        "max": 45.992
+      },
+      "tokens": {
+        "mean": 40365.5,
+        "stddev": 863.5,
+        "min": 39502,
+        "max": 41229
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+0.0",
+      "tokens": "+1360.0"
+    }
+  }
+}

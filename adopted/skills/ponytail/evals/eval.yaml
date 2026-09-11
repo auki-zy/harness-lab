@@ -1,0 +1,51 @@
+schema_version: v1alpha1
+
+# ponytail 的评测配置（skill-up 格式）。
+# 跑法：skill-up run candidates/skills/ponytail/evals/eval.yaml
+# 说明：benchmark.enabled=true 会让每个用例都跑 with_skill / without_skill 两边 —— 这就是我们台账里的 A/B 条件。
+
+environment:
+  type: none
+  env:
+    TZ: UTC
+
+mcp:
+  servers: []
+
+skills:
+  - source: local_path
+    path: .
+
+engine:
+  # 引擎 = 真正干活的 agent CLI（skill-up 自己不做推理）。
+  # 必须是本机装了的命令；可选：claude_code / codex / qodercli / qwen_code（或你自己的命令）。
+  # 跑前检查会先确认它在 PATH 上、而且**能用**（claude_code 走内部网关 Athen，见 tools/lib/engines.mjs），
+  # 不能用就直接报错、不跑、也不写试用记录。
+  # 临时换一个：node tools/skillup-bridge.mjs run --name ponytail --engine codex
+  name: claude_code
+  model:
+    name: auto          # auto = 用引擎默认；走 Athen 时由桥接换成网关上的模型名（默认 claude-sonnet-5）
+
+cases:
+  files:
+    - evals/cases/wc-cli.yaml
+    - evals/cases/log-tally.yaml
+  defaults:
+    timeout_seconds: 300
+    max_turns: 3
+    collect_artifacts:
+      - "wc.mjs"
+      - "impl.mjs"
+      - "tally.mjs"
+
+benchmark:
+  enabled: true
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-wc.sh
+  timeout_seconds: 60
+
+report:
+  formats: [json, html]
+  artifacts: [transcript]

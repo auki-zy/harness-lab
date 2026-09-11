@@ -1,0 +1,61 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "只按用户给出的这条任务要求评判产出是否达标（不要自己加要求，也不要用别的标准）",
+      "passed": true,
+      "evidence": "用户任务（transcript idx 0）要求交付单文件 index.html（内联 CSS/JS、零依赖），页面含导航、Hero、三张功能卡、定价对比、订阅表单（校验＋就近错误提示）、页脚，并支持明暗主题＋跟随系统偏好。交付的 index.html（54,228 字节，1532 行）结构逐项对得上：\u003cheader\u003e/\u003cnav aria-label=主导航\u003e、.hero（h1 + lead + actions + 路线预览卡）、section#features 下三张 .card、section#pricing 下三档 .plan 六项能力逐项对照、form#subscribe-form（email/route/terms 三个 .field，各自带 .field__error 就地提示）、\u003cfooter\u003e。; 独立用 headless Chrome 直接以 file:///C:/Users/yu.zhao/AppData/Local/Temp/skill-up-1917392857/index.html 打开：控制台 0 error / 0 warning（含纯键盘走查期间与表单出错状态期间）。; 375x812 与 1440x900、light 与 dark 四种组合下 document.documentElement.scrollWidth 分别为 375 / 375 / 1440 / 1440，与 innerWidth 相等；越界元素计数为 0；触发表单全部错误态（长中文错误文案）后仍为 375/1440，无横向滚动。; 自行按 WCAG 公式遍历所有叶子文本节点计算对比度（正文 4.5:1、大字号 3:1）：375/1440 × light/dark 四种组合下不达标项均为 0（正文 token 例如浅色 --text-muted #4B5670 on #F6F8FC ≈ 6.8:1，深色 #A9B3CE on #0B1020 ≈ 9.0:1）。; 用真实键盘事件（Input.dispatchKeyEvent Tab）在 375px 下走查：共 19 个焦点停留点，覆盖 skip-link、品牌、两个导航链接、主题切换按钮、Hero 两个 CTA、三档定价按钮、邮箱、路线、条款勾选框、提交按钮、四个页脚链接，随后回绕到 body（走完）；每个停留点的焦点环为 solid 3px rgb(11, 87, 208)，勾选框的环落在其 44×44 包裹层 .check__hit 上，无缺失。; 主题：模拟 prefers-color-scheme:dark 加载后 data-theme=dark / data-mode=system；系统切回 light 时页面实时跟随变为 light；点击主题切换按钮后变为 dark 且显示出「跟随系统外观」复位按钮。; 模拟 prefers-reduced-motion: reduce 后 body/.card 的 transitionDuration 降为 1e-06s，scroll-behavior=auto（动效已响应减弱设置）。; 颜色 token 检查：剥离 :root 与 [data-theme=\"dark\"] 两个令牌块后，样式表内剩余 #hex 为 0、rgba() 为 0，全表 189 处 var(--…)；body 规则为 font-size:16px / line-height:1.5。; 图标检查：无任何 emoji 字符（扫描无 pictograph 码位），共 41 处内联 \u003csvg\u003e；错误提示图标用内联 data:image/svg+xml 掩码实现，仍为 SVG 且不依赖外部文件。; 表单行为验证：邮箱格式错误/路线过短/未勾选条款时，三处就地提示分别出现且 aria-invalid=true、焦点落到第一个出错字段；全部合法提交后显示成功状态并清空字段。; 触控目标实测：主题按钮 44×44、导航链接 48×44、页脚链接 60×44、输入框 293×48（375px）/574×48（1440px）、跳过链接 132×44；条款勾选框本体为 24×24，外有 44×44 包裹层（实测该包裹层自身不可点，wrapperClickToggles=false，但同排关联 \u003clabel\u003e 可点，375px 下 label 为 259×45），即触控断点下该控件的有效可点区域达到 ≥44×44。"
+    },
+    {
+      "text": "产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标",
+      "passed": true,
+      "evidence": "工作目录（C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-1917392857）当前只有一个交付文件 index.html（54,228 字节），无 README、说明文件、审计脚本或截图残留（find . -maxdepth 1 -type f 仅 ./index.html）。; 零依赖零构建可验证：全文件无 \u003cscript src\u003e、无 \u003clink href\u003e 外链；正则扫描到的绝对 URL 只有内联 data URI 里的 SVG 命名空间字符串 http://www.w3.org/2000/svg，无任何网络请求；直接用 file:// 协议在 headless Chrome 中打开渲染正常，控制台无输出。; 输出格式即任务要求的单文件 index.html，内联 \u003cstyle\u003e 与内联 \u003cscript\u003e 各就位（2 个 script 块，node --check 语法通过），双击即开可用。; 未附加多余解释：最终回复仅一行「全部通过。看一眼实际渲染。」，交付物内只有常规代码注释（区块注释与行内说明），没有面向用户的说明文档或额外产物。; 未要求的防御代码未构成冗余：仅有的守卫是 localStorage 的 try/catch、matchMedia 的 addEventListener/addListener 回退与若干 null 判断，直接服务于任务明写的「打开无控制台报错」验收项（file:// 场景下 localStorage 可能抛错），且实测控制台确实干净；未引入任何未被要求的功能、库或文件。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 39,
+          "original_bytes": 39
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 399948,
+          "original_bytes": 399948
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 1940
+  }
+}

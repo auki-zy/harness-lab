@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+      "passed": false,
+      "evidence": "FAIL: 运行 wc.mjs 出错：Error: cannot read file '/tmp/tmp.y0mXtOldaE/input.txt': ENOENT: no such file or directory, open 'C:\\tmp\\tmp.y0mXtOldaE\\input.txt'"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 1,
+    "total": 2,
+    "pass_rate": 0.5
+  }
+}

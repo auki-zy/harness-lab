@@ -1,0 +1,1728 @@
+{
+  "generatedAt": "2026-09-11T10:21:23.783Z",
+  "taxonomy": {
+    "version": 1,
+    "policy": {
+      "note": "标签体系（taxonomy）：维度与取值在这里集中定义。应用中出现的**未登记取值**会标记为「待确认」——新类型首次使用必须由用户确认后才写回本文件。",
+      "pendingFile": "evals/pending-tags.json"
+    },
+    "dimensions": {
+      "type": {
+        "label": "类型",
+        "values": {
+          "skill": "技能",
+          "agent": "子代理",
+          "mcp": "MCP 服务"
+        }
+      },
+      "purpose": {
+        "label": "用途",
+        "values": {
+          "ui-design": "界面设计",
+          "code-quality": "代码质量",
+          "testing": "测试",
+          "debugging": "调试",
+          "planning": "计划与流程",
+          "docs": "文档",
+          "security": "安全",
+          "integration": "外部集成",
+          "knowledge": "知识蒸馏"
+        }
+      },
+      "stage": {
+        "label": "阶段",
+        "values": {
+          "candidate": "候选",
+          "trialing": "试用中",
+          "adopted": "已采纳",
+          "rejected": "已放弃"
+        }
+      },
+      "source": {
+        "label": "来源",
+        "values": {
+          "official": "官方",
+          "community": "社区",
+          "self": "自研"
+        }
+      }
+    }
+  },
+  "pendingTags": [],
+  "capabilities": [
+    {
+      "id": "frontend-design",
+      "type": "skill",
+      "status": "adopted",
+      "summary": "值得用：做界面时的视觉方向与审美主张。采纳依据：受控对比（page-card，A/B）通过，用户人评赞并选了 B（加载能力那版）。",
+      "description": "新建界面或重塑现有界面时，给出有辨识度、有意图的视觉设计指引：在审美方向与字体排版上给建议，让设计选择不落进「一眼像模板默认样式」。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译",
+      "howToUse": "harness-tool add frontend-design",
+      "humanDecision": null,
+      "source": {
+        "repo": "anthropics/skills",
+        "path": "skills/frontend-design/SKILL.md",
+        "license": "Apache-2.0"
+      },
+      "localPath": "adopted/skills/frontend-design",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "ui-design"
+        ],
+        "stage": "adopted",
+        "source": "official"
+      },
+      "trials": [
+        {
+          "trialId": "2026-09-10-frontend-design",
+          "capability": {
+            "id": "frontend-design",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "page-card",
+            "fixture": "adopted/skills/frontend-design/benchmarks/tasks/page-card",
+            "description": "同一个成员卡片页任务：A 无能力直接实现；B 加载 frontend-design 技能后实现（两次独立上下文）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 12.2,
+              "B": 14.6
+            },
+            "staticChecks": {
+              "A": "0 外链/脚本；1 label；1 @media",
+              "B": "0 外链/脚本；3 表结构；5 断点"
+            },
+            "notes": "两版都能过静态检查、都能用；观感上用户选了 B（加载能力那版），但没有写理由"
+          },
+          "judge": [
+            "human"
+          ],
+          "humanReview": {
+            "mode": "quick",
+            "better": "B",
+            "verdict": "up",
+            "scores": null
+          },
+          "verdict": {
+            "decision": "adopt",
+            "confidence": "medium",
+            "reason": "本条只讲这次受控对比：两版都做到任务要求、静态检查都通过、体积差别很小；用户快速人评给了赞，并选了 B（加载了能力的那版更好），没有写理由。按当时规则「≥1 次可复核试用通过 + 人评赞 → adopt」判采纳（此后规则收紧为「连续两次通过」，见 evals/schema.md 第六节）；能力级状态见 capabilities.json。"
+          },
+          "evidence": [
+            "adopted/skills/frontend-design/EVIDENCE.md",
+            "adopted/skills/frontend-design/benchmarks/SCORING.md",
+            "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html",
+            "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html"
+          ],
+          "model": "deepseek-v4-flash（两条件各一独立上下文子代理）",
+          "date": "2026-09-10",
+          "recordedAt": "2026-09-10T08:07:00+08:00"
+        }
+      ],
+      "latestTrial": {
+        "trialId": "2026-09-10-frontend-design",
+        "capability": {
+          "id": "frontend-design",
+          "type": "skill"
+        },
+        "kind": "controlled",
+        "task": {
+          "id": "page-card",
+          "fixture": "adopted/skills/frontend-design/benchmarks/tasks/page-card",
+          "description": "同一个成员卡片页任务：A 无能力直接实现；B 加载 frontend-design 技能后实现（两次独立上下文）"
+        },
+        "conditions": [
+          {
+            "name": "A",
+            "withCapability": false,
+            "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html"
+          },
+          {
+            "name": "B",
+            "withCapability": true,
+            "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html"
+          }
+        ],
+        "measures": {
+          "correctness": {
+            "A": 1,
+            "B": 1
+          },
+          "sizeKB": {
+            "A": 12.2,
+            "B": 14.6
+          },
+          "staticChecks": {
+            "A": "0 外链/脚本；1 label；1 @media",
+            "B": "0 外链/脚本；3 表结构；5 断点"
+          },
+          "notes": "两版都能过静态检查、都能用；观感上用户选了 B（加载能力那版），但没有写理由"
+        },
+        "judge": [
+          "human"
+        ],
+        "humanReview": {
+          "mode": "quick",
+          "better": "B",
+          "verdict": "up",
+          "scores": null
+        },
+        "verdict": {
+          "decision": "adopt",
+          "confidence": "medium",
+          "reason": "本条只讲这次受控对比：两版都做到任务要求、静态检查都通过、体积差别很小；用户快速人评给了赞，并选了 B（加载了能力的那版更好），没有写理由。按当时规则「≥1 次可复核试用通过 + 人评赞 → adopt」判采纳（此后规则收紧为「连续两次通过」，见 evals/schema.md 第六节）；能力级状态见 capabilities.json。"
+        },
+        "evidence": [
+          "adopted/skills/frontend-design/EVIDENCE.md",
+          "adopted/skills/frontend-design/benchmarks/SCORING.md",
+          "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html",
+          "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html"
+        ],
+        "model": "deepseek-v4-flash（两条件各一独立上下文子代理）",
+        "date": "2026-09-10",
+        "recordedAt": "2026-09-10T08:07:00+08:00"
+      }
+    },
+    {
+      "id": "ponytail",
+      "type": "skill",
+      "status": "adopted",
+      "summary": "值得用：skill-up 可复核试用连续全过，用例无退步。",
+      "description": "强制给出「真能跑的最省方案」——最简单、最短、最小。化身见过一切的资深开发者：先问这件事到底要不要做（YAGNI），能用标准库就不自己写，能用平台原生能力就不引依赖，一行能解决就不写五十行。有 lite / full（默认）/ ultra 三档强度；任何编码任务都适用，非编码请求（常识问答、写文章、翻译、摘要）不要用。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（触发词清单缩写为「任何编码任务／非编码请求不要用」，原文见该文件）",
+      "howToUse": "harness-tool add ponytail",
+      "humanDecision": null,
+      "source": {
+        "repo": "DietrichGebert/ponytail",
+        "path": "skills/ponytail/SKILL.md",
+        "license": "MIT"
+      },
+      "localPath": "adopted/skills/ponytail",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "code-quality"
+        ],
+        "stage": "adopted",
+        "source": "community"
+      },
+      "trials": [
+        {
+          "trialId": "2026-09-10-ponytail-skillup",
+          "capability": {
+            "id": "ponytail",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "wc-cli+log-tally",
+            "fixture": "adopted/skills/ponytail-workspace/iteration-2",
+            "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false
+            },
+            {
+              "name": "B",
+              "withCapability": true
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 0,
+              "B": 0
+            },
+            "durationSec": {
+              "A": 0.5,
+              "B": 1
+            },
+            "steps": {
+              "A": 0,
+              "B": 0
+            },
+            "staticChecks": {
+              "A": "用例 0/2 通过；耗时 0.3s",
+              "B": "用例 0/2 通过；耗时 0.8s"
+            },
+            "notes": "引擎 qodercli / 模型 auto；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；报告：adopted/skills/ponytail-workspace/iteration-2"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "retry",
+            "confidence": "low",
+            "reason": "这次评测本身报错了（不是能力没做到）：agent execution failed: qodercli run failed (exit 127): /usr/bin/bash: line 1: qodercli: command not found——先修配置或环境再跑；这一次不算对能力的结论"
+          },
+          "evidence": [
+            "adopted/skills/ponytail-workspace/iteration-2/result.json",
+            "adopted/skills/ponytail-workspace/iteration-2/benchmark.json",
+            "adopted/skills/ponytail-workspace/iteration-2/report.html",
+            "adopted/skills/ponytail-workspace/iteration-2/benchmark.md"
+          ],
+          "model": "qodercli / auto",
+          "date": "2026-09-10",
+          "recordedAt": "2026-09-10T11:17:42.925Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "adopted/skills/ponytail-workspace/iteration-2/result.json"
+          }
+        },
+        {
+          "trialId": "2026-09-10-ponytail",
+          "capability": {
+            "id": "ponytail",
+            "type": "skill"
+          },
+          "kind": "mock",
+          "task": {
+            "id": "wc-cli",
+            "fixture": "adopted/skills/ponytail/benchmarks/tasks/wc-cli",
+            "description": "固定任务：写一个只用 Node 自带的 wc.mjs（输出 lines/words/chars 的 JSON，只交付这一个文件）。A 不加载能力、B 加载 ponytail，各一次独立实现，产物与检查脚本都留在仓库里"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 0.6,
+              "B": 0.4
+            },
+            "staticChecks": {
+              "A": "非空代码行 19；第三方 import 0；交付文件 2（wc.mjs + test.mjs，task 明确要求只交付 wc.mjs）",
+              "B": "非空代码行 10；第三方 import 0；交付文件 1（只有 wc.mjs）"
+            },
+            "notes": "两版输出都正确（5/10/58）、缺文件都 exit 1 且 stdout 为空；差别在省不省与是否守约束：B 用不到一半的代码达成同一结果且只交付一个文件，A 多交付了任务禁止的 test.mjs，并写了未要求的 usage 分支与 try/catch（B 靠 Node 原生 ENOENT 满足缺文件条款）。B 的次要瑕疵：无参数调用会抛未捕获栈回溯（exit 1、stdout 空，仍符合口径）。"
+          },
+          "judge": [
+            "auto",
+            "llm"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "hold",
+            "confidence": "medium",
+            "reason": "本条只讲这次 mock 试用：B 胜且达标（评审 winner=B，constraint 5/5、minimality 5/5、correctness 5/5、verifiability 3/5，confidence high）。但按规则「可复核试用只有 1 次」先挂起——再跑一次可复核试用且全过即可判 adopt。"
+          },
+          "evidence": [
+            "adopted/skills/ponytail/benchmarks/tasks/wc-cli/description.md",
+            "adopted/skills/ponytail/benchmarks/tasks/wc-cli/check.mjs",
+            "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs",
+            "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/test.mjs",
+            "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs"
+          ],
+          "model": "deepseek-v4-flash（两条件各一独立上下文子代理；auto = check.mjs，llm = 独立评审子代理）",
+          "date": "2026-09-10",
+          "recordedAt": "2026-09-10T18:05:00+08:00"
+        },
+        {
+          "trialId": "2026-09-11-ponytail-skillup",
+          "capability": {
+            "id": "ponytail",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "wc-cli+log-tally",
+            "fixture": "adopted/skills/ponytail-workspace/iteration-3",
+            "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/without_skill/outputs/workspace/wc.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/with_skill/outputs/workspace/wc.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 0,
+              "B": 0
+            },
+            "sizeKB": {
+              "A": 0.6,
+              "B": 0.6
+            },
+            "tokensIn": {
+              "A": 78069,
+              "B": 78325
+            },
+            "tokensOut": {
+              "A": 1884,
+              "B": 1849
+            },
+            "tokensTotal": {
+              "A": 79953,
+              "B": 80174
+            },
+            "tokensCached": {
+              "A": 38419,
+              "B": 39186
+            },
+            "durationSec": {
+              "A": 117.4,
+              "B": 90.9
+            },
+            "steps": {
+              "A": 2,
+              "B": 3
+            },
+            "toolCalls": {
+              "A": 5,
+              "B": 6
+            },
+            "toolMix": {
+              "A": "Bash 3 / Write 2",
+              "B": "Bash 4 / Write 2"
+            },
+            "staticChecks": {
+              "A": "用例 0/2 通过；断言 1/2；耗时 27.8s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+              "B": "用例 0/2 通过；断言 1/2；耗时 30.3s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh"
+            },
+            "notes": "引擎 claude_code / 模型 claude-sonnet-5；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；产物大小 A 0.6 KB / B 0.6 KB；报告：adopted/skills/ponytail-workspace/iteration-3"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "retry",
+            "confidence": "low",
+            "reason": "这次评测的用例配置有 bug，判据不成立（不是能力没做到，也不是能力做到了）：两条用例都把输入放在工作区里，而 agent 会自己造/清理测试文件——wc-cli 的两个 agent 都覆写了工作区的 input.txt（判分读到 2 行/25 字符的自家样例），log-tally 的 agent 清理测试文件时把 events.jsonl 删了（判分直接说「工作区里没有 events.jsonl」）。四个用例里 agent 自己都报「实现已通过自测」，产物也在。已把输入改成随用例内联、判分脚本自带同一份输入，重跑后再下结论。"
+          },
+          "evidence": [
+            "adopted/skills/ponytail-workspace/iteration-3/result.json",
+            "adopted/skills/ponytail-workspace/iteration-3/benchmark.json",
+            "adopted/skills/ponytail-workspace/iteration-3/report.html",
+            "adopted/skills/ponytail-workspace/iteration-3/benchmark.md",
+            "adopted/skills/ponytail-workspace/iteration-3/wc-cli/without_skill/outputs/workspace/wc.mjs",
+            "adopted/skills/ponytail-workspace/iteration-3/wc-cli/with_skill/outputs/workspace/wc.mjs"
+          ],
+          "model": "claude_code / claude-sonnet-5",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T02:53:34.340Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "adopted/skills/ponytail-workspace/iteration-3/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-11-ponytail-skillup-2",
+          "capability": {
+            "id": "ponytail",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "wc-cli+log-tally",
+            "fixture": "adopted/skills/ponytail-workspace/iteration-4",
+            "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/without_skill/outputs/workspace/wc.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/with_skill/outputs/workspace/wc.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 0,
+              "B": 0
+            },
+            "sizeKB": {
+              "A": 0.7,
+              "B": 0.6
+            },
+            "tokensIn": {
+              "A": 78353,
+              "B": 77909
+            },
+            "tokensOut": {
+              "A": 2777,
+              "B": 1994
+            },
+            "tokensTotal": {
+              "A": 81130,
+              "B": 79903
+            },
+            "tokensCached": {
+              "A": 39351,
+              "B": 38633
+            },
+            "durationSec": {
+              "A": 64.3,
+              "B": 54.9
+            },
+            "steps": {
+              "A": 2,
+              "B": 3
+            },
+            "toolCalls": {
+              "A": 4,
+              "B": 5
+            },
+            "toolMix": {
+              "A": "Write 2 / Bash 2",
+              "B": "Bash 3 / Write 2"
+            },
+            "staticChecks": {
+              "A": "用例 0/2 通过；断言 1/2；耗时 36.1s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh",
+              "B": "用例 0/2 通过；断言 1/2；耗时 23.7s；未过：script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ponytail\\evals\\fixtures\\scripts\\check-wc.sh"
+            },
+            "notes": "引擎 claude_code / 模型 claude-sonnet-5；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；产物大小 A 0.7 KB / B 0.6 KB；报告：adopted/skills/ponytail-workspace/iteration-4"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "retry",
+            "confidence": "low",
+            "reason": "又是判分脚本自己的 bug，判据不成立：让判分脚本自带输入这一步是对的，但临时文件用了 `mktemp -d`——Git Bash 给的是 `/tmp/tmp.xxxx/input.txt`，Windows 上的 node 会把它解析成 `C:\\tmp\\...`，四个用例全部报 `ENOENT: no such file or directory`。产物本身是好的（四个 agent 都自报实现通过自测）。已把临时文件改成当前目录下的相对路径，重跑后再下结论。"
+          },
+          "evidence": [
+            "adopted/skills/ponytail-workspace/iteration-4/result.json",
+            "adopted/skills/ponytail-workspace/iteration-4/benchmark.json",
+            "adopted/skills/ponytail-workspace/iteration-4/report.html",
+            "adopted/skills/ponytail-workspace/iteration-4/benchmark.md",
+            "adopted/skills/ponytail-workspace/iteration-4/wc-cli/without_skill/outputs/workspace/wc.mjs",
+            "adopted/skills/ponytail-workspace/iteration-4/wc-cli/with_skill/outputs/workspace/wc.mjs"
+          ],
+          "model": "claude_code / claude-sonnet-5",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T02:58:33.338Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "adopted/skills/ponytail-workspace/iteration-4/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-11-ponytail-skillup-3",
+          "capability": {
+            "id": "ponytail",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "wc-cli+log-tally",
+            "fixture": "adopted/skills/ponytail-workspace/iteration-5",
+            "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-5/wc-cli/without_skill/outputs/workspace/wc.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-5/wc-cli/with_skill/outputs/workspace/wc.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 0.6,
+              "B": 0.7
+            },
+            "tokensIn": {
+              "A": 78544,
+              "B": 80375
+            },
+            "tokensOut": {
+              "A": 2187,
+              "B": 3076
+            },
+            "tokensTotal": {
+              "A": 80731,
+              "B": 83451
+            },
+            "tokensCached": {
+              "A": 39511,
+              "B": 40128
+            },
+            "durationSec": {
+              "A": 85.4,
+              "B": 85.5
+            },
+            "steps": {
+              "A": 5,
+              "B": 4
+            },
+            "toolCalls": {
+              "A": 6,
+              "B": 8
+            },
+            "toolMix": {
+              "A": "Bash 4 / Write 2",
+              "B": "Bash 5 / Write 2 / Read 1"
+            },
+            "staticChecks": {
+              "A": "用例 2/2 通过；断言 2/2；耗时 46.0s",
+              "B": "用例 2/2 通过；断言 2/2；耗时 48.2s"
+            },
+            "notes": "引擎 claude_code / 模型 claude-sonnet-5；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；产物大小 A 0.6 KB / B 0.7 KB；报告：adopted/skills/ponytail-workspace/iteration-5"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "adopt",
+            "confidence": "medium",
+            "reason": "可复核试用已通过 2 次，无退步；对照 A 2/2"
+          },
+          "evidence": [
+            "adopted/skills/ponytail-workspace/iteration-5/result.json",
+            "adopted/skills/ponytail-workspace/iteration-5/benchmark.json",
+            "adopted/skills/ponytail-workspace/iteration-5/report.html",
+            "adopted/skills/ponytail-workspace/iteration-5/benchmark.md",
+            "adopted/skills/ponytail-workspace/iteration-5/wc-cli/without_skill/outputs/workspace/wc.mjs",
+            "adopted/skills/ponytail-workspace/iteration-5/wc-cli/with_skill/outputs/workspace/wc.mjs"
+          ],
+          "model": "claude_code / claude-sonnet-5",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T03:02:24.997Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "adopted/skills/ponytail-workspace/iteration-5/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-11-ponytail-skillup-4",
+          "capability": {
+            "id": "ponytail",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "wc-cli+log-tally",
+            "fixture": "adopted/skills/ponytail-workspace/iteration-6",
+            "description": "用最省的写法做 wc 统计（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 0.8,
+              "B": 0.6
+            },
+            "tokensIn": {
+              "A": 37663,
+              "B": 37429
+            },
+            "tokensOut": {
+              "A": 2716,
+              "B": 2917
+            },
+            "tokensTotal": {
+              "A": 40379,
+              "B": 40346
+            },
+            "tokensCached": {
+              "A": 18688,
+              "B": 19328
+            },
+            "durationSec": {
+              "A": 40.4,
+              "B": 40.8
+            },
+            "steps": {
+              "A": 2,
+              "B": 2
+            },
+            "toolCalls": {
+              "A": 6,
+              "B": 6
+            },
+            "toolMix": {
+              "A": "Bash 4 / Write 2",
+              "B": "Bash 4 / Write 2"
+            },
+            "staticChecks": {
+              "A": "用例 2/2 通过；断言 2/2；耗时 19.9s",
+              "B": "用例 2/2 通过；断言 2/2；耗时 18.3s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：wc-cli、log-tally；产物大小 A 0.8 KB / B 0.6 KB；报告：adopted/skills/ponytail-workspace/iteration-6"
+          },
+          "judge": [
+            "auto",
+            "human"
+          ],
+          "humanReview": {
+            "mode": "quick",
+            "verdict": "up",
+            "scores": null,
+            "reviewedAt": "2026-09-11T08:39:50.547Z"
+          },
+          "verdict": {
+            "decision": "adopt",
+            "confidence": "medium",
+            "reason": "可复核试用已通过 3 次，无退步；对照 A 2/2"
+          },
+          "evidence": [
+            "adopted/skills/ponytail-workspace/iteration-6/result.json",
+            "adopted/skills/ponytail-workspace/iteration-6/benchmark.json",
+            "adopted/skills/ponytail-workspace/iteration-6/report.html",
+            "adopted/skills/ponytail-workspace/iteration-6/benchmark.md",
+            "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs",
+            "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T06:36:12.598Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "adopted/skills/ponytail-workspace/iteration-6/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-11-ponytail-skillup-5",
+          "capability": {
+            "id": "ponytail",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ask-dedupe",
+            "fixture": "adopted/skills/ponytail-workspace/iteration-8",
+            "description": "写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 0,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 0.8,
+              "B": 2.8
+            },
+            "tokensIn": {
+              "A": 18382,
+              "B": 17645
+            },
+            "tokensOut": {
+              "A": 1321,
+              "B": 536
+            },
+            "tokensTotal": {
+              "A": 19703,
+              "B": 18181
+            },
+            "tokensCached": {
+              "A": 18176,
+              "B": 17408
+            },
+            "durationSec": {
+              "A": 18.8,
+              "B": 15.7
+            },
+            "steps": {
+              "A": 1,
+              "B": 1
+            },
+            "toolCalls": {
+              "A": 3,
+              "B": 3
+            },
+            "toolMix": {
+              "A": "Bash 2 / Write 1",
+              "B": "Bash 2 / Write 1"
+            },
+            "staticChecks": {
+              "A": "用例 0/1 通过；断言 2/3；耗时 18.8s；未过：产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标",
+              "B": "用例 1/1 通过；断言 3/3；耗时 15.7s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-dedupe；产物大小 A 0.8 KB / B 2.8 KB；报告：adopted/skills/ponytail-workspace/iteration-8"
+          },
+          "judge": [
+            "auto",
+            "llm",
+            "human"
+          ],
+          "humanReview": {
+            "mode": "quick",
+            "verdict": "up",
+            "scores": null,
+            "reviewedAt": "2026-09-11T07:30:29.557Z"
+          },
+          "verdict": {
+            "decision": "adopt",
+            "confidence": "medium",
+            "reason": "可复核试用已通过 4 次，无退步；对照 A 0/1"
+          },
+          "evidence": [
+            "adopted/skills/ponytail-workspace/iteration-8/result.json",
+            "adopted/skills/ponytail-workspace/iteration-8/benchmark.json",
+            "adopted/skills/ponytail-workspace/iteration-8/report.html",
+            "adopted/skills/ponytail-workspace/iteration-8/benchmark.md",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/check.mjs",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/description.md",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/input.txt",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-a/test.mjs",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/COMMIT.txt",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/LICENSE.txt",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/SKILL.md",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/SOURCE.md",
+            "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T06:43:35.490Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "adopted/skills/ponytail-workspace/iteration-8/result.json"
+          },
+          "selfCheck": false
+        }
+      ],
+      "latestTrial": {
+        "trialId": "2026-09-11-ponytail-skillup-5",
+        "capability": {
+          "id": "ponytail",
+          "type": "skill"
+        },
+        "kind": "controlled",
+        "task": {
+          "id": "ask-dedupe",
+          "fixture": "adopted/skills/ponytail-workspace/iteration-8",
+          "description": "写一个 Node 脚本 dedupe.mjs：读一个文本文件，按行去重（保持首次出现的顺序）后打印到 stdout，一行…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+        },
+        "conditions": [
+          {
+            "name": "A",
+            "withCapability": false,
+            "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs"
+          },
+          {
+            "name": "B",
+            "withCapability": true,
+            "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+          }
+        ],
+        "measures": {
+          "correctness": {
+            "A": 0,
+            "B": 1
+          },
+          "sizeKB": {
+            "A": 0.8,
+            "B": 2.8
+          },
+          "tokensIn": {
+            "A": 18382,
+            "B": 17645
+          },
+          "tokensOut": {
+            "A": 1321,
+            "B": 536
+          },
+          "tokensTotal": {
+            "A": 19703,
+            "B": 18181
+          },
+          "tokensCached": {
+            "A": 18176,
+            "B": 17408
+          },
+          "durationSec": {
+            "A": 18.8,
+            "B": 15.7
+          },
+          "steps": {
+            "A": 1,
+            "B": 1
+          },
+          "toolCalls": {
+            "A": 3,
+            "B": 3
+          },
+          "toolMix": {
+            "A": "Bash 2 / Write 1",
+            "B": "Bash 2 / Write 1"
+          },
+          "staticChecks": {
+            "A": "用例 0/1 通过；断言 2/3；耗时 18.8s；未过：产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标",
+            "B": "用例 1/1 通过；断言 3/3；耗时 15.7s"
+          },
+          "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-dedupe；产物大小 A 0.8 KB / B 2.8 KB；报告：adopted/skills/ponytail-workspace/iteration-8"
+        },
+        "judge": [
+          "auto",
+          "llm",
+          "human"
+        ],
+        "humanReview": {
+          "mode": "quick",
+          "verdict": "up",
+          "scores": null,
+          "reviewedAt": "2026-09-11T07:30:29.557Z"
+        },
+        "verdict": {
+          "decision": "adopt",
+          "confidence": "medium",
+          "reason": "可复核试用已通过 4 次，无退步；对照 A 0/1"
+        },
+        "evidence": [
+          "adopted/skills/ponytail-workspace/iteration-8/result.json",
+          "adopted/skills/ponytail-workspace/iteration-8/benchmark.json",
+          "adopted/skills/ponytail-workspace/iteration-8/report.html",
+          "adopted/skills/ponytail-workspace/iteration-8/benchmark.md",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/check.mjs",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/description.md",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/input.txt",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-a/test.mjs",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/COMMIT.txt",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/LICENSE.txt",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/SKILL.md",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/.claude/skills/ponytail/SOURCE.md",
+          "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+        ],
+        "model": "claude_code / deepseek-v4-flash",
+        "date": "2026-09-11",
+        "recordedAt": "2026-09-11T06:43:35.490Z",
+        "source": {
+          "tool": "skill-up",
+          "report": "adopted/skills/ponytail-workspace/iteration-8/result.json"
+        },
+        "selfCheck": false
+      }
+    },
+    {
+      "id": "ui-ux-pro-max",
+      "type": "skill",
+      "status": "adopted",
+      "summary": "值得用：你自己确认采纳了。",
+      "description": "面向 Web、移动端与桌面端的 UI/UX 设计知识库。做界面设计、搭建、评审或修复时使用：页面、组件、设计系统、无障碍、交互、响应式布局、字体排印、色彩、图表，以及具体技术栈下的 UI 实现。本地可检索的数据：79 套可检索风格（50 套启用）、192 套产品配色与推理画像、74 组字体搭配、119 条 UX 准则、105 个图标、17 个 GSAP 预设、25 种图表类型、22 个技术栈。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（原文见 candidates/skills/ui-ux-pro-max/SKILL.md）",
+      "howToUse": "harness-tool add ui-ux-pro-max",
+      "humanDecision": {
+        "verdict": "adopt",
+        "reviewedAt": "2026-09-11"
+      },
+      "source": {
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+        "path": ".claude/skills/ui-ux-pro-max/SKILL.md",
+        "license": "MIT",
+        "commit": "7f69fed6a2717900085f1bc3b263721f8ba025e2"
+      },
+      "localPath": "candidates/skills/ui-ux-pro-max",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "ui-design"
+        ],
+        "stage": "adopted",
+        "source": "community"
+      },
+      "trials": [
+        {
+          "trialId": "2026-09-11-ui-ux-pro-max-skillup",
+          "capability": {
+            "id": "ui-ux-pro-max",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ui-audit-priority-lint",
+            "fixture": "candidates/skills/ui-ux-pro-max-workspace/iteration-2",
+            "description": "用 Node 写一个把 UI/UX 优先级表中的硬阈值（对比度 4.5:1、触控 44px、正文 16px、禁用 emoji 图标）落地成可判定审计输出的命令行程序（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 2.1,
+              "B": 1.6
+            },
+            "tokensIn": {
+              "A": 21603,
+              "B": 19741
+            },
+            "tokensOut": {
+              "A": 1991,
+              "B": 921
+            },
+            "tokensTotal": {
+              "A": 23594,
+              "B": 20662
+            },
+            "tokensCached": {
+              "A": 21376,
+              "B": 19200
+            },
+            "durationSec": {
+              "A": 32,
+              "B": 20.8
+            },
+            "steps": {
+              "A": 2,
+              "B": 1
+            },
+            "toolCalls": {
+              "A": 5,
+              "B": 4
+            },
+            "toolMix": {
+              "A": "Bash 4 / Write 1",
+              "B": "Bash 3 / Write 1"
+            },
+            "staticChecks": {
+              "A": "用例 1/1 通过；断言 2/2；耗时 32.0s",
+              "B": "用例 1/1 通过；断言 2/2；耗时 20.8s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ui-audit-priority-lint；产物大小 A 2.1 KB / B 1.6 KB；报告：candidates/skills/ui-ux-pro-max-workspace/iteration-2"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "hold",
+            "confidence": "medium",
+            "reason": "带能力这一次全过（对照 A 1/1）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+          },
+          "evidence": [
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/result.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/benchmark.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/report.html",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/benchmark.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SKILL.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T07:31:13.718Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-11-ui-ux-pro-max-skillup-2",
+          "capability": {
+            "id": "ui-ux-pro-max",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ui-audit-priority-lint",
+            "fixture": "candidates/skills/ui-ux-pro-max-workspace/iteration-3",
+            "description": "用 Node 写一个把 UI/UX 优先级表中的硬阈值（对比度 4.5:1、触控 44px、正文 16px、禁用 emoji 图标）落地成可判定审计输出的命令行程序（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 1.8,
+              "B": 1.6
+            },
+            "tokensIn": {
+              "A": 19695,
+              "B": 20612
+            },
+            "tokensOut": {
+              "A": 1498,
+              "B": 1282
+            },
+            "tokensTotal": {
+              "A": 21193,
+              "B": 21894
+            },
+            "tokensCached": {
+              "A": 19200,
+              "B": 20224
+            },
+            "durationSec": {
+              "A": 25.3,
+              "B": 26.7
+            },
+            "steps": {
+              "A": 1,
+              "B": 1
+            },
+            "toolCalls": {
+              "A": 5,
+              "B": 6
+            },
+            "toolMix": {
+              "A": "Bash 4 / Write 1",
+              "B": "Bash 5 / Write 1"
+            },
+            "staticChecks": {
+              "A": "用例 1/1 通过；断言 2/2；耗时 25.3s",
+              "B": "用例 1/1 通过；断言 2/2；耗时 26.7s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ui-audit-priority-lint；产物大小 A 1.8 KB / B 1.6 KB；报告：candidates/skills/ui-ux-pro-max-workspace/iteration-3"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "ready",
+            "confidence": "medium",
+            "reason": "机器判定达标：可复核试用已通过 2 次、无退步；对照 A 1/1——采纳与否由你定（在能力详情里给结论）"
+          },
+          "evidence": [
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/result.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/benchmark.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/report.html",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/benchmark.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SKILL.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T08:44:58.426Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-11-ui-ux-pro-max-skillup-3",
+          "capability": {
+            "id": "ui-ux-pro-max",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ask-202609110857",
+            "fixture": "candidates/skills/ui-ux-pro-max-workspace/iteration-4",
+            "description": "为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false
+            },
+            {
+              "name": "B",
+              "withCapability": true
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "tokensIn": {
+              "A": 118148,
+              "B": 110433
+            },
+            "tokensOut": {
+              "A": 21435,
+              "B": 40076
+            },
+            "tokensTotal": {
+              "A": 139583,
+              "B": 150509
+            },
+            "tokensCached": {
+              "A": 117888,
+              "B": 111744
+            },
+            "durationSec": {
+              "A": 495.9,
+              "B": 401
+            },
+            "steps": {
+              "A": 19,
+              "B": 20
+            },
+            "toolCalls": {
+              "A": 55,
+              "B": 49
+            },
+            "toolMix": {
+              "A": "Edit 28 / Bash 20 / Write 5 / Read 2",
+              "B": "Edit 19 / Bash 14 / Read 7 / Write 5 / Grep 3 / Skill 1"
+            },
+            "staticChecks": {
+              "A": "用例 1/1 通过；断言 3/3；耗时 495.9s",
+              "B": "用例 1/1 通过；断言 3/3；耗时 401.0s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609110857；报告：candidates/skills/ui-ux-pro-max-workspace/iteration-4"
+          },
+          "judge": [
+            "auto",
+            "llm"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "ready",
+            "confidence": "medium",
+            "reason": "机器判定达标：可复核试用已通过 3 次、无退步；对照 A 1/1——采纳与否由你定（在能力详情里给结论）"
+          },
+          "evidence": [
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/result.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/benchmark.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/report.html",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/benchmark.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/COMMIT.txt",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/LICENSE.txt",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SKILL.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-4/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.md"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T09:15:19.474Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/ui-ux-pro-max-workspace/iteration-4/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-11-ui-ux-pro-max-skillup-4",
+          "capability": {
+            "id": "ui-ux-pro-max",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ask-202609110857+ask-ride-neutral",
+            "fixture": "candidates/skills/ui-ux-pro-max-workspace/iteration-5",
+            "description": "为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，…（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false
+            },
+            {
+              "name": "B",
+              "withCapability": true
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 0,
+              "B": 1
+            },
+            "tokensIn": {
+              "A": 190759,
+              "B": 171292
+            },
+            "tokensOut": {
+              "A": 39603,
+              "B": 64100
+            },
+            "tokensTotal": {
+              "A": 230362,
+              "B": 235392
+            },
+            "tokensCached": {
+              "A": 119936,
+              "B": 94464
+            },
+            "durationSec": {
+              "A": 871.1,
+              "B": 643.9
+            },
+            "steps": {
+              "A": 37,
+              "B": 20
+            },
+            "toolCalls": {
+              "A": 98,
+              "B": 90
+            },
+            "toolMix": {
+              "A": "Bash 48 / Edit 24 / Read 17 / Write 9",
+              "B": "Bash 37 / Edit 32 / Write 10 / Read 9 / Skill 2"
+            },
+            "staticChecks": {
+              "A": "用例 0/2 通过；断言 2/3；耗时 267.9s；未过：产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标",
+              "B": "用例 2/2 通过；断言 3/3；耗时 325.2s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：ask-202609110857、ask-ride-neutral；报告：candidates/skills/ui-ux-pro-max-workspace/iteration-5"
+          },
+          "judge": [
+            "auto",
+            "llm",
+            "human"
+          ],
+          "humanReview": {
+            "mode": "quick",
+            "verdict": "up",
+            "scores": null,
+            "reviewedAt": "2026-09-11T10:10:15.010Z"
+          },
+          "verdict": {
+            "decision": "ready",
+            "confidence": "medium",
+            "reason": "机器判定达标：可复核试用已通过 4 次、无退步；对照 A 0/2——采纳与否由你定（在能力详情里给结论）"
+          },
+          "evidence": [
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/result.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/benchmark.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/report.html",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/benchmark.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/COMMIT.txt",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/LICENSE.txt",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SKILL.md",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.json",
+            "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.md"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T10:05:03.243Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/ui-ux-pro-max-workspace/iteration-5/result.json"
+          },
+          "selfCheck": false
+        }
+      ],
+      "latestTrial": {
+        "trialId": "2026-09-11-ui-ux-pro-max-skillup-4",
+        "capability": {
+          "id": "ui-ux-pro-max",
+          "type": "skill"
+        },
+        "kind": "controlled",
+        "task": {
+          "id": "ask-202609110857+ask-ride-neutral",
+          "fixture": "candidates/skills/ui-ux-pro-max-workspace/iteration-5",
+          "description": "为夜间通勤者做一款「骑行路线规划」App 的单文件落地页：交付 index.html，内联 CSS/JS，零依赖零构建，…（skill-up v1alpha1：2 条用例，每条都跑 with_skill / without_skill）"
+        },
+        "conditions": [
+          {
+            "name": "A",
+            "withCapability": false
+          },
+          {
+            "name": "B",
+            "withCapability": true
+          }
+        ],
+        "measures": {
+          "correctness": {
+            "A": 0,
+            "B": 1
+          },
+          "tokensIn": {
+            "A": 190759,
+            "B": 171292
+          },
+          "tokensOut": {
+            "A": 39603,
+            "B": 64100
+          },
+          "tokensTotal": {
+            "A": 230362,
+            "B": 235392
+          },
+          "tokensCached": {
+            "A": 119936,
+            "B": 94464
+          },
+          "durationSec": {
+            "A": 871.1,
+            "B": 643.9
+          },
+          "steps": {
+            "A": 37,
+            "B": 20
+          },
+          "toolCalls": {
+            "A": 98,
+            "B": 90
+          },
+          "toolMix": {
+            "A": "Bash 48 / Edit 24 / Read 17 / Write 9",
+            "B": "Bash 37 / Edit 32 / Write 10 / Read 9 / Skill 2"
+          },
+          "staticChecks": {
+            "A": "用例 0/2 通过；断言 2/3；耗时 267.9s；未过：产出要能直接用：该跑得起来、该输出的格式没错；多余的解释、额外文件、未要求的防御代码都算不达标",
+            "B": "用例 2/2 通过；断言 3/3；耗时 325.2s"
+          },
+          "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 2 条：ask-202609110857、ask-ride-neutral；报告：candidates/skills/ui-ux-pro-max-workspace/iteration-5"
+        },
+        "judge": [
+          "auto",
+          "llm",
+          "human"
+        ],
+        "humanReview": {
+          "mode": "quick",
+          "verdict": "up",
+          "scores": null,
+          "reviewedAt": "2026-09-11T10:10:15.010Z"
+        },
+        "verdict": {
+          "decision": "ready",
+          "confidence": "medium",
+          "reason": "机器判定达标：可复核试用已通过 4 次、无退步；对照 A 0/2——采纳与否由你定（在能力详情里给结论）"
+        },
+        "evidence": [
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/result.json",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/benchmark.json",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/report.html",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/benchmark.md",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/COMMIT.txt",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/LICENSE.txt",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SKILL.md",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.json",
+          "candidates/skills/ui-ux-pro-max-workspace/iteration-5/ask-202609110857/with_skill/outputs/workspace/.claude/skills/ui-ux-pro-max/SOURCE.md"
+        ],
+        "model": "claude_code / deepseek-v4-flash",
+        "date": "2026-09-11",
+        "recordedAt": "2026-09-11T10:05:03.243Z",
+        "source": {
+          "tool": "skill-up",
+          "report": "candidates/skills/ui-ux-pro-max-workspace/iteration-5/result.json"
+        },
+        "selfCheck": false
+      }
+    },
+    {
+      "id": "brainstorming",
+      "type": "skill",
+      "status": "trialing",
+      "summary": "待观察：skill-up 一次可复核试用全过，再来一次通过即可采纳。",
+      "description": "任何创作性工作开工前都必须先用它——做新功能、搭组件、加能力、改行为都算。在动手实现之前，先把用户意图、需求与设计探清楚。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（原文见该文件）",
+      "howToUse": "harness-tool add brainstorming",
+      "humanDecision": null,
+      "source": {
+        "repo": "obra/superpowers",
+        "path": "skills/brainstorming/SKILL.md",
+        "license": "MIT",
+        "commit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
+      },
+      "localPath": "candidates/skills/brainstorming",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "planning"
+        ],
+        "stage": "trialing",
+        "source": "community"
+      },
+      "trials": [
+        {
+          "trialId": "2026-09-11-brainstorming-skillup",
+          "capability": {
+            "id": "brainstorming",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "brainstorm-path-triage",
+            "fixture": "candidates/skills/brainstorming-workspace/iteration-1",
+            "description": "按 brainstorming 的三条路径给请求分类，并输出该路径在动手前应产出的东西（含拿不准取重路径）（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 0.9,
+              "B": 0.8
+            },
+            "tokensIn": {
+              "A": 19678,
+              "B": 22525
+            },
+            "tokensOut": {
+              "A": 1478,
+              "B": 706
+            },
+            "tokensTotal": {
+              "A": 21156,
+              "B": 23231
+            },
+            "tokensCached": {
+              "A": 19456,
+              "B": 22272
+            },
+            "durationSec": {
+              "A": 26.6,
+              "B": 35.3
+            },
+            "steps": {
+              "A": 2,
+              "B": 1
+            },
+            "toolCalls": {
+              "A": 4,
+              "B": 6
+            },
+            "toolMix": {
+              "A": "Bash 3 / Write 1",
+              "B": "Bash 5 / Write 1"
+            },
+            "staticChecks": {
+              "A": "用例 1/1 通过；断言 2/2；耗时 26.6s",
+              "B": "用例 1/1 通过；断言 2/2；耗时 35.3s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：brainstorm-path-triage；产物大小 A 0.9 KB / B 0.8 KB；报告：candidates/skills/brainstorming-workspace/iteration-1"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "hold",
+            "confidence": "medium",
+            "reason": "带能力这一次全过（对照 A 1/1）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+          },
+          "evidence": [
+            "candidates/skills/brainstorming-workspace/iteration-1/result.json",
+            "candidates/skills/brainstorming-workspace/iteration-1/benchmark.json",
+            "candidates/skills/brainstorming-workspace/iteration-1/report.html",
+            "candidates/skills/brainstorming-workspace/iteration-1/benchmark.md",
+            "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs",
+            "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/.claude/skills/brainstorming/SKILL.md",
+            "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/.claude/skills/brainstorming/SOURCE.md",
+            "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-11",
+          "recordedAt": "2026-09-11T07:53:30.273Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/brainstorming-workspace/iteration-1/result.json"
+          },
+          "selfCheck": false
+        }
+      ],
+      "latestTrial": {
+        "trialId": "2026-09-11-brainstorming-skillup",
+        "capability": {
+          "id": "brainstorming",
+          "type": "skill"
+        },
+        "kind": "controlled",
+        "task": {
+          "id": "brainstorm-path-triage",
+          "fixture": "candidates/skills/brainstorming-workspace/iteration-1",
+          "description": "按 brainstorming 的三条路径给请求分类，并输出该路径在动手前应产出的东西（含拿不准取重路径）（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+        },
+        "conditions": [
+          {
+            "name": "A",
+            "withCapability": false,
+            "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs"
+          },
+          {
+            "name": "B",
+            "withCapability": true,
+            "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs"
+          }
+        ],
+        "measures": {
+          "correctness": {
+            "A": 1,
+            "B": 1
+          },
+          "sizeKB": {
+            "A": 0.9,
+            "B": 0.8
+          },
+          "tokensIn": {
+            "A": 19678,
+            "B": 22525
+          },
+          "tokensOut": {
+            "A": 1478,
+            "B": 706
+          },
+          "tokensTotal": {
+            "A": 21156,
+            "B": 23231
+          },
+          "tokensCached": {
+            "A": 19456,
+            "B": 22272
+          },
+          "durationSec": {
+            "A": 26.6,
+            "B": 35.3
+          },
+          "steps": {
+            "A": 2,
+            "B": 1
+          },
+          "toolCalls": {
+            "A": 4,
+            "B": 6
+          },
+          "toolMix": {
+            "A": "Bash 3 / Write 1",
+            "B": "Bash 5 / Write 1"
+          },
+          "staticChecks": {
+            "A": "用例 1/1 通过；断言 2/2；耗时 26.6s",
+            "B": "用例 1/1 通过；断言 2/2；耗时 35.3s"
+          },
+          "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：brainstorm-path-triage；产物大小 A 0.9 KB / B 0.8 KB；报告：candidates/skills/brainstorming-workspace/iteration-1"
+        },
+        "judge": [
+          "auto"
+        ],
+        "humanReview": null,
+        "verdict": {
+          "decision": "hold",
+          "confidence": "medium",
+          "reason": "带能力这一次全过（对照 A 1/1）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+        },
+        "evidence": [
+          "candidates/skills/brainstorming-workspace/iteration-1/result.json",
+          "candidates/skills/brainstorming-workspace/iteration-1/benchmark.json",
+          "candidates/skills/brainstorming-workspace/iteration-1/report.html",
+          "candidates/skills/brainstorming-workspace/iteration-1/benchmark.md",
+          "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs",
+          "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/.claude/skills/brainstorming/SKILL.md",
+          "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/.claude/skills/brainstorming/SOURCE.md",
+          "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs"
+        ],
+        "model": "claude_code / deepseek-v4-flash",
+        "date": "2026-09-11",
+        "recordedAt": "2026-09-11T07:53:30.273Z",
+        "source": {
+          "tool": "skill-up",
+          "report": "candidates/skills/brainstorming-workspace/iteration-1/result.json"
+        },
+        "selfCheck": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "eval_id": 0,
+  "eval_name": "用户自己出的题（冒烟）：把文本统计成 JSON",
+  "prompt": "在空目录里只交付一个文件 `stats.mjs`：读取命令行第一个参数指定的文本文件，\n往 stdout 打印一行 JSON：{\"lines\":行数,\"words\":词数,\"chars\":字符数}，不要输出别的。\n文件不存在时非 0 退出且 stdout 为空。只用 Node 自带能力。\n",
+  "assertions": [
+    "expect.exit_code",
+    "产出是否只交付了 stats.mjs 一个文件、且是能运行的 Node 脚本",
+    "输出格式是否严格是那三个键的一行 JSON"
+  ]
+}

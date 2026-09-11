@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\brainstorming\\evals\\fixtures\\scripts\\check-brainstorm-path-triage.sh",
+      "passed": true,
+      "evidence": "PASS: triage.mjs 通过 6 条用例（feasibility-question-is-spike、existing-flow-is-bounded、new-project-is-architectural、shared-interface-upgrades-to-architectural、empty-input-takes-heavier-path、missing-file-produces-nothing）"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

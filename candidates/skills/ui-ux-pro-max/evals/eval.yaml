@@ -1,0 +1,45 @@
+schema_version: v1alpha1
+
+# example 的评测配置（skill-up 格式）。改完用：
+#   skill-up validate evals/eval.yaml
+#   skill-up run evals/eval.yaml            # benchmark 打开时会同时跑 with_skill / without_skill
+# 用法与字段说明：https://alibaba.github.io/skill-up/zh/guide/writing-evals
+
+environment:
+  type: none
+  env:
+    TZ: UTC
+
+mcp:
+  servers: []
+
+skills:
+  - source: local_path
+    path: .
+
+engine:
+  name: claude_code         # 换成你本机装了的引擎：claude_code / codex / qodercli / qwen_code
+  model:
+    name: auto
+
+cases:
+  files:
+    - evals/cases/ui-audit-priority-lint.yaml
+  defaults:
+    timeout_seconds: 300
+    max_turns: 3
+    collect_artifacts:
+      - "**/*.mjs"
+      - "**/*.md"
+
+benchmark:
+  enabled: true             # 同时跑 with_skill / without_skill —— 台账里的 A/B 条件
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check.sh
+  timeout_seconds: 60
+
+report:
+  formats: [json, html]
+  artifacts: [transcript]

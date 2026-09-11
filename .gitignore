@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.vite/
+*.local
+*.tsbuildinfo
+.trial-runs/
+
+# 评测运行目录（skill-up 的 iteration-N）：**报告与 A/B 产物要入库**——试用记录里的 evidence 与
+# 产物路径就指向它们，不入库的话页面上的「打开」在新克隆里全是空的。
+# 不入库的只有三类（占运行目录 82% 的体积）：
+#   - agent / 裁判的原始日志（*.jsonl，单个 200KB+；台账从不引用它们，实测只在一处 reason 文本里被提到）
+#   - 工具注入到 B 侧工作区的技能副本（.claude/skills/**，可从候选目录重新拉；也免得重复分发第三方内容）
+#   - 与 response.md 重复的 stdout.json
+*.jsonl
+**/outputs/agent/run/stdout.json
+**/outputs/judge/run/stdout.json
+**/outputs/workspace/.claude/

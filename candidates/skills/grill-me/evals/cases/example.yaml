@@ -1,0 +1,28 @@
+id: example
+title: 待改：这个用例要验什么
+description: 一句话说明这个用例覆盖的能力点
+
+input:
+  prompt: |
+    TODO：写给 agent 的任务说明（要具体、可判定；别写成"请你优化一下"这种）。
+
+context:
+  # 需要给 agent 初始文件时**直接内联**（最稳）：不要依赖工作区里那份文件保持不变——
+  # agent 很爱自己造/清理测试数据，判分脚本读到的就不是你准备的输入了。
+  # files:
+  #   "input.txt": |
+  #     第一行
+  #     第二行
+  # 也可以挂一个 fixture 目录（路径相对 skill 根）：repo_fixture: fixtures/repos/<名字>
+
+constraints:
+  timeout_seconds: 300
+  max_turns: 3
+
+expect:
+  exit_code: 0
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check.sh
+  timeout_seconds: 60

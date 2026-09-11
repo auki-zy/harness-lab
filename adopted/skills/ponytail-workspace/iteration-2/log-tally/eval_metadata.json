@@ -1,0 +1,6 @@
+{
+  "eval_id": 0,
+  "eval_name": "用最省的写法统计 NDJSON 日志里各等级出现次数",
+  "prompt": "写一个 Node 脚本 `tally.mjs`（放在当前工作目录），统计 `events.jsonl` 里每个 level 出现的次数：\n\n用法：`node tally.mjs \u003c文件\u003e`，输出一行 JSON，键是 level、值是次数，**键按字典序升序**，不要输出别的。\n\n口径：\n- 每行是一个 JSON 对象，取它的 `level` 字段（字符串）。\n- 空文件 → 输出 `{}`。\n- 出现非 JSON 行，或某行没有 `level` 字段 → 错误写 stderr、退出码 1。\n- 文件不存在 → 错误写 stderr、退出码 1。\n- 只允许用 Node 自带能力，不允许安装依赖；只交付 `tally.mjs` 一个文件。\n",
+  "assertions": null
+}

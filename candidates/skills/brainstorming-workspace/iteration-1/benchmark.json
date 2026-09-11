@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "skill_name": "brainstorming",
+    "skill_path": "D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\brainstorming",
+    "timestamp": "2026-09-11T07:53:30Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "按 brainstorming 的三条路径给请求分类，并输出该路径在动手前应产出的东西（含拿不准取重路径）",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 35.285,
+        "tokens": 23231,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\brainstorming\\evals\\fixtures\\scripts\\check-brainstorm-path-triage.sh",
+          "passed": true,
+          "evidence": "PASS: triage.mjs 通过 6 条用例（feasibility-question-is-spike、existing-flow-is-bounded、new-project-is-architectural、shared-interface-upgrades-to-architectural、empty-input-takes-heavier-path、missing-file-produces-nothing）"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "按 brainstorming 的三条路径给请求分类，并输出该路径在动手前应产出的东西（含拿不准取重路径）",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 26.623,
+        "tokens": 21156,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\brainstorming\\evals\\fixtures\\scripts\\check-brainstorm-path-triage.sh",
+          "passed": true,
+          "evidence": "PASS: triage.mjs 通过 6 条用例（feasibility-question-is-spike、existing-flow-is-bounded、new-project-is-architectural、shared-interface-upgrades-to-architectural、empty-input-takes-heavier-path、missing-file-produces-nothing）"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 35.285,
+        "stddev": 0,
+        "min": 35.285,
+        "max": 35.285
+      },
+      "tokens": {
+        "mean": 23231,
+        "stddev": 0,
+        "min": 23231,
+        "max": 23231
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 26.623,
+        "stddev": 0,
+        "min": 26.623,
+        "max": 26.623
+      },
+      "tokens": {
+        "mean": 21156,
+        "stddev": 0,
+        "min": 21156,
+        "max": 21156
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+8.7",
+      "tokens": "+2075.0"
+    }
+  }
+}

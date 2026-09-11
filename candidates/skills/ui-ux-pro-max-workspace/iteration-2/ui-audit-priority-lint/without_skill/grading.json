@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\ui-ux-pro-max\\evals\\fixtures\\scripts\\check-ui-audit-priority-lint.sh",
+      "passed": true,
+      "evidence": "PASS: ui-audit.mjs 通过 5 条用例（clean-pass、violations-ordered、threshold-boundary、missing-file、bad-json）"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

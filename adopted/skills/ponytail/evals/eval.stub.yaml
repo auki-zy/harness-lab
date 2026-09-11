@@ -1,0 +1,62 @@
+schema_version: v1alpha1
+
+# 离线自检用的配置：把引擎换成 lab 自带的 stub（tools/engines/stub.mjs），不调用任何模型。
+# 跑法（在仓库根执行）：
+#   $env:STUB_NODE = (Get-Command node).Source
+#   $env:STUB_SCRIPT = "$PWD\tools\engines\stub.mjs"
+#   <skill-up> run candidates/skills/ponytail/evals/eval.stub.yaml
+# ⚠️ 这样跑出来的报告只是链路自检，不是真实评测结论，别写进 evals/trials/。
+
+environment:
+  type: none
+  env:
+    TZ: UTC
+
+mcp:
+  servers: []
+
+skills:
+  - source: local_path
+    path: .
+
+engine:
+  name: stub-local
+  model:
+    name: stub
+  custom:
+    transport: local
+    response_format: session_result
+    timeout_seconds: 300
+    local:
+      command: ${STUB_NODE}
+      args:
+        - ${STUB_SCRIPT}
+        - --input
+        - ${input_file}
+        - --output
+        - ${output_file}
+      input_file: ${input_file}
+      output_file: ${output_file}
+
+cases:
+  files:
+    - evals/cases/wc-cli.yaml
+  defaults:
+    timeout_seconds: 300
+    max_turns: 3
+    collect_artifacts:
+      - "wc.mjs"
+      - "impl.mjs"
+      - "helpers.mjs"
+
+benchmark:
+  enabled: true
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-wc.sh
+  timeout_seconds: 60
+
+report:
+  formats: [json]
+  artifacts: [transcript]

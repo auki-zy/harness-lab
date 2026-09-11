@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "policy": {
+    "note": "标签体系（taxonomy）：维度与取值在这里集中定义。应用中出现的**未登记取值**会标记为「待确认」——新类型首次使用必须由用户确认后才写回本文件。",
+    "pendingFile": "evals/pending-tags.json"
+  },
+  "dimensions": {
+    "type": {
+      "label": "类型",
+      "values": { "skill": "技能", "agent": "子代理", "mcp": "MCP 服务" }
+    },
+    "purpose": {
+      "label": "用途",
+      "values": {
+        "ui-design": "界面设计",
+        "code-quality": "代码质量",
+        "testing": "测试",
+        "debugging": "调试",
+        "planning": "计划与流程",
+        "docs": "文档",
+        "security": "安全",
+        "integration": "外部集成",
+        "knowledge": "知识蒸馏"
+      }
+    },
+    "stage": {
+      "label": "阶段",
+      "values": {
+        "candidate": "候选",
+        "trialing": "试用中",
+        "adopted": "已采纳",
+        "rejected": "已放弃"
+      }
+    },
+    "source": {
+      "label": "来源",
+      "values": { "official": "官方", "community": "社区", "self": "自研" }
+    }
+  }
+}
