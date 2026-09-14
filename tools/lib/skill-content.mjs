@@ -73,6 +73,21 @@ export function refDirName(name) {
   return String(name ?? '').replace(/[^A-Za-z0-9._-]/g, '').replace(/^\.+/, '');
 }
 
+/**
+ * 上游提交号取哪个。
+ *
+ * 踩过（2026-09-14）：GitHub 的 commits 接口会限流（实测 403），而 `prepare` 失败时写的是 `unknown` ——
+ * 页面重新拉取一次，**已知的提交号就被覆盖掉了**（`refs/SOURCES.json` 里还钉着旧值，两处对不上，
+ * 而 SOURCE.md 的"导入时的上游提交"是溯源的关键字段）。所以规则是：查到的优先，查不到就**沿用上次记录的**，
+ * 绝不降级；两边都没有才写 unknown。
+ */
+export function pickCommit(fetched, previous) {
+  const ok = (v) => (v && String(v) !== 'unknown' ? String(v) : '');
+  if (ok(fetched)) return { commit: ok(fetched), kept: false };
+  if (ok(previous)) return { commit: ok(previous), kept: true };
+  return { commit: 'unknown', kept: false };
+}
+
 function read(file) {
   return existsSync(file) ? readFileSync(file, 'utf8') : '';
 }

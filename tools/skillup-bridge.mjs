@@ -34,7 +34,7 @@ import {
   writeTrial,
 } from './lib/trial-record.mjs';
 import { askAthen } from './lib/athen.mjs';
-import { materializeRefs, skillMaterial, withRefSkills } from './lib/skill-content.mjs';
+import { materializeRefs, pickCommit, skillMaterial, withRefSkills } from './lib/skill-content.mjs';
 import {
   ATHEN_HOST,
   KNOWN_ENGINES,
@@ -300,6 +300,29 @@ async function ensureChineseDescription({ name, dir, purpose }) {
 }
 
 /**
+ * 查一个仓库 main 的提交号：先走 GitHub API（不带 token 时限流很紧，实测 403），
+ * 拿不到就退到 `git ls-remote <url> HEAD` —— 走 git 协议、不限流，公开仓库不用登录。
+ */
+async function lookupCommit(repo) {
+  const raw = await fetchText(`https://api.github.com/repos/${repo}/commits/main`);
+  if (raw) {
+    try {
+      const sha = JSON.parse(raw).sha;
+      if (sha) return sha;
+    } catch {
+      /* 拿到的不是 JSON（限流页 / 报错），往下试 */
+    }
+  }
+  try {
+    const res = spawnSync('git', ['ls-remote', `https://github.com/${repo}`, 'HEAD'], { encoding: 'utf8', timeout: 30000 });
+    if (res.status === 0) return (res.stdout ?? '').trim().split(/\s+/)[0] ?? '';
+  } catch {
+    /* 没装 git 就算了 */
+  }
+  return '';
+}
+
+/**
  * 转发壳技能（`grill-me`：正文只有一句 `Call the Skill tool with "grilling".`）：
  * 把它**引用的那个技能**拉进 `refs/`，并挂进 eval 配置的 `skills:` 列表。
  *
@@ -344,17 +367,14 @@ async function prepare(args) {
   const skillText = await fetchText(`https://raw.githubusercontent.com/${repo}/main/${usedPath}`);
   if (!skillText) fail(`读取 ${repo}/${usedPath} 失败`);
   const license = (await fetchText(`https://raw.githubusercontent.com/${repo}/main/LICENSE`)) ?? '';
-  let commit = 'unknown';
-  const commitRaw = await fetchText(`https://api.github.com/repos/${repo}/commits/main`);
-  if (commitRaw) {
-    try {
-      commit = JSON.parse(commitRaw).sha ?? 'unknown';
-    } catch {
-      /* 忽略 */
-    }
-  }
-
+  // 提交号：API 会限流（实测 403），所以 API 拿不到就走 `git ls-remote`（不受限流），
+  // 都拿不到才沿用上次记的值 —— **绝不把已知的提交号降级成 unknown**（见 pickCommit 的说明）
   const capDir = P('candidates', 'skills', name);
+  const sourceFile = path.join(capDir, 'SOURCE.json');
+  const previousCommit = existsSync(sourceFile) ? readJson(sourceFile).commit : '';
+  const { commit, kept } = pickCommit(await lookupCommit(repo), previousCommit);
+  if (kept) log(`⚠ 上游提交号这次没查到（API 限流 / 网络），沿用上次记录的 ${commit}`);
+
   mkdirSync(capDir, { recursive: true });
   writeFileSync(path.join(capDir, 'SKILL.md'), skillText, 'utf8');
   if (license) writeFileSync(path.join(capDir, 'LICENSE.txt'), license, 'utf8');

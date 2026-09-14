@@ -5,7 +5,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { materializeRefs, parseSkill, referencedSkills, skillMaterial, thinReason, withRefSkills } from './skill-content.mjs';
+import { materializeRefs, parseSkill, pickCommit, referencedSkills, skillMaterial, thinReason, withRefSkills } from './skill-content.mjs';
 
 const tmp = () => mkdtempSync(path.join(tmpdir(), 'skill-content-'));
 const shell = (extra = '') =>
@@ -128,6 +128,22 @@ describe('materializeRefs', () => {
     const again = await materializeRefs({ dir, source, fetchText: async () => (called++, '') });
     expect(called).toBe(0);
     expect(again.resolved[0].origin).toBe('already');
+  });
+});
+
+describe('pickCommit', () => {
+  it('查到就用查到的', () => {
+    expect(pickCommit('abc123', 'old999')).toEqual({ commit: 'abc123', kept: false });
+  });
+
+  it('查不到时沿用上次记录的，不降级成 unknown（GitHub API 403 那次就是这么把提交号覆盖掉的）', () => {
+    expect(pickCommit('', 'old999')).toEqual({ commit: 'old999', kept: true });
+    expect(pickCommit('unknown', 'old999')).toEqual({ commit: 'old999', kept: true });
+  });
+
+  it('两边都没有才写 unknown', () => {
+    expect(pickCommit('', '')).toEqual({ commit: 'unknown', kept: false });
+    expect(pickCommit('unknown', undefined)).toEqual({ commit: 'unknown', kept: false });
   });
 });
 

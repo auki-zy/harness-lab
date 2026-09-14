@@ -95,6 +95,8 @@
 | 目录页（tree） | `https://github.com/o/r/tree/main/.claude/skills/foo` | 同上 |
 | 直链 | `https://raw.githubusercontent.com/o/r/main/…/SKILL.md` | 同上 |
 
+**提交号不许降级成 `unknown`**（2026-09-14 踩过）：`prepare` 会记下"导入时的上游提交"（`SOURCE.json` / `COMMIT.txt` / `SOURCE.md` 三处），而 GitHub 的 commits 接口**不带 token 时限流很紧（实测 403）**——那次失败后写了 `unknown`，把已知的提交号覆盖掉了（`refs/SOURCES.json` 里还钉着旧值，两处对不上）。规矩：`pickCommit()` 查到的优先、查不到**沿用上次记录的**；查的顺序是 GitHub API → **`git ls-remote <url> HEAD`**（走 git 协议、不限流、公开仓库不用登录）。真要复核时也别只信接口：拿到提交号后**逐文件比对内容**再改记录。
+
 - **能力名**取子路径最后一段（`…/ui-ux-pro-max` → `ui-ux-pro-max`），没有子路径就用仓库名；
 - 仓库里有多个 `SKILL.md` 时**不会瞎猜**：直接把每个技能的目录列出来，并把 `owner/repo:子路径` 拼好让你复制（`tools/gen-eval.mjs` 与 `prepare` 都走这一套）；
 - 只想确认"这条链接能不能用"、不想花钱：`node tools/skillup-bridge.mjs auto --input "<链接>" --dry-run` —— 只解析来源并确认找得到 `SKILL.md`，**不拉取、不出题、不跑**。
