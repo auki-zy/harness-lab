@@ -13,7 +13,15 @@ export const CAPS = P('evals', 'capabilities.json');
 export const TAGS = P('evals', 'tags.json');
 export const TRIALS = P('evals', 'trials');
 
-export const log = (m) => console.log(m);
+/**
+ * 诊断信息一律走 **stderr**：**stdout 是载荷通道**。
+ *
+ * 踩过的坑（2026-09-11）：draft-prompt 端点把子进程的 stdout 整段当成"生成的提示词"，
+ * 而 log() 当时写的是 stdout —— 于是 `ℹ 这份 SKILL.md 是转发壳，内容取自它引用的 grilling…`
+ * 这句话被当成提示词灌进了页面的输入框，用户一提交，**A 侧直接读到评测内部设定**，那次 A/B 就废了。
+ * 页面上显示日志的地方（`runScriptSync` / `runScriptAsync`）是 stdout + stderr 合并的，不受影响。
+ */
+export const log = (m) => console.error(m);
 export const fail = (m) => {
   console.error(m);
   process.exit(1);

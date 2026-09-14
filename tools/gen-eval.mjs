@@ -518,6 +518,77 @@ report:
 `;
 }
 
+/**
+ * 起草出来的提示词有没有毛病 —— **确定性检查，不靠模型自觉**。
+ *
+ * 为什么要有：光在 system 里写"不许把技能的做法写进提示词"，模型还是会写（实测连出三版：
+ * "把含含糊糊的地方全给我逼出来"、"一轮一轮过"、"把它问透"）。所以起草完先过一遍机器检查，
+ * 命中就带着"你哪里写错了"重写一次。查三类：
+ *   - 做法 / 态度词：交互编排（一轮一轮 / 问透 / 追问 / 盘问…）、施压词（逼问 / 拷问 / 挑刺…）
+ *   - 能力名出现在提示词里：A 侧看到名字就等于被点名（"写到 grill-me.md" 也算）
+ *   - 太长：编排写多了必然长（40–90 字，硬上限 140）
+ */
+const METHOD_WORDS =
+  /一轮一轮|一轮|逐个问|一个一个问|一个个问|反复问|反复追问|追问|问透|问到底|盘问|逼问|拷问|逼出来|挑刺|挑毛病|压力测试|狠狠|不留情|别放过|验收标准|我照着就能|做好了要/;
+
+function draftProblems(prompt, name) {
+  const hits = [];
+  if (prompt.length > 140) hits.push(`太长（${prompt.length} 字，要 40–90 字）`);
+  if (name && prompt.includes(name)) hits.push(`写进了能力名「${name}」（A 侧看到名字等于被点名）`);
+  const m = prompt.match(METHOD_WORDS);
+  if (m) hits.push(`写进了技能的做法 / 态度：「${m[0]}」`);
+  return hits;
+}
+
+/**
+ * 交付物文件名里带了能力名 → 换成中性名字。
+ *
+ * 模型在这件事上很顽固（实测三次重写都还写 `grill-me.md`），但"文件名"本来就是随便起的，
+ * 所以这条直接确定性替换：**只动"当文件名用"的写法**（`grill-me.md`、`docs/grill-me.md`），
+ * 行文里提到能力名的情况不碰（那种要重写，硬替换会把句子改烂）。
+ */
+function neutralizeName(prompt, name) {
+  if (!name) return prompt;
+  const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`([\\w./-]*)${esc}(\\.\\w+)`, 'gi');
+  if (!prompt.match(re)) return prompt;
+  log('ℹ 交付物文件名里带了能力名，已换成中性的名字（A 侧看到名字等于被点名）');
+  return prompt.replace(re, (_m, pre, ext) => `${pre}notes${ext}`);
+}
+
+/** 起草一次（必要时带着问题重写一次），再过一遍机器检查；检查结果不管过没过都会说出来 */
+async function draftOnce({ system, user, name }) {
+  let prompt = '';
+  try {
+    prompt = clean((await askAthen({ system, user, maxTokens: 8000 })).text);
+  } catch (err) {
+    log(`⚠ 第一次没拿到提示词（${err instanceof Error ? err.message : err}），加大预算重试…`);
+    prompt = clean((await askAthen({ system, user, maxTokens: 24000 })).text);
+  }
+  if (!prompt) fail('模型没给出提示词，再试一次');
+
+  const problems = draftProblems(prompt, name);
+  if (problems.length) {
+    log(`⚠ 起草的提示词有问题，带着问题重写一次：${problems.join('；')}`);
+    const retry = `${user}\n\n=== 上一次你写的提示词（不合格，请重写）===\n${prompt}\n\n=== 问题 ===\n${problems.join('\n')}\n请重写：更短更简单，不要编排，不要写技能的做法与态度，交付物文件名也不要带能力名。`;
+    const again = clean((await askAthen({ system, user: retry, maxTokens: 8000 })).text);
+    if (again) prompt = again;
+  }
+
+  prompt = neutralizeName(prompt, name);
+  const left = draftProblems(prompt, name);
+  if (left.length) log(`⚠ 重写后仍有问题（${left.join('；')}）—— 提交前建议自己再改一遍`);
+  else log(`✔ 通过检查：${prompt.length} 字，没有技能做法 / 态度词，也没有出现能力名`);
+  return prompt;
+}
+
+const clean = (text) =>
+  String(text ?? '')
+    .trim()
+    .replace(/^```[a-z]*\n?|```$/g, '')
+    .replace(/^["'「]|["'」]$/g, '')
+    .trim();
+
 /** 让模型设计用例；purpose 只允许已登记的取值。长提示下推理型模型可能一次不够，就加大预算重试一次。 */
 export async function designEval({ name, dir, purposes, feedback = '' }) {
   const thin = thinSkillReason(dir);
@@ -579,47 +650,36 @@ if (args['draft-prompt']) {
     '你替人起草一条"给 AI 编码 agent 的任务提示词"，用来对比**加载某个技能 / 不加载它**两版的产出差异。',
     '',
     '硬要求：',
-    '1. 写得像**用户日常提需求**：背景 + 要 agent 交什么 + 放在哪 + 什么样算能用（外部可观察的一两句）。',
+    '1. **短、简单，像随口提的一句需求**：40–90 字、一到两句，中文。背景一句 + 要 agent 交什么 + 放在哪个文件。',
+    '1b. **不要编排**：不写"先别动代码""做好了要满足…""验收标准是…""我照着就能开工"这类流程与验收说明，',
+    '   也不分点、不加小标题、不写条数/轮次。**任务越简单，A/B 比的越是技能本身**——编排写多了，',
+    '   两边都在照你的编排做，技能有没有用反而被淹掉（用户原话："任务应该更简单化，不要在提示词中编排"）。',
     '2. **绝对不要把技能自己的做法写进提示词**：不写它的步骤 / 流程 / 章节结构 / 小标题 / 轮次或条数 / 阈值 /',
     '   合格线 / 禁用词 / 评分标准。原因：A 侧（不加载技能）只拿到这条提示词；提示词里写了技能那套做法，',
     '   等于把技能喂给了 A，这次对照就比不出"技能到底有没有用"。**这是这套评测最容易做错的一件事。**',
     '2b. **"触发条件"和"态度词"同样算做法，也不许写**：description 里那句 "Use when the user wants to X"',
-    '   说的是"什么时候该用这个技能"，别把它翻译成"你要我做 X"；正文里的语气词（relentlessly / 狠狠 / 逼问 /',
-    '   拷问 / 挑刺 / 别放过任何一个含糊处）也别搬进提示词。实例（真实踩过）：grilling 的 description 是',
-    '   "Grill the user relentlessly about a plan… Use when the user wants to stress-test their thinking"，',
-    '   起草时被写成了"把这份初稿里我还没想清楚、含含糊糊带过去的地方全给我逼出来，直接摆到桌面上让我拍板"——',
-    '   那就是把技能的态度当成了用户的要求。改法：只说**用户想要的结果**（"动手前想先把这份计划过一遍，产出一份',
-    '   我能照着开工的文档"），不说"你该怎么对我"。',
-    '2c. **写完逐句自检**：这句话是"用户想要什么结果"，还是"技能教导该怎么做/该怎么对待用户"？是后者就删掉，',
-    '   换成前者。**最终判据**：这条提示词交给一个**没装任何技能**的 agent，它也能照着做——如果你写的要求只有',
-    '   读过这个技能才知道该这么做，那就是泄漏，必须改写。',
+    '   说的是"什么时候该用这个技能"，别把它翻译成"你要我做 X"；语气词（relentlessly / 狠狠 / 逼问 / 拷问 /',
+    '   挑刺 / 别放过任何含糊处）也别搬进来。实例（真实踩过）：grilling 的 "Grill the user relentlessly…',
+    '   Use when the user wants to stress-test their thinking" 被写成了"把含含糊糊带过去的地方全给我逼出来，',
+    '   摆到桌面上让我拍板"—— 那是把技能的态度当成了用户的要求。只说**用户想要的结果**，不说"你该怎么对我"。',
+    '2c. **写完逐句自检**：这句是"用户想要什么结果"，还是"技能教导该怎么做"？**最终判据**：这条提示词交给一个',
+    '   **没装任何技能**的 agent，它也能照着做——只有读过这个技能才知道该怎么做，那就是泄漏，必须改写。',
     '3. 交付物形态要说清（那属于"用户的需求"，不属于技能的方法）：',
     `   ${DRAFT_DELIVERABLE_RULE}`,
-    '3b. **"什么样算能用"要贴合这个技能真实的产出形态**，别写成它做不到的事。技能产出的是"等你拍板的问题清单"，',
-    '   就写"我照着把该定的定完就能开工"；写成"不用我再做任何决定、不用回头找你确认"就是**反着技能来**——',
-    '   那不是中立，是给 B 侧下套：B 会来问你（技能要求决策归用户），A 会直接把方案定了，A 反而"更听话"。',
-    '   自检：把这个技能**真实的产出**（做法那部分不算）写成一个用户会说的验收标准。',
-    '3c. **先判断这个技能产出的"形状"，只写形状，不写"怎么得到这个形状"**：它是"一份方案"、"一份待用户拍板的问题',
-    '   清单"、"一个能打开的页面"，还是"一段能跑的脚本"？形状属于用户的需求（我要的是清单，不是改好的方案），',
-    '   可以写；**得到这个形状的做法——步骤、顺序、轮次、态度、判断标准——一个字都不要写**。',
-    '   例（grilling）：写"把该我拍板的事整理成一份清单放 docs/plan-stress.md" ✅；写"按轮次一批一批问、每个问题',
-    '   都给出你的推荐答案、不许替我拍板、问到没有含糊处为止" ❌（那些是技能的做法，写了 A 侧就白拿一份技能）。',
-    '4. 一屏以内（120–220 字），中文，直接给任务本身——不要解释、不要分点标号、不要"以下是提示词"。',
+    '   文件名用中性的（如 `docs/notes.md`、`index.html`、`impl.mjs`），**不要用能力名**——',
+    '   A 侧看到 `grill-me.md` 这种名字就等于被点名，这次对照就废了。',
+    '3b. **交付物要贴合这个技能真实的产出形状**（一份方案？一份待用户拍板的问题清单？一个能打开的页面？一段能跑的',
+    '   脚本？），形状本身可以写；**"怎么得到这个形状"不许写**（步骤 / 顺序 / 轮次 / 态度 / 判断标准）。',
+    '   反面也防：别无中生有地加"不用我再做任何决定"这种技能做不到的要求——那是给 B 侧下套。',
+    '4. 直接给任务本身——不要解释、不要"以下是提示词"、不要引号包裹。',
     purposes.length ? `5. 用途标签会从这些里选，不用写进提示词：${purposes.join(' / ')}。` : '',
   ]
     .filter(Boolean)
     .join('\n');
   const user = `技能名：${name}\n\n=== 技能素材（SKILL.md 的 description + 正文；转发壳技能还含它引用的那个技能）===\n${text}`;
-  // 推理模型会先"想"：预算给小了会全花在 thinking 上（踩过），所以起步就给够，不够再加倍
-  let draft = '';
-  try {
-    draft = (await askAthen({ system, user, maxTokens: 8000 })).text;
-  } catch (err) {
-    log(`⚠ 第一次没拿到提示词（${err instanceof Error ? err.message : err}），加大预算重试…`);
-    draft = (await askAthen({ system, user, maxTokens: 24000 })).text;
-  }
-  const prompt = draft.trim().replace(/^```[a-z]*\n?|```$/g, '').trim();
-  if (!prompt) fail('模型没给出提示词，再试一次');
+  // 推理模型会先"想"：预算给小了会全花在 thinking 上（踩过），所以起步就给够、不够再加倍；
+  // 起草完还要过一遍机器检查（做法/态度词、能力名、长度），不合格就带着"哪里写错了"重写一次
+  const prompt = await draftOnce({ system, user, name });
   process.stdout.write(`${prompt}\n`);
   process.exit(0);
 }
@@ -630,6 +690,9 @@ if (!found) fail(`找不到技能：candidates/skills/${name}`);
 if (fromPrompt) {
   writeAskCase({ dir: found.dir, prompt: fromPrompt, task, criteria: args.criteria });
   log(`  任务提示词（原样照抄，未润色）：${firstLine(fromPrompt)}`);
+  // 只提醒不拦：一次 A/B 要跑十几分钟，提示词里要是写了技能的做法，那次对照就白跑了
+  const risk = draftProblems(fromPrompt, name);
+  if (risk.length) log(`  ⚠ 这条提示词可能让对照失效（${risk.join('；')}）—— 还能跑，但结论要打折扣`);
   log(`  下一步：node tools/skillup-bridge.mjs run --name ${name} --eval ${ASK_EVAL}`);
   process.exit(0);
 }

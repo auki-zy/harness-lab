@@ -3,7 +3,7 @@
 - 上游仓库: https://github.com/mattpocock/skills
 - 路径: skills/productivity/grill-me/SKILL.md
 - 导入时的上游提交: unknown
-- 抓取日期: 2026-09-11（原样导入，未改写 SKILL.md）
+- 抓取日期: 2026-09-14（原样导入，未改写 SKILL.md）
 - 许可: 见同目录 LICENSE.txt
 
 ## 评测
