@@ -1,4 +1,4 @@
-# ARCHITECTURE.md
+﻿# ARCHITECTURE.md
 
 这份文件是系统的顶层地图：领域地图、分层与依赖规则，以及这个仓库的工程约定。保持简短。
 
@@ -66,7 +66,7 @@
 
 - `src/shared/findings.ts`：结论 / 人评 / 指标 / 证据的文案映射集中在这里，还有对照级的 `systemSummary()`（"这一次哪一版更好"，规则写死在函数里、页面上照原样写依据），改动会同时影响台账行与详情，必须跟着改 `findings.test.ts`。
 - `vite.config.ts` 的证据路由：路径拼接与"只放行已登记文件"是唯一的文件访问面，改错会影响详情里的「打开」。
-- 样本少：4 个能力 / 13 条试用，但真实跑出结论的能力只有 `ponytail`、`frontend-design`、`brainstorming` 与新拉进来的 `ui-ux-pro-max`（4 条记录），"多能力 / 多试用 / 多维度筛选"的表现还没被真实数据压过。
+- 样本少：5 个能力 / 17 条试用，但真实跑出结论的能力只有 `ponytail`、`frontend-design`、`brainstorming` 与新拉进来的 `ui-ux-pro-max`（4 条记录），"多能力 / 多试用 / 多维度筛选"的表现还没被真实数据压过。
 - `tools/lib/engines.mjs` 的配置解析（`configuredEngine` / `configuredModel`）有单测（`tools/lib/engines.test.mjs`）：**它读的是 eval.yaml 的文本**，最容易被行内注释、缩进、同名键（`judge.model`）带偏——改它必须跟着改测试。
 - `tools/lib/skill-content.mjs`：一份技能"到底有什么内容"的口径（frontmatter 的 `description` + 正文 + 被引用的技能）。**起草提示词、素材门槛、B 侧装几个技能都由它决定**，改之前先读 `evals/schema.md` 那节「转发壳技能」——那里写了为什么 `grill-me` 要把 `grilling` 一起装上。
 

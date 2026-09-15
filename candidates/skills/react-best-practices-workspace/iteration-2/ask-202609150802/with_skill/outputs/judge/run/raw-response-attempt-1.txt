@@ -1,0 +1,45 @@
+```json
+{
+  "results": [
+    {
+      "criterion_id": "criterion-1",
+      "passed": true,
+      "evidence": [
+        "用户任务原文（transcript turn 1）：「src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。」——三项显式要求：优化、写回 src/Dashboard.tsx、改动说明进 docs/notes.md 且逐条对应问题。",
+        "「写回这个文件」已满足：transcript turn 7 调用 Write，file_path 为 C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-1819681872\\src\\Dashboard.tsx，tool_result 返回 'The file ... Dashboard.tsx has been updated successfully'。原路径未变，非新建副本。",
+        "「改动说明放 docs/notes.md」已满足：transcript turn 8 调用 Write 创建 docs/notes.md（tool_result: 'File created successfully at ... docs\\notes.md'），内容含「反馈的两个症状」并按「问题 → 原因 → 改动」逐条编号（1 并行取数、2 useMemo 派生、3 Map 索引、4 memo+稳定 props、5 key 改 id、6 toLowerCase 提到循环外、7 resize 监听泄漏）。",
+        "「写清每处改动是想解决哪个问题」已满足：notes.md 每条都标注归属症状，如「## 一、首屏慢（打开要好几秒）」「## 二、切筛选卡」，并附「## 四、预期效果」对照表（首屏 1800ms→650ms、渲染轮次 2→1 等）。",
+        "未对任务未要求的事项扣分：agent 明确列出「刻意没有改的地方」（不换 toSorted、不加 useDeferredValue、不加骨架屏），这些属于任务范围外的自主取舍，且已给出理由并说明未动代码，不构成未达标项。",
+        "final_message 与实际动作一致，未出现未执行却声称完成的表述（声称的 Write/tsc/穷举比对在 transcript 中均有对应 tool_call 与 tool_result）。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-2",
+      "passed": true,
+      "evidence": [
+        "交付物齐全：src/Dashboard.tsx 已写入（transcript turn 7-8，Write 返回 success），docs/notes.md 已创建（turn 8-9，Write 返回 success），两者均存在于任务指定路径。",
+        "可编译性经实际验证而非口头声明：transcript turn 9-12，agent 在 /tmp/tscheck 安装 typescript@5.6 + @types/react@18，执行 `tsc --noEmit --jsx react-jsx --strict --target ES2020 --lib ES2020,DOM ... Dashboard.tsx`，tool_result 输出 `TSC_EXIT=0`，即 strict 模式下零错误。",
+        "输出格式与任务要求一致：任务只要「同一份 .tsx 文件 + docs/notes.md 说明」，产出正是这两份文件，notes.md 为 Markdown（含标题、代码块、表格），非随意文本。",
+        "行为等价性经运行验证：transcript turn 12-13 运行 eq.mjs 穷举 8 组 query × 4 种 status 共 32 种组合，输出 'OK: 32 组 (query,status) 组合结果完全一致' 与 '原始 orders 未被 sort 改动: true | 长度 480'，证明重写后筛选/排序结果与顺序未变、未引入原地修改副作用。",
+        "改动未引入新依赖风险：新代码只使用 react 自带 API（useMemo/useCallback/memo/useEffect）以及 `import type { CSSProperties } from 'react'`，原文件仅 `import { useEffect, useState }`；仓库无 package.json，改动未引入任何新包。",
+        "验证后清理了临时目录（turn 13: `rm -rf /tmp/tscheck`），未在工作区留下多余产物，工作区仍为 src/Dashboard.tsx + docs/notes.md。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-3",
+      "passed": true,
+      "evidence": [
+        "症状一「打开要好几秒」有直接对应改动：原文件 useEffect 中三个接口串行 await（fetchOrders 600ms → fetchMetrics 650ms → fetchUsers 550ms，见 transcript 中原始文件第 67-77 行）；新代码改为 `const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()]);`，并加 cancelled 卸载标记。",
+        "症状二「切筛选卡」有直接对应改动：原文件把筛选/排序放在 useEffect 里通过 setRows 写回（第 80-86 行，且 rows 为独立 useState），新代码删除 rows state，改为渲染期 `const rows = useMemo(...)` 派生，并把两次 filter 合并为一趟遍历、`query.toLowerCase()` 提到循环外。",
+        "症状二的第二个根因改动：原 `const userOf = (id) => users.find(...)` 在 rows.map 中逐行调用（480 行 × 60 成员），新代码改为 `const usersById = useMemo(() => new Map(users.map(u => [u.id, u])), [users])`，渲染处改用 `usersById.get(o.user)?.name`。",
+        "症状二的第三个根因改动：Row 全程无 memo 且收到内联 `style={{ padding: 8 }}` 与 `onPick={() => setQuery(o.user)}`（原文件第 134-142、156-166 行）；新代码三处配套——样式常量提到模块作用域（ROW_STYLE / METRIC_STYLE）、`pickUser = useCallback((userId) => setQuery(userId), [])` 并把 userId 作为参数传入、`Row` 用 `memo(function Row(...))` 包裹，行为等价（Row 内 `onClick={() => onPick(order.user)}`）。",
+        "症状二相关的 key 修正：`key={i}` 改为 `key={o.id}`（原文件第 136 行 → 新代码 `key={o.id}`），与 memo 命中直接相关。",
+        "额外改动限于真实缺陷而非无关清理：渲染体中的 `window.addEventListener('resize', ...)`（原第 89 行，每次渲染注册新匿名监听且无清理）被移入 useEffect 并在清理函数中 removeEventListener，此改动直接关联「切筛选卡/拖窗口更卡」的渲染放大效应，在 notes.md「三、顺手修掉的一个泄漏」中有对应说明；未发现与两个症状无关的纯风格性改动（接口实现、UI 结构、类型定义均保持原样）。"
+      ],
+      "failures": []
+    }
+  ]
+}
+```

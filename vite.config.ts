@@ -1,4 +1,4 @@
-import { copyFileSync, createReadStream, existsSync, mkdirSync, openSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, closeSync, createReadStream, existsSync, mkdirSync, openSync, readFileSync, readSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -121,6 +121,21 @@ const TOOLS: Record<string, { script: string; needs?: 'source' | 'result' }> = {
   promptfoo: { script: 'tools/promptfoo-bridge.mjs', needs: 'result' },
   'mcp-probe': { script: 'tools/mcp-probe.mjs' },
 };
+
+/** 工具的人话名字。状态端点（页面「按类型选工具」）与「正在评测」列表共用这一份——
+ * 抄两套的话，页面上同一个工具会出现两种叫法。
+ */
+const TOOL_LABELS: Record<string, string> = {
+  'skill-up': '技能（skill-up）',
+  promptfoo: '子代理（promptfoo）',
+  'mcp-probe': 'MCP（协议探针）',
+};
+
+/** 重复跑次数（同一条用例跑几遍）：1–5，别的值一律当 1 —— 一次 A/B 十几分钟，别让人误填 50 */
+function repeatArg(body: Record<string, unknown>): number {
+  const n = Number(body.repeat);
+  return Number.isInteger(n) && n > 1 && n <= 5 ? n : 1;
+}
 
 /** 能力类型 → 该用哪套评测工具；配置文件名决定"能不能直接跑" */
 const TYPE_TOOL: Record<string, string> = { skill: 'skill-up', agent: 'promptfoo', mcp: 'mcp-probe' };
@@ -295,27 +310,89 @@ interface EvalRun {
   status: 'running' | 'done';
   code: number | null;
   logFile: string;
+  /** 展示用：跑的是哪个能力 / 哪套工具 / 哪条路（页面「正在评测」那一块靠这些信息） */
+  name: string;
+  tool: string;
+  kind: EvalRunKind;
+  /** 重复跑次数（同一条用例跑几遍）；1 = 不重复 */
+  repeat: number;
+  startedAt: number;
+  finishedAt: number | null;
 }
 
+/** 这次跑的是哪条路：用户自己出题（ask）/ 一键评测（auto）/ 直接跑已有用例（run） */
+type EvalRunKind = 'ask' | 'auto' | 'run';
+
 const evalRuns = new Map<string, EvalRun>();
+
+/** 跑完的任务在列表里留 2 小时（页面刷新 / 关弹窗后还能看到刚才那次的结果） */
+const RUN_KEEP_MS = 2 * 60 * 60 * 1000;
 
 function runScriptSync(script: string, args: string[]): { ok: boolean; code: number | null; log: string } {
   const res = spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8' });
   return { ok: res.status === 0, code: res.status, log: `${res.stdout ?? ''}${res.stderr ?? ''}`.trim() };
 }
 
-function runScriptAsync(script: string, args: string[]): EvalRun {
+/** 日志尾巴：跑久了的日志可能好几 MB，只读最后一段（列表里只显示最后一行） */
+function logTail(logFile: string, maxBytes = 8192): string {
+  try {
+    const size = statSync(logFile).size;
+    const from = Math.max(0, size - maxBytes);
+    const fd = openSync(logFile, 'r');
+    const buf = Buffer.alloc(size - from);
+    readSync(fd, buf, 0, buf.length, from);
+    closeSync(fd);
+    return buf.toString('utf8');
+  } catch {
+    return '';
+  }
+}
+
+function lastLine(text: string, max = 160): string {
+  const line = text.split('\n').map((l) => l.trim()).filter(Boolean).pop() ?? '';
+  return line.length > max ? `${line.slice(0, max)}…` : line;
+}
+
+/** 给页面看的一次运行（不含日志正文：正文走 /api/eval/run?id=，列表只要一行进度） */
+function runInfo(run: EvalRun) {
+  return {
+    id: run.id,
+    name: run.name,
+    tool: run.tool,
+    /** 工具的人话名字（TOOLS 里那份，别让页面再抄一套） */
+    toolLabel: TOOL_LABELS[run.tool] ?? run.tool,
+    kind: run.kind,
+    repeat: run.repeat,
+    status: run.status,
+    code: run.code,
+    startedAt: run.startedAt,
+    durationMs: (run.finishedAt ?? Date.now()) - run.startedAt,
+    tail: lastLine(logTail(run.logFile)),
+  };
+}
+
+function runScriptAsync(script: string, args: string[], meta: { name: string; tool: string; kind: EvalRunKind; repeat?: number }): EvalRun {
   mkdirSync(EVAL_RUNS, { recursive: true });
   const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
   const logFile = path.join(EVAL_RUNS, `${id}.log`);
   writeFileSync(logFile, `$ node ${script} ${args.join(' ')}\n\n`, 'utf8');
-  const run: EvalRun = { id, status: 'running', code: null, logFile };
+  const run: EvalRun = {
+    id,
+    status: 'running',
+    code: null,
+    logFile,
+    startedAt: Date.now(),
+    finishedAt: null,
+    ...meta,
+    repeat: meta.repeat && meta.repeat > 1 ? meta.repeat : 1,
+  };
   evalRuns.set(id, run);
   const fd = openSync(logFile, 'a');
   const child = spawn(process.execPath, [script, ...args], { cwd: root, stdio: ['ignore', fd, fd] });
   child.on('exit', (code) => {
     run.status = 'done';
     run.code = code;
+    run.finishedAt = Date.now();
   });
   return run;
 }
@@ -367,7 +444,7 @@ function evalApiPlugin(): Plugin {
               tools: [
                 {
                   id: 'skill-up',
-                  label: '技能（skill-up）',
+                  label: TOOL_LABELS['skill-up'],
                   hint: !skillUpBin
                     ? '未安装：仍可导入别人跑好的 result.json'
                     : usable.length
@@ -376,8 +453,8 @@ function evalApiPlugin(): Plugin {
                         ? `已就绪：${skillUpVersion}｜⚠ 引擎装了但都没登录（${engines.map((e) => e.name).join(' / ')}）`
                         : `已就绪：${skillUpVersion}｜⚠ 没有引擎（qodercli / claude_code / codex / qwen_code 都没装）`,
                 },
-                { id: 'promptfoo', label: '子代理（promptfoo）', hint: '用 npx 现场拉取；也可以只导入 out.json' },
-                { id: 'mcp-probe', label: 'MCP（协议探针）', hint: '零依赖，直接起 server 按协议问一遍' },
+                { id: 'promptfoo', label: TOOL_LABELS.promptfoo, hint: '用 npx 现场拉取；也可以只导入 out.json' },
+                { id: 'mcp-probe', label: TOOL_LABELS['mcp-probe'], hint: '零依赖，直接起 server 按协议问一遍' },
               ],
               capabilities: knownCapabilities(),
               purposes: registeredPurposes(),
@@ -399,7 +476,15 @@ function evalApiPlugin(): Plugin {
             const args = ['auto', '--input', input];
             if (task) args.push('--prompt', task);
             if (body.taskId && NAME_RE.test(String(body.taskId))) args.push('--task', String(body.taskId));
-            return send(200, { runId: runScriptAsync(TOOLS['skill-up'].script, args).id });
+            const repeat = repeatArg(body);
+            if (repeat > 1) args.push('--repeat', String(repeat));
+            const run = runScriptAsync(TOOLS['skill-up'].script, args, {
+              name: input.length > 60 ? `${input.slice(0, 60)}…` : input,
+              tool: 'skill-up',
+              kind: task ? 'ask' : 'auto',
+              repeat,
+            });
+            return send(200, { runId: run.id, run: runInfo(run) });
           }
 
           if (url === '/api/review' && req.method === 'POST') {
@@ -498,7 +583,22 @@ function evalApiPlugin(): Plugin {
               if (body.purpose) args.push('--purpose', String(body.purpose));
               if (body.inspector) args.push('--inspector');
             }
-            return send(200, { runId: runScriptAsync(spec.script, args).id });
+            const kind: EvalRunKind = body.eval && /ask/i.test(String(body.eval)) ? 'ask' : 'run';
+            const repeat = repeatArg(body);
+            if (repeat > 1) args.push('--repeat', String(repeat));
+            const run = runScriptAsync(spec.script, args, { name, tool, kind, repeat });
+            return send(200, { runId: run.id, run: runInfo(run) });
+          }
+
+          // 「正在评测」那一块的数据源：关掉弹窗、刷新页面都还能看到刚才发起的那次
+          if (url === '/api/eval/runs' && req.method === 'GET') {
+            const now = Date.now();
+            const runs = [...evalRuns.values()]
+              .filter((r) => r.status === 'running' || now - (r.finishedAt ?? r.startedAt) < RUN_KEEP_MS)
+              .sort((a, b) => b.startedAt - a.startedAt)
+              .slice(0, 20)
+              .map(runInfo);
+            return send(200, { runs });
           }
 
           if (url === '/api/eval/run' && req.method === 'GET') {
@@ -508,6 +608,9 @@ function evalApiPlugin(): Plugin {
             return send(200, {
               status: run.status,
               code: run.code,
+              // 时间信息一起给：进度窗口显示"已跑多久"必须用**服务端的开始时间**，
+              // 不能拿"窗口是什么时候打开的"当起点（踩过：打开弹窗才开始计时）
+              run: runInfo(run),
               log: existsSync(run.logFile) ? readFileSync(run.logFile, 'utf8') : '',
             });
           }

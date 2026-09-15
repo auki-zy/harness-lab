@@ -1,9 +1,27 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { EvalRunInfo } from '../shared/trial-api';
 
-const auto = vi.fn((_input: { input: string; task?: string }) => Promise.resolve({ runId: 'r-auto' }));
-const start = vi.fn((_input: { tool: string; name: string }) => Promise.resolve({ runId: 'r-run' }));
+/** 服务端发起评测后返回的那条运行信息（页面列表拿它立刻显示"正在评测"） */
+const runOf = (over: Partial<EvalRunInfo> = {}): EvalRunInfo => ({
+  id: 'r-run',
+  name: 'ponytail',
+  tool: 'skill-up',
+  toolLabel: '技能（skill-up）',
+  kind: 'run',
+  status: 'running',
+  code: null,
+  startedAt: Date.now(),
+  durationMs: 0,
+  tail: '▶ node tools/skillup-bridge.mjs run --name ponytail',
+  ...over,
+});
+
+const auto = vi.fn((_input: { input: string; task?: string }) =>
+  Promise.resolve({ runId: 'r-auto', run: runOf({ id: 'r-auto', name: 'ui-ux-pro-max', kind: 'auto' }) }),
+);
+const start = vi.fn((_input: { tool: string; name: string; repeat?: number }) => Promise.resolve({ runId: 'r-run', run: runOf() }));
 const draft = vi.fn((input: { name?: string; input?: string }) =>
   Promise.resolve({
     prompt: '做一个落地页：只交付 index.html，用浏览器打开就能看到效果',
@@ -115,7 +133,9 @@ describe('发起评测弹窗', () => {
   });
 
   it('填已有候选的名字 → 直接跑它的配置；填链接 → 走"拉取 + 自动设计用例"', async () => {
-    render(<RunEval open onClose={() => {}} />);
+    const onClose = vi.fn();
+    const started = vi.fn();
+    render(<RunEval open onClose={onClose} onStarted={started} />);
     const submit = await screen.findByRole('button', { name: SUBMIT });
     const capability = screen.getByLabelText('能力', { selector: 'input' });
 
@@ -125,13 +145,16 @@ describe('发起评测弹窗', () => {
     await waitFor(() => expect(start).toHaveBeenCalledTimes(1));
     expect(start.mock.calls[0][0]).toEqual({ tool: 'skill-up', name: 'ponytail' });
     expect(auto).not.toHaveBeenCalled();
-    expect(await screen.findByText(/已写试用记录/)).toBeTruthy();
-    expect(screen.getByRole('button', { name: '刷新台账' })).toBeTruthy();
+    // 提交即关窗：这次运行交给列表去盯（不再把人关在弹窗里等十几分钟）
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(started.mock.calls[0][0]).toMatchObject({ id: 'r-run', status: 'running', name: 'ponytail' });
 
     cleanup();
     auto.mockClear();
     start.mockClear();
-    render(<RunEval open onClose={() => {}} />);
+    const onClose2 = vi.fn();
+    const started2 = vi.fn();
+    render(<RunEval open onClose={onClose2} onStarted={started2} />);
     const capability2 = await screen.findByLabelText('能力', { selector: 'input' });
     fireEvent.change(capability2, { target: { value: 'DietrichGebert/ponytail' } });
     const submit2 = screen.getByRole('button', { name: SUBMIT });
@@ -140,6 +163,7 @@ describe('发起评测弹窗', () => {
     await waitFor(() => expect(auto).toHaveBeenCalledTimes(1));
     expect(auto.mock.calls[0][0]).toEqual({ input: 'DietrichGebert/ponytail' });
     expect(start).not.toHaveBeenCalled();
+    await waitFor(() => expect(onClose2).toHaveBeenCalledTimes(1));
   });
 
   it('「根据能力生成」：先起草一条贴合能力的提示词，用户改完再提交', async () => {
@@ -267,3 +291,30 @@ describe('发起评测弹窗', () => {
     expect(screen.getAllByText(/claude auth login/).length).toBeGreaterThan(0);
   });
 });
+
+  it('可以要求重复跑：选 2 次 → 提交时带上 repeat（结论里会给"全过几次"）', async () => {
+    render(<RunEval open onClose={() => {}} onStarted={() => {}} />);
+    const submit = await screen.findByRole('button', { name: SUBMIT });
+    const capability = screen.getByLabelText('能力', { selector: 'input' });
+    fireEvent.change(capability, { target: { value: 'ponytail' } });
+    await waitFor(() => expect((submit as HTMLButtonElement).disabled).toBe(false));
+
+    // AntD 的 Select：先按下选择器（展开下拉），再点选项
+    fireEvent.mouseDown(screen.getByLabelText('重复跑次数'));
+    fireEvent.click(await screen.findByText('2 次'));
+
+    fireEvent.click(submit);
+    await waitFor(() => expect(start).toHaveBeenCalledTimes(1));
+    expect(start.mock.calls[0][0]).toEqual({ tool: 'skill-up', name: 'ponytail', repeat: 2 });
+  });
+
+  it('默认不重复：repeat 不带上（别让 1 次运行看起来像"重复过"）', async () => {
+    render(<RunEval open onClose={() => {}} onStarted={() => {}} />);
+    const submit = await screen.findByRole('button', { name: SUBMIT });
+    const capability = screen.getByLabelText('能力', { selector: 'input' });
+    fireEvent.change(capability, { target: { value: 'ponytail' } });
+    await waitFor(() => expect((submit as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(submit);
+    await waitFor(() => expect(start).toHaveBeenCalledTimes(1));
+    expect(start.mock.calls[0][0].repeat).toBeUndefined();
+  });

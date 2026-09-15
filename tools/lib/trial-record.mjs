@@ -273,11 +273,30 @@ export function previousPasses(name) {
  * 判定规则（各处统一，别各写一套）：
  * - 评测工具本身报错（没跑起来）→ retry（别把工具的锅算到能力头上）
  * - B（带能力）没全过 → reject；B 结果缺失 → retry
+ * - **重复跑里 B 只过了一部分 → retry（"不稳定"，不是能力不行也不是达标）**（2026-09-15 加）
  * - 离线自检（stub 引擎 / 夹具）→ hold，且**不**参与"连续两次"计数
- * - B 全过且此前已有 ≥1 次真实通过 → adopt；否则 hold
+ * - B 全过且此前已有 ≥1 次真实通过 → adopt（现在是 ready）；否则 hold
+ *
+ * `runs` / `perfectRuns` 是重复跑（`--repeat N`）带来的：结论里要写清"B 在几次里过了几次"，
+ * 单次运行不再是默认口径——实测同一条用例两次跑，A 侧结果会翻转（1/1 → 0/1）。
  */
-export function decide({ passRateB, totalB, name, extra, errorsB = 0, errorNote, selfCheck = false, probeOnly = false }) {
+export function decide({
+  passRateB,
+  totalB,
+  name,
+  extra,
+  errorsB = 0,
+  errorNote,
+  selfCheck = false,
+  probeOnly = false,
+  runs = 1,
+  perfectRunsB,
+  perfectRunsA,
+}) {
   const because = errorNote ? `：${errorNote}` : '';
+  const repeated = runs > 1;
+  const perfectB = perfectRunsB ?? (passRateB >= 1 ? runs : 0);
+  const evidence = repeated ? `（${runs} 次重复里 B 全过 ${perfectB}/${runs}${perfectRunsA !== undefined ? `、A 全过 ${perfectRunsA}/${runs}` : ''}）` : '';
   if (!totalB) {
     return { decision: 'retry', confidence: 'low', reason: `报告里没有"带能力"的结果${because}——先确认评测真的跑了` };
   }
@@ -288,8 +307,19 @@ export function decide({ passRateB, totalB, name, extra, errorsB = 0, errorNote,
       reason: `这次评测本身报错了（不是能力没做到）${because}——先修配置或环境再跑；这一次不算对能力的结论`,
     };
   }
+  if (repeated && perfectB < runs && perfectB > 0) {
+    return {
+      decision: 'retry',
+      confidence: 'low',
+      reason: `重复跑不稳定${evidence}——B 在 ${runs} 次里只全过了 ${perfectB} 次，这既不能算达标也不能算能力不行；先看是不是用例/环境有抖动（比如两侧都会偶发跑偏），重复次数加上去再下结论`,
+    };
+  }
   if (passRateB < 1) {
-    return { decision: 'reject', confidence: 'medium', reason: `带能力的这次没全过（${Math.round(passRateB * 100)}%）——没把任务做对` };
+    return {
+      decision: 'reject',
+      confidence: 'medium',
+      reason: `带能力的这次没全过（${Math.round(passRateB * 100)}%）${evidence}——没把任务做对`,
+    };
   }
   const prev = previousPasses(name);
   if (prev >= 1 && !selfCheck && !probeOnly) {
@@ -299,8 +329,9 @@ export function decide({ passRateB, totalB, name, extra, errorsB = 0, errorNote,
     // 只有人在能力详情里点了「采纳」才会变 adopted（`applyHumanDecision()`）。
     return {
       decision: 'ready',
-      confidence: 'medium',
-      reason: `机器判定达标：可复核试用已通过 ${prev + 1} 次、无退步${extra ? `；${extra}` : ''}——采纳与否由你定（在能力详情里给结论）`,
+      // 重复跑全过 → 证据更硬；单次运行仍旧只是"中等"
+      confidence: repeated && perfectB === runs ? 'high' : 'medium',
+      reason: `机器判定达标${evidence}：可复核试用已通过 ${prev + 1} 次、无退步${extra ? `；${extra}` : ''}——采纳与否由你定（在能力详情里给结论）`,
     };
   }
   if (probeOnly) {
@@ -322,13 +353,17 @@ export function decide({ passRateB, totalB, name, extra, errorsB = 0, errorNote,
     return {
       decision: 'hold',
       confidence: 'low',
-      reason: `带能力这一次全过${extra ? `（${extra}）` : ''}；但这是离线自检（stub 引擎 / 夹具，脚本扮演 agent），只证明评测链路通、不证明能力有效——不算采纳计数，要用真实引擎再跑一次`,
+      reason: `带能力这一次全过${evidence}${extra ? `（${extra}）` : ''}；但这是离线自检（stub 引擎 / 夹具，脚本扮演 agent），只证明评测链路通、不证明能力有效——不算采纳计数，要用真实引擎再跑一次`,
     };
   }
   return {
     decision: 'hold',
     confidence: 'medium',
-    reason: `带能力这一次全过${extra ? `（${extra}）` : ''}；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）`,
+    reason:
+      `带能力这一次全过${evidence}${extra ? `（${extra}）` : ''}；` +
+      (repeated
+        ? `重复 ${runs} 次都对上了，但这是第一次可复核试用——再来一次（换一条用例更值）就能采纳`
+        : '按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）'),
   };
 }
 

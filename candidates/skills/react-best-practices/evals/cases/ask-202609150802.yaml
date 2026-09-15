@@ -1,0 +1,25 @@
+id: ask-202609150802
+title: src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…
+description: 用户自己出的题（A 不给技能 / B 给技能；由 agent_judge 判）
+
+input:
+  prompt: |
+    src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。
+
+context:
+  repo_fixture: evals/fixtures/react-slow-dashboard
+
+constraints:
+  timeout_seconds: 900
+  max_turns: 12
+
+expect:
+  exit_code: 0
+
+judge:
+  type: agent_judge
+  model: anthropic/deepseek-v4-flash
+  criteria:
+    - "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）"
+    - "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到"
+    - "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理"

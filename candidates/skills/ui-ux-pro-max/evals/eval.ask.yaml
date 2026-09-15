@@ -1,4 +1,4 @@
-schema_version: v1alpha1
+﻿schema_version: v1alpha1
 
 # 用户自己出的题（由 tools/gen-eval.mjs --from-prompt 生成）。
 # A = 只给这段提示词；B = 提示词 + 技能正文（benchmark.enabled 控制）。
@@ -37,6 +37,8 @@ cases:
       - "**/*.mjs"
       - "**/*.js"
       - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.jsx"
       - "**/*.py"
       - "**/*.md"
       - "**/*.txt"

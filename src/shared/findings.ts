@@ -341,6 +341,42 @@ export function trialDateShort(trial?: Trial | null): string {
   return m ? `${m[1]}-${m[2]}` : date || '日期未知';
 }
 
+/** 后台评测的三种发起方式 → 一句话（列表里显示"这次是怎么发起的"） */
+export function runKindView(kind?: string): { label: string; detail: string } {
+  switch (kind) {
+    case 'ask':
+      return { label: '自己出题', detail: '按你写的那段提示词跑 A/B：A 只给提示词，B 再附上技能' };
+    case 'auto':
+      return { label: '一键评测', detail: '拉取 →（按技能出题）→ 跑 A/B → 落账，一条龙' };
+    default:
+      return { label: '跑已有用例', detail: '用这个能力自己的 evals/ 配置跑一遍' };
+  }
+}
+
+/** 后台评测的状态 → 印章 + 说明（列表里的进度、进度弹窗的抬头都用它） */
+export function runStateView(run: { status: string; code?: number | null }): { stamp: string; tone: Tone; detail: string } {
+  if (run.status === 'running') {
+    return { stamp: '评测中', tone: 'ready', detail: '后台正在跑，可以关掉这个窗口；进度在这儿看' };
+  }
+  if (run.code === 0) {
+    return { stamp: '完成', tone: 'adopt', detail: '跑完了，台账已经更新（试用记录在对应能力的详情里）' };
+  }
+  return {
+    stamp: '失败',
+    tone: 'reject',
+    detail: '跑完了但有失败项：看日志，或按 evals/schema.md 的判定规则决定下一步',
+  };
+}
+
+/** 时长 → 「3 分 12 秒」这种一眼能读的写法（跑着的任务显示"已跑 X"，跑完显示"用了 X"） */
+export function runDuration(ms?: number | null): string {
+  const total = Math.max(0, Math.round((ms ?? 0) / 1000));
+  if (total < 60) return `${total} 秒`;
+  const min = Math.floor(total / 60);
+  const sec = total % 60;
+  return sec === 0 ? `${min} 分` : `${min} 分 ${sec} 秒`;
+}
+
 /** 人评-only 试用里那句"为什么不摆证据链"的说明（按试用方式给准确的说法） */
 export function noEvidenceNote(trial?: Trial | null): string {
   const { kind } = trialKindView(trial);
@@ -399,6 +435,20 @@ export function measureRows(trial?: Trial | null): MeasureRow[] {
   const checks = measures.staticChecks;
   if (checks && Object.keys(checks).length > 0) {
     rows.push({ label: '静态检查（脚本、结构、断点等）', values: { ...checks }, note: '' });
+  }
+
+  // 重复跑（`--repeat N`）：一行"全过几次 / 共几次"，方差直接摆在脸上
+  //（实测同一条用例两次跑，A 侧从 1/1 翻成 0/1——不写出来就会被当成"技能有效"）
+  const repeats = measures.repeats;
+  const repeatEntries = repeats ? Object.entries(repeats) : [];
+  if (repeatEntries.length > 0) {
+    const values = Object.fromEntries(repeatEntries.map(([name, v]) => [name, `${v} 次全过`]));
+    const both = repeatEntries.every(([, v]) => String(v).split('/')[0] === String(v).split('/')[1]);
+    rows.push({
+      label: '重复跑（同一条用例跑几遍）',
+      values,
+      note: both ? '每次都过' : '有波动——单次结果不能当结论',
+    });
   }
 
   // ── 成本与效率：从 2026-09 起成为默认对照维度（token / 耗时 / 轮次 / 工具调用 / 花费）──

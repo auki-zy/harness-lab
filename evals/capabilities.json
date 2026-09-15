@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-11",
+  "updatedAt": "2026-09-15",
   "capabilities": [
     {
       "id": "frontend-design",
@@ -107,6 +107,36 @@
       "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（原文见该文件）",
       "summary": "待观察：skill-up 一次可复核试用全过，再来一次通过即可采纳。",
       "howToUse": "harness-tool add brainstorming"
+    },
+    {
+      "id": "react-best-practices",
+      "type": "skill",
+      "source": {
+        "repo": "davila7/claude-code-templates",
+        "path": "cli-tool/components/skills/web-development/react-best-practices/SKILL.md",
+        "license": "MIT",
+        "commit": "560f2fccd9a13099283ea7ef1ff3787da17eb1ef"
+      },
+      "localPath": "candidates/skills/react-best-practices",
+      "status": "adopted",
+      "priorEvidence": "2026-09-15 skill-up(ask-202609150802)：A 0/1 / B 0/1 → reject ｜ 2026-09-15 skill-up(ask-202609150802)：A 0/1 / B 0/1 → retry（用例无效：工作区缺待改文件） ｜ 2026-09-15 skill-up(ask-202609150802)：A 1/1 / B 1/1 → hold ｜ 2026-09-15 skill-up(ask-202609150802)：A 0/1 / B 1/1 → ready ｜ 2026-09-15 skill-up(ask-202609150802)：A 3/3 / B 3/3 → ready",
+      "addedAt": "2026-09-15",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "code-quality"
+        ],
+        "stage": "trialing",
+        "source": "community"
+      },
+      "description": "一份 React 与 Next.js 性能优化指南：40+ 条规则，覆盖消除瀑布、精简打包体积、改善渲染。适合在优化 React 应用性能、做性能审查、重构组件时使用。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（模型翻译，未人工校对；原文见该文件）",
+      "summary": "机器判定达标：可复核试用连续全过、用例无退步——采纳与否等你给结论。",
+      "howToUse": "harness-tool add react-best-practices",
+      "humanDecision": {
+        "verdict": "adopt",
+        "reviewedAt": "2026-09-15"
+      }
     }
   ],
   "note": "候选池按需精简：未采纳的在 candidates/，已采纳的移到 adopted/；两边都用 harness-tool add <名字> 装进项目。",

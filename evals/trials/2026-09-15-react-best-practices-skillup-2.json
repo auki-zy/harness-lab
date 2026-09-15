@@ -1,0 +1,89 @@
+{
+  "trialId": "2026-09-15-react-best-practices-skillup-2",
+  "capability": {
+    "id": "react-best-practices",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "ask-202609150802",
+    "fixture": "candidates/skills/react-best-practices-workspace/iteration-2",
+    "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false
+    },
+    {
+      "name": "B",
+      "withCapability": true
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 1,
+      "B": 1
+    },
+    "sizeKB": {
+      "A": 6,
+      "B": 5.2
+    },
+    "tokensIn": {
+      "A": 34410,
+      "B": 32711
+    },
+    "tokensOut": {
+      "A": 3974,
+      "B": 6562
+    },
+    "tokensTotal": {
+      "A": 38384,
+      "B": 39273
+    },
+    "tokensCached": {
+      "A": 34176,
+      "B": 32512
+    },
+    "durationSec": {
+      "A": 89.7,
+      "B": 93.3
+    },
+    "steps": {
+      "A": 6,
+      "B": 5
+    },
+    "toolCalls": {
+      "A": 15,
+      "B": 12
+    },
+    "toolMix": {
+      "A": "Bash 11 / Write 2 / Read 1 / Edit 1",
+      "B": "Bash 8 / Read 2 / Write 2"
+    },
+    "staticChecks": {
+      "A": "用例 1/1 通过；断言 4/4；耗时 89.7s",
+      "B": "用例 1/1 通过；断言 4/4；耗时 93.3s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；产物大小 A 6 KB / B 5.2 KB；报告：candidates/skills/react-best-practices-workspace/iteration-2；（注意）这条试用的报告与 A/B 产物在 2026-09-15 的重复跑里被同名 iteration 目录覆盖了（当时 skill-up 的 --iteration 从 1 编号、默认写回 workspace 根）；文件找不回来，所以不再列证据路径。桥接已改为每次运行写独立的 run-<时间戳>/ 输出目录，不会再发生。"
+  },
+  "judge": [
+    "auto",
+    "llm"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "hold",
+    "confidence": "medium",
+    "reason": "带能力这一次全过（对照 A 1/1）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+  },
+  "evidence": [],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-15",
+  "recordedAt": "2026-09-15T08:13:23.982Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "candidates/skills/react-best-practices-workspace/iteration-2/result.json"
+  },
+  "selfCheck": false
+}

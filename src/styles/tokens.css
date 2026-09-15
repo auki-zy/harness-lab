@@ -19,6 +19,8 @@
   --ochre: #8f6414;
   --seal: #ae3b2c;
   --azure: #2f5d8a;
+  /* 「正在评测」那一行的底色：和 ready 印章同一个蓝，浅到不抢眼（跑着的任务才用） */
+  --azure-wash: #e8eef6;
   --grey-tone: #7a828a;
 
   --font-sans: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", system-ui,

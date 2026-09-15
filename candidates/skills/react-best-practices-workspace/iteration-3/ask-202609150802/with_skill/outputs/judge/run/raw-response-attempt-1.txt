@@ -1,0 +1,43 @@
+```json
+{
+  "results": [
+    {
+      "criterion_id": "criterion-1",
+      "passed": true,
+      "evidence": [
+        "任务要求三项：优化 src/Dashboard.tsx、改完直接写回该文件、改动说明放 docs/notes.md 并写清每处改动想解决哪个问题。",
+        "产物 1 存在：src/Dashboard.tsx（6763 bytes，磁盘上已存在，agent 用 Write 写回同一路径 src/Dashboard.tsx，未另存新文件）。",
+        "产物 2 存在：docs/notes.md（6566 bytes），首行标题为「# Dashboard.tsx 性能优化说明」，明确写着 文件：`src/Dashboard.tsx`（已直接写回）。",
+        "notes.md 采用「逐条改动：问题 → 改动」结构，每条都标注了对应问题，如「### 1. 三个接口串行请求（对应「打开要好几秒」）」「### 3. 输入框每个字符都触发全表重算（对应「切筛选也卡」）」，满足「写清每处改动是想解决哪个问题」。",
+        "未把任务未要求的内容当作扣分项：额外的 resize 监听泄漏修复、memo/常量提升等属于任务范围内的性能优化延伸，agent 在终稿中亦主动说明其为「你没提但同源」，未造成任何要求缺失。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-2",
+      "passed": true,
+      "evidence": [
+        "两个交付物均真实落盘可用：`ls -la` 显示 src/Dashboard.tsx（6763B）与 docs/notes.md（6566B）存在且非空。",
+        "格式与任务要求一致：代码写回原文件 src/Dashboard.tsx（非 .txt/.bak），说明文档落在任务指定的 docs/notes.md，为 Markdown 格式。",
+        "可解析性已实际验证：transcript turn 12-13 中 `bun build ./src/Dashboard.tsx --outfile=/tmp/dash-check.js --external react --external 'react/*'` 输出「Bundled 1 module in 20ms / dash-check.js 7.1 KB / EXIT: 0」，确认无语法错误；首次未加 --external 时的失败仅报 `Could not resolve: \"react\"`（缺 node_modules 的模块解析问题），非语法错误。",
+        "代码内容自洽可编译：修订后的文件第 12-16 行从 react 导入 useDeferredValue/useMemo/useSyncExternalStore 等，`React.CSSProperties` 的用法与原文件第 152 行一致，未引入新的未导入标识符。",
+        "agent 在 notes.md 与终稿中如实披露「无 package.json/tsconfig/node_modules，无法 tsc 与实际运行，耗时数字为算术推算」，未虚构运行结果；任务本身只要求优化并写文件，未要求启动应用，故不构成未达成。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-3",
+      "passed": true,
+      "evidence": [
+        "症状「打开要好几秒」有直接对应改动：原文件 useEffect 中三次串行 await（sleep 600/650/550），新文件第 101 行为 `const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()]);`，将串行瀑布改为并行，并带 cancelled 清理标志（原 67-77 行的三段 await 已删除）。",
+        "症状「切筛选卡」有三处对应改动：原 `rows` state + useEffect 回写（原 61/80-86 行）已删除，改为第 115-124 行渲染期 `useMemo` 计算派生值（`const rows = useMemo(...)`），去掉一轮渲染→effect→setState 往返。",
+        "输入阻塞问题对应改动：第 113 行 `const deferredQuery = useDeferredValue(query);`，useMemo 依赖数组使用 deferredQuery，与 notes.md 第 3 条「用 useDeferredValue(query) 拿到 deferredQuery」一致。",
+        "每行线性查找问题对应改动：第 116 行 `const userMap = useMemo(() => new Map(users.map((u) => [u.id, u])), [users]);`，第 176 行渲染处改为 `userMap.get(o.user)?.name`，替换原第 91 行 `users.find(...)`。",
+        "长列表重渲染对应改动：第 195 行 `const Row = memo(function Row(...))`，第 174 行 `key={o.id}` 取代原 `key={i}`，静态样式提为 ROW_STYLE 常量。",
+        "notes.md 逐条把改动映射回症状（第 1 条对应「打开要好几秒」，第 2/3/5/6 条对应「切筛选也卡」），并用终稿复述该对应关系，说明改动不是无关清理。"
+      ],
+      "failures": []
+    }
+  ]
+}
+```

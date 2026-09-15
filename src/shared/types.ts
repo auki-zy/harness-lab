@@ -53,6 +53,8 @@ export interface Trial {
     correctness?: Record<string, number>;
     sizeKB?: Record<string, number>;
     staticChecks?: Record<string, string>;
+    /** 重复跑（`--repeat N`）：每条条件是"全过几次 / 共几次"，例如 `{ A: '1/3', B: '3/3' }` */
+    repeats?: Record<string, string>;
     // ── 成本与效率维度（都是"按条件名"给的数字，缺哪项就不显示哪行）──
     /** 输入 token（不含缓存命中） */
     tokensIn?: Record<string, number>;

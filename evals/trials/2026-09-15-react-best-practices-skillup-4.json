@@ -1,0 +1,117 @@
+{
+  "trialId": "2026-09-15-react-best-practices-skillup-4",
+  "capability": {
+    "id": "react-best-practices",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "ask-202609150802",
+    "fixture": "candidates/skills/react-best-practices-workspace/run-20260915095440（3 轮重复）",
+    "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill，重复 3 次）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 1,
+      "B": 1
+    },
+    "repeats": {
+      "A": "3/3",
+      "B": "3/3"
+    },
+    "sizeKB": {
+      "A": 6.6,
+      "B": 6
+    },
+    "tokensIn": {
+      "A": 81257,
+      "B": 94339
+    },
+    "tokensOut": {
+      "A": 18520,
+      "B": 19071
+    },
+    "tokensTotal": {
+      "A": 99777,
+      "B": 113410
+    },
+    "tokensCached": {
+      "A": 28032,
+      "B": 32384
+    },
+    "durationSec": {
+      "A": 154.9,
+      "B": 189.6
+    },
+    "steps": {
+      "A": 12,
+      "B": 20
+    },
+    "toolCalls": {
+      "A": 21,
+      "B": 29
+    },
+    "toolMix": {
+      "A": "Bash 10 / Write 6 / Read 3 / Edit 2",
+      "B": "Bash 16 / Write 6 / Read 3 / Skill 3 / Grep 1"
+    },
+    "staticChecks": {
+      "A": "用例 3/3 通过；重复 3 次：全过 3/3；断言 4/4；最后一次耗时 47.2s",
+      "B": "用例 3/3 通过；重复 3 次：全过 3/3；断言 4/4；最后一次耗时 77.2s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；重复 3 次（同一条用例）：A 全过 3/3、B 全过 3/3；产物大小 A 6.6 KB / B 6 KB；报告：candidates/skills/react-best-practices-workspace/run-20260915095440/（3 轮）"
+  },
+  "judge": [
+    "auto",
+    "llm"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "ready",
+    "confidence": "high",
+    "reason": "机器判定达标（3 次重复里 B 全过 3/3、A 全过 3/3）：可复核试用已通过 3 次、无退步；对照 A 3/3——采纳与否由你定（在能力详情里给结论）"
+  },
+  "evidence": [
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/result.json",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/benchmark.json",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/report.html",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/benchmark.md",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/result.json",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/benchmark.json",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/report.html",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/benchmark.md",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/result.json",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/benchmark.json",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/report.html",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/benchmark.md",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/docs/notes.md",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/COMMIT.txt",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/LICENSE.txt",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SKILL.md",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.json",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.md",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/docs/notes.md",
+    "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+  ],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-15",
+  "recordedAt": "2026-09-15T10:03:57.358Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/result.json"
+  },
+  "selfCheck": false
+}

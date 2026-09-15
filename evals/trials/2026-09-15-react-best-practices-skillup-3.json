@@ -1,0 +1,104 @@
+{
+  "trialId": "2026-09-15-react-best-practices-skillup-3",
+  "capability": {
+    "id": "react-best-practices",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "ask-202609150802",
+    "fixture": "candidates/skills/react-best-practices-workspace/iteration-3",
+    "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 0,
+      "B": 1
+    },
+    "sizeKB": {
+      "A": 4.6,
+      "B": 6.6
+    },
+    "tokensIn": {
+      "A": 18604,
+      "B": 37326
+    },
+    "tokensOut": {
+      "A": 3205,
+      "B": 6045
+    },
+    "tokensTotal": {
+      "A": 21809,
+      "B": 43371
+    },
+    "tokensCached": {
+      "A": 18432,
+      "B": 36992
+    },
+    "durationSec": {
+      "A": 60.7,
+      "B": 97
+    },
+    "steps": {
+      "A": 2,
+      "B": 11
+    },
+    "toolCalls": {
+      "A": 3,
+      "B": 15
+    },
+    "toolMix": {
+      "A": "Bash 2 / Read 1",
+      "B": "Bash 8 / Read 2 / Write 2 / Edit 2 / WebSearch 1"
+    },
+    "staticChecks": {
+      "A": "用例 0/1 通过；断言 1/4；耗时 60.7s；未过：只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）; 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到; 针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+      "B": "用例 1/1 通过；断言 4/4；耗时 97.0s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；产物大小 A 4.6 KB / B 6.6 KB；报告：candidates/skills/react-best-practices-workspace/iteration-3"
+  },
+  "judge": [
+    "auto",
+    "llm"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "ready",
+    "confidence": "medium",
+    "reason": "机器判定达标：可复核试用已通过 2 次、无退步；对照 A 0/1——采纳与否由你定（在能力详情里给结论）"
+  },
+  "evidence": [
+    "candidates/skills/react-best-practices-workspace/iteration-3/result.json",
+    "candidates/skills/react-best-practices-workspace/iteration-3/benchmark.json",
+    "candidates/skills/react-best-practices-workspace/iteration-3/report.html",
+    "candidates/skills/react-best-practices-workspace/iteration-3/benchmark.md",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/COMMIT.txt",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/LICENSE.txt",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SKILL.md",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.json",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.md",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/docs/notes.md",
+    "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+  ],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-15",
+  "recordedAt": "2026-09-15T08:30:55.570Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "candidates/skills/react-best-practices-workspace/iteration-3/result.json"
+  },
+  "selfCheck": false
+}

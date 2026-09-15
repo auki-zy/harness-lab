@@ -1,0 +1,35 @@
+# Skill Benchmark: react-best-practices
+
+**Date**: 2026-09-15T09:51:19Z
+**Evals**: src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/… (1 runs each per configuration)
+
+## Summary
+
+| Metric | With Skill | Without Skill | Delta |
+|--------|-----------|--------------|-------|
+| Pass Rate | 100% ± 0% | 100% ± 0% | +0.00 |
+
+## Per-Case Results
+
+### src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/… (with_skill)
+
+- **Pass Rate**: 100% (4/4)
+
+| Expectation | Result | Evidence |
+|-------------|--------|----------|
+| expect.exit_code | ✅ | all checks passed |
+| 只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准） | ✅ | 任务要求的三件事逐条对照：(1) 优化 src/Dashboard.tsx 的打开慢/切筛选卡；(2) 改完写回同一文件；(3) 改动说明放 docs/notes.md 并写清每处改动解决哪个问题。; 写回原文件：transcript turn 8-9 的 Write 调用 file_path 为 `...\src\Dashboard.tsx`，工具返回 'The file ... has been updated successfully'，即写回的是任务指定的那个文件而非新建副本。; 说明文件：turn 9 Write 调用创建 `...\docs\notes.md`，并在 turn 23 的 `find . -type f` 输出中确认存在 `./docs/notes.md` 与 `./src/Dashboard.tsx`。; notes.md 开头即写明对应关系：“对应两个现象：**打开要好几秒** → 由改动 1（请求瀑布）导致。**切筛选/打字卡** → 由改动 2–7 共同导致。”，每个改动小节都含“原代码/问题/改法”，即逐条说明了改动解决哪个问题。; 未被任务要求的事项没有被拿来当作扣分点：虚拟滚动、筛选字段语义 bug、`<select>` 内联回调都只在 notes.md 的“我没有动的地方”里作为知情说明列出，未作为缺陷计入（criterion-1 要求不得用额外标准扣分）。 |
+| 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到 | ✅ | 交付物齐全：改写后的 `src/Dashboard.tsx`（turn 8 Write 成功，220 行）与新建的 `docs/notes.md`（turn 9 Write 成功），turn 23 的文件列表 `./docs/notes.md`、`./src/Dashboard.tsx` 与之吻合。; 格式符合任务要求：产物仍是 TSX 源码文件，保留了原有导出（`export interface Order/Metric/User`、`fetchOrders/fetchMetrics/fetchUsers`、`export function Dashboard`），说明文档为 Markdown 且按“现象 → 改动”组织，与“改动说明放 docs/notes.md”的格式要求一致。; 语法结构自检通过：turn 23 `node .check.js src/Dashboard.tsx --trace` 输出 'balanced OK'（括号/字符串/模板字面量配平），排除了低级语法破损；一次性脚本已按 turn 23 的 `rm -f .check.js` 删除，工作区未留残留物。; 无法运行/编译是环境限制而非产物缺陷：工作区仅有 src/ 与 .claude/，无 package.json/tsconfig.json/node_modules，`npx tsc` 返回“This is not the tsc command you are looking for”，全局也无 typescript/esbuild。agent 在最终消息中如实声明“我没能做类型检查，也没跑起来验证”，并明确说明结构检查“不能替代真实编译”，未把未验证的结论说成已验证。; 代码本身为合法的 React 18 TSX：三个 fetch 用 Promise.all 并行、useMemo/useCallback/memo 用法与依赖数组正确，`Row` 的 onPick 类型 `(user: string) => void` 与父级 `useCallback((user: string) => setQuery(user), [])` 匹配，未见会导致运行失败的构造。 |
+| 针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理 | ✅ | 症状一（首次打开慢）有对应改动：原代码 useEffect 里 `await fetchOrders()` → `await fetchMetrics()` → `await fetchUsers()` 串行（600+650+550≈1800ms），改写为 `const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()])`（turn 8 Write 内容中的 useEffect 块，第 88-101 行一带），正是首屏耗时的直接成因。; 症状二（切筛选卡）有对应改动，且针对的是卡顿的实际成因：删除 `const [rows, setRows] = useState([])` + 回写 `useEffect(setRows(next))` 的派生状态，改为渲染期 `const rows = useMemo(...)`（只依赖 sortedOrders/deferredQuery/status），消除每次筛选多跑一整轮渲染。; 同一症状的其它针对性改动均在代码中可见：`sortedOrders = useMemo(() => [...orders].sort(...), [orders])` 把每次筛选的 O(n log n) 排序降为一次性；`userById` Map 索引取代每行 `users.find`；`memo(Row)` + 模块级 `ROW_STYLE` 常量 + `useCallback` 稳定 `handlePick` 修掉三个 memo 打穿点；`key={i}` 改 `key={o.id}`；输入框用 `useDeferredValue(query)`。; 此外修掉一个持续加剧卡顿/泄漏的真实缺陷：`window.addEventListener('resize', ...)` 原本写在渲染体内且从不摘除，现移入 useEffect 并 `return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', onResize); }`，用 rAF 合并 resize 回调。; 改动与说明互相印证：notes.md 的“改动 1”对应打开慢、“改动 2–7/8”对应切筛选卡，与 Dashboard.tsx 中的实际代码一致，未出现只在文档里声明而代码未改的情况。 |
+
+### src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/… (without_skill)
+
+- **Pass Rate**: 100% (4/4)
+
+| Expectation | Result | Evidence |
+|-------------|--------|----------|
+| expect.exit_code | ✅ | all checks passed |
+| 只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准） | ✅ | 任务三件事：① 优化 src/Dashboard.tsx（首屏慢 / 切筛选卡）② 改完直接写回这个文件 ③ 改动说明放 docs/notes.md 并写清每处改动解决哪个问题。; ① 优化已做：src/Dashboard.tsx:89-102 三接口 Promise.all 并发；src/Dashboard.tsx:105-111 rows 改 useMemo 派生；src/Dashboard.tsx:114-118 建 Map 查表；src/Dashboard.tsx:121-125 resize 监听移入 useEffect 并 cleanup；src/Dashboard.tsx:68-78 Row 用 memo 包裹。; ② 就地写回已做：Write 工具 file_path 为 C:\Users\yu.zhao\AppData\Local\Temp\skill-up-2785538792\src\Dashboard.tsx（transcript turn 4 工具结果 'has been updated successfully'），本次核对磁盘文件仍在该路径且内容完整。; ③ 说明文档已做：docs/notes.md 存在（7256 字节，见目录列表），内容按「一、首屏慢 / 二、切筛选卡 / 三、顺手修的 bug / 四、没动的地方」分节，每条改动都点明对应问题（如 '问题：原来三个 await 串行排列，总耗时是三者相加 ≈ 600 + 650 + 550 = 1800ms'）。; 未按任务外的额外标准扣分：任务未要求跑测试/构建、未要求基准数据、未要求加 debounce 或虚拟滚动，均不计为失分项。 |
+| 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到 | ✅ | 交付物齐全：src/Dashboard.tsx 已更新（184 行，语法完整的 TSX：闭合标签、JSX 表达式与接口定义自洽），docs/notes.md 存在（7256 字节）。; 代码内部一致、能打开编译：RowProps 仅含 order/name/onPick，与调用处 src/Dashboard.tsx:171-178 传入的 props 一致；CSSProperties 已改为 import type（src/Dashboard.tsx:8），不再依赖未 import 的 React 命名空间；Row 在 src/Dashboard.tsx:68 定义、Dashboard 在 src/Dashboard.tsx:80 之后使用，无 TDZ 问题；三处 Edit 后无重复定义。; 导出的公共接口保持原样：Order/Metric/User、fetchOrders/fetchMetrics/fetchUsers、Dashboard（src/Dashboard.tsx:10-28, 33-56, 80）。; 行为对得上任务要求：筛选语义（按 o.user id 匹配）、排序（b.amount - a.amount）、点击行回填筛选框（onPick(order.user) → setQuery）均与改动前一致；DOM 结构未变。; 限制说明：工作区只有 src/Dashboard.tsx，无 package.json/tsconfig/测试（transcript turn 3 'ls -R' 输出仅 ./src/Dashboard.tsx），故无法实际启动运行；这一点属环境缺依赖，且 agent 在交付说明与 notes.md 中已显式声明『没有跑类型检查、构建或测试，也没实测耗时』，交付物本身未缺失、格式无错。 |
+| 针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理 | ✅ | 症状一（首次打开慢）有对应改动：src/Dashboard.tsx:88-102 把原本串行的三次 await（原文件 67-77 行：fetchOrders→setOrders→fetchMetrics→setMetrics→fetchUsers→setUsers）改为 Promise.all 并发，并合并为一次渲染，直接针对 600+650+550ms 的首屏等待。; 症状二（切筛选卡）有对应改动：src/Dashboard.tsx:104-111 把 rows 从 useEffect+setRows（原文件 80-86 行，每次按键渲染两遍且先画一帧旧数据）改成 useMemo 渲染期派生——这是切筛选卡顿的根因改动。; 症状二配套改动：src/Dashboard.tsx:114-118 用 Map 替代每行 users.find（原 91 行），src/Dashboard.tsx:106 把 query.toLowerCase() 提出循环，src/Dashboard.tsx:68-78 Row 加 memo + src/Dashboard.tsx:59 模块级 ROW_STYLE + src/Dashboard.tsx:128 handlePick useCallback（原行内箭头 onPick 使浅比较失效），src/Dashboard.tsx:173 key={i} → key={o.id}。; 另有针对性修复：原 89 行 window.addEventListener('resize', ...) 写在渲染函数体且无 cleanup，每渲染多挂一个监听器导致 resize 触发 N 次 setState→N 次渲染，现已移入 useEffect 并 removeEventListener（src/Dashboard.tsx:120-125）。; 非无关清理：改动集中在渲染/请求路径，未做文件重排、重命名等无关动作；notes.md 中每个小节标题直接对应一个症状（『一、首屏慢』『二、切筛选卡』）。 |
+

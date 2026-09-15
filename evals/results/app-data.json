@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T03:49:01.902Z",
+  "generatedAt": "2026-09-15T10:28:07.518Z",
   "taxonomy": {
     "version": 1,
     "policy": {
@@ -1720,6 +1720,548 @@
         "source": {
           "tool": "skill-up",
           "report": "candidates/skills/brainstorming-workspace/iteration-1/result.json"
+        },
+        "selfCheck": false
+      }
+    },
+    {
+      "id": "react-best-practices",
+      "type": "skill",
+      "status": "adopted",
+      "summary": "机器判定达标：可复核试用连续全过、用例无退步——采纳与否等你给结论。",
+      "description": "一份 React 与 Next.js 性能优化指南：40+ 条规则，覆盖消除瀑布、精简打包体积、改善渲染。适合在优化 React 应用性能、做性能审查、重构组件时使用。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（模型翻译，未人工校对；原文见该文件）",
+      "howToUse": "harness-tool add react-best-practices",
+      "humanDecision": {
+        "verdict": "adopt",
+        "reviewedAt": "2026-09-15"
+      },
+      "source": {
+        "repo": "davila7/claude-code-templates",
+        "path": "cli-tool/components/skills/web-development/react-best-practices/SKILL.md",
+        "license": "MIT",
+        "commit": "560f2fccd9a13099283ea7ef1ff3787da17eb1ef"
+      },
+      "localPath": "candidates/skills/react-best-practices",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "code-quality"
+        ],
+        "stage": "trialing",
+        "source": "community"
+      },
+      "trials": [
+        {
+          "trialId": "2026-09-15-react-best-practices-skillup",
+          "capability": {
+            "id": "react-best-practices",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ask-202609150802",
+            "fixture": "candidates/skills/react-best-practices-workspace/iteration-1",
+            "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下，改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false
+            },
+            {
+              "name": "B",
+              "withCapability": true
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 0,
+              "B": 0
+            },
+            "tokensIn": {
+              "A": 17317,
+              "B": 18267
+            },
+            "tokensOut": {
+              "A": 434,
+              "B": 622
+            },
+            "tokensTotal": {
+              "A": 17751,
+              "B": 18889
+            },
+            "tokensCached": {
+              "A": 17152,
+              "B": 18048
+            },
+            "durationSec": {
+              "A": 14.7,
+              "B": 22.4
+            },
+            "steps": {
+              "A": 1,
+              "B": 3
+            },
+            "toolCalls": {
+              "A": 3,
+              "B": 5
+            },
+            "toolMix": {
+              "A": "Bash 3",
+              "B": "Bash 5"
+            },
+            "staticChecks": {
+              "A": "用例 0/1 通过；断言 1/3；耗时 14.7s；未过：只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）; 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+              "B": "用例 0/1 通过；断言 1/3；耗时 22.4s；未过：只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）; 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；报告：candidates/skills/react-best-practices-workspace/iteration-1；（注意）这条试用的报告与 A/B 产物在 2026-09-15 的重复跑里被同名 iteration 目录覆盖了（当时 skill-up 的 --iteration 从 1 编号、默认写回 workspace 根）；文件找不回来，所以不再列证据路径。桥接已改为每次运行写独立的 run-<时间戳>/ 输出目录，不会再发生。"
+          },
+          "judge": [
+            "auto",
+            "llm"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "retry",
+            "confidence": "low",
+            "reason": "这次评测的用例本身有问题：提示词要求改 src/Dashboard.tsx，而工作区里没有这个文件——A、B 两边都无从下手（各 0/1），不是\"能力没做到\"。已把待优化的组件作为工作区输入（context.repo_fixture: evals/fixtures/react-slow-dashboard）补进用例并重跑，结论以重跑那次为准。"
+          },
+          "evidence": [],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-15",
+          "recordedAt": "2026-09-15T08:04:04.813Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/react-best-practices-workspace/iteration-1/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-15-react-best-practices-skillup-2",
+          "capability": {
+            "id": "react-best-practices",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ask-202609150802",
+            "fixture": "candidates/skills/react-best-practices-workspace/iteration-2",
+            "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false
+            },
+            {
+              "name": "B",
+              "withCapability": true
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 6,
+              "B": 5.2
+            },
+            "tokensIn": {
+              "A": 34410,
+              "B": 32711
+            },
+            "tokensOut": {
+              "A": 3974,
+              "B": 6562
+            },
+            "tokensTotal": {
+              "A": 38384,
+              "B": 39273
+            },
+            "tokensCached": {
+              "A": 34176,
+              "B": 32512
+            },
+            "durationSec": {
+              "A": 89.7,
+              "B": 93.3
+            },
+            "steps": {
+              "A": 6,
+              "B": 5
+            },
+            "toolCalls": {
+              "A": 15,
+              "B": 12
+            },
+            "toolMix": {
+              "A": "Bash 11 / Write 2 / Read 1 / Edit 1",
+              "B": "Bash 8 / Read 2 / Write 2"
+            },
+            "staticChecks": {
+              "A": "用例 1/1 通过；断言 4/4；耗时 89.7s",
+              "B": "用例 1/1 通过；断言 4/4；耗时 93.3s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；产物大小 A 6 KB / B 5.2 KB；报告：candidates/skills/react-best-practices-workspace/iteration-2；（注意）这条试用的报告与 A/B 产物在 2026-09-15 的重复跑里被同名 iteration 目录覆盖了（当时 skill-up 的 --iteration 从 1 编号、默认写回 workspace 根）；文件找不回来，所以不再列证据路径。桥接已改为每次运行写独立的 run-<时间戳>/ 输出目录，不会再发生。"
+          },
+          "judge": [
+            "auto",
+            "llm"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "hold",
+            "confidence": "medium",
+            "reason": "带能力这一次全过（对照 A 1/1）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+          },
+          "evidence": [],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-15",
+          "recordedAt": "2026-09-15T08:13:23.982Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/react-best-practices-workspace/iteration-2/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-15-react-best-practices-skillup-3",
+          "capability": {
+            "id": "react-best-practices",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ask-202609150802",
+            "fixture": "candidates/skills/react-best-practices-workspace/iteration-3",
+            "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 0,
+              "B": 1
+            },
+            "sizeKB": {
+              "A": 4.6,
+              "B": 6.6
+            },
+            "tokensIn": {
+              "A": 18604,
+              "B": 37326
+            },
+            "tokensOut": {
+              "A": 3205,
+              "B": 6045
+            },
+            "tokensTotal": {
+              "A": 21809,
+              "B": 43371
+            },
+            "tokensCached": {
+              "A": 18432,
+              "B": 36992
+            },
+            "durationSec": {
+              "A": 60.7,
+              "B": 97
+            },
+            "steps": {
+              "A": 2,
+              "B": 11
+            },
+            "toolCalls": {
+              "A": 3,
+              "B": 15
+            },
+            "toolMix": {
+              "A": "Bash 2 / Read 1",
+              "B": "Bash 8 / Read 2 / Write 2 / Edit 2 / WebSearch 1"
+            },
+            "staticChecks": {
+              "A": "用例 0/1 通过；断言 1/4；耗时 60.7s；未过：只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）; 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到; 针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+              "B": "用例 1/1 通过；断言 4/4；耗时 97.0s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；产物大小 A 4.6 KB / B 6.6 KB；报告：candidates/skills/react-best-practices-workspace/iteration-3"
+          },
+          "judge": [
+            "auto",
+            "llm"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "ready",
+            "confidence": "medium",
+            "reason": "机器判定达标：可复核试用已通过 2 次、无退步；对照 A 0/1——采纳与否由你定（在能力详情里给结论）"
+          },
+          "evidence": [
+            "candidates/skills/react-best-practices-workspace/iteration-3/result.json",
+            "candidates/skills/react-best-practices-workspace/iteration-3/benchmark.json",
+            "candidates/skills/react-best-practices-workspace/iteration-3/report.html",
+            "candidates/skills/react-best-practices-workspace/iteration-3/benchmark.md",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/COMMIT.txt",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/LICENSE.txt",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SKILL.md",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.json",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.md",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/docs/notes.md",
+            "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-15",
+          "recordedAt": "2026-09-15T08:30:55.570Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/react-best-practices-workspace/iteration-3/result.json"
+          },
+          "selfCheck": false
+        },
+        {
+          "trialId": "2026-09-15-react-best-practices-skillup-4",
+          "capability": {
+            "id": "react-best-practices",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "ask-202609150802",
+            "fixture": "candidates/skills/react-best-practices-workspace/run-20260915095440（3 轮重复）",
+            "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill，重复 3 次）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false,
+              "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+            },
+            {
+              "name": "B",
+              "withCapability": true,
+              "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "repeats": {
+              "A": "3/3",
+              "B": "3/3"
+            },
+            "sizeKB": {
+              "A": 6.6,
+              "B": 6
+            },
+            "tokensIn": {
+              "A": 81257,
+              "B": 94339
+            },
+            "tokensOut": {
+              "A": 18520,
+              "B": 19071
+            },
+            "tokensTotal": {
+              "A": 99777,
+              "B": 113410
+            },
+            "tokensCached": {
+              "A": 28032,
+              "B": 32384
+            },
+            "durationSec": {
+              "A": 154.9,
+              "B": 189.6
+            },
+            "steps": {
+              "A": 12,
+              "B": 20
+            },
+            "toolCalls": {
+              "A": 21,
+              "B": 29
+            },
+            "toolMix": {
+              "A": "Bash 10 / Write 6 / Read 3 / Edit 2",
+              "B": "Bash 16 / Write 6 / Read 3 / Skill 3 / Grep 1"
+            },
+            "staticChecks": {
+              "A": "用例 3/3 通过；重复 3 次：全过 3/3；断言 4/4；最后一次耗时 47.2s",
+              "B": "用例 3/3 通过；重复 3 次：全过 3/3；断言 4/4；最后一次耗时 77.2s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；重复 3 次（同一条用例）：A 全过 3/3、B 全过 3/3；产物大小 A 6.6 KB / B 6 KB；报告：candidates/skills/react-best-practices-workspace/run-20260915095440/（3 轮）"
+          },
+          "judge": [
+            "auto",
+            "llm"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "ready",
+            "confidence": "high",
+            "reason": "机器判定达标（3 次重复里 B 全过 3/3、A 全过 3/3）：可复核试用已通过 3 次、无退步；对照 A 3/3——采纳与否由你定（在能力详情里给结论）"
+          },
+          "evidence": [
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/result.json",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/benchmark.json",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/report.html",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/benchmark.md",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/result.json",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/benchmark.json",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/report.html",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/benchmark.md",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/result.json",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/benchmark.json",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/report.html",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/benchmark.md",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/docs/notes.md",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/COMMIT.txt",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/LICENSE.txt",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SKILL.md",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.json",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.md",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/docs/notes.md",
+            "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-15",
+          "recordedAt": "2026-09-15T10:03:57.358Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/result.json"
+          },
+          "selfCheck": false
+        }
+      ],
+      "latestTrial": {
+        "trialId": "2026-09-15-react-best-practices-skillup-4",
+        "capability": {
+          "id": "react-best-practices",
+          "type": "skill"
+        },
+        "kind": "controlled",
+        "task": {
+          "id": "ask-202609150802",
+          "fixture": "candidates/skills/react-best-practices-workspace/run-20260915095440（3 轮重复）",
+          "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill，重复 3 次）"
+        },
+        "conditions": [
+          {
+            "name": "A",
+            "withCapability": false,
+            "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+          },
+          {
+            "name": "B",
+            "withCapability": true,
+            "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+          }
+        ],
+        "measures": {
+          "correctness": {
+            "A": 1,
+            "B": 1
+          },
+          "repeats": {
+            "A": "3/3",
+            "B": "3/3"
+          },
+          "sizeKB": {
+            "A": 6.6,
+            "B": 6
+          },
+          "tokensIn": {
+            "A": 81257,
+            "B": 94339
+          },
+          "tokensOut": {
+            "A": 18520,
+            "B": 19071
+          },
+          "tokensTotal": {
+            "A": 99777,
+            "B": 113410
+          },
+          "tokensCached": {
+            "A": 28032,
+            "B": 32384
+          },
+          "durationSec": {
+            "A": 154.9,
+            "B": 189.6
+          },
+          "steps": {
+            "A": 12,
+            "B": 20
+          },
+          "toolCalls": {
+            "A": 21,
+            "B": 29
+          },
+          "toolMix": {
+            "A": "Bash 10 / Write 6 / Read 3 / Edit 2",
+            "B": "Bash 16 / Write 6 / Read 3 / Skill 3 / Grep 1"
+          },
+          "staticChecks": {
+            "A": "用例 3/3 通过；重复 3 次：全过 3/3；断言 4/4；最后一次耗时 47.2s",
+            "B": "用例 3/3 通过；重复 3 次：全过 3/3；断言 4/4；最后一次耗时 77.2s"
+          },
+          "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；重复 3 次（同一条用例）：A 全过 3/3、B 全过 3/3；产物大小 A 6.6 KB / B 6 KB；报告：candidates/skills/react-best-practices-workspace/run-20260915095440/（3 轮）"
+        },
+        "judge": [
+          "auto",
+          "llm"
+        ],
+        "humanReview": null,
+        "verdict": {
+          "decision": "ready",
+          "confidence": "high",
+          "reason": "机器判定达标（3 次重复里 B 全过 3/3、A 全过 3/3）：可复核试用已通过 3 次、无退步；对照 A 3/3——采纳与否由你定（在能力详情里给结论）"
+        },
+        "evidence": [
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/result.json",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/benchmark.json",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/report.html",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-1/benchmark.md",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/result.json",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/benchmark.json",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/report.html",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-2/benchmark.md",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/result.json",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/benchmark.json",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/report.html",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/benchmark.md",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/docs/notes.md",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/COMMIT.txt",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/LICENSE.txt",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SKILL.md",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.json",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/.claude/skills/react-best-practices/SOURCE.md",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/docs/notes.md",
+          "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+        ],
+        "model": "claude_code / deepseek-v4-flash",
+        "date": "2026-09-15",
+        "recordedAt": "2026-09-15T10:03:57.358Z",
+        "source": {
+          "tool": "skill-up",
+          "report": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/result.json"
         },
         "selfCheck": false
       }

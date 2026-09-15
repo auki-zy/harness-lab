@@ -1,0 +1,38 @@
+id: react-perf-observable-patterns
+title: 用一个单文件 Node 脚本验：独立异步任务是否被并行执行、同 key 取数是否只触发一次底层、排序是否改动了输入
+description: 这条任务把技能的两条 CRITICAL 主张（独立异步操作必须重叠、重复取数必须复用同一份进行中的结果）和一个方法级主张（排序不得原地改动输入）转成了外部可观测的数字：顺序 await 的实现只会报出 maxConcurrent=1，不去重的实现会报出 loads=2，用原地 sort 的实现会报出 mutated=true——三种退化写法都会在 stdout 上直接现形。
+
+input:
+  prompt: |
+    在当前目录写一个单文件 Node ESM 脚本 `perfkit.mjs`（只用 Node 内置能力，不装任何依赖、不跑构建），通过 `node perfkit.mjs <命令> [参数]` 调用。每个命令只往 stdout 打印一行结果，正常情况退出码 0，出错时按下面规定返回退出码 1，且不要往 stdout 打印这一行以外的任何内容。
+
+    命令与输出：
+
+    1. `parallel <n>`：并行执行 n 个互不依赖的异步任务，每个任务持续约 50ms。任务开始与结束时都要更新“当前处于进行中的任务数”，据此统计出整个过程里同时进行中的任务数的峰值。这 n 个任务之间没有依赖关系，应当重叠执行，因此统计出来的峰值应等于 n。打印 `maxConcurrent=<峰值>`（整数）。n 为 0 时打印 `maxConcurrent=0`。
+
+    2. `dedupe <value>`：构造一次取数操作，它接收一个 key，每当底层数据源被真正触发时把计数器加 1 并返回 <value>。在同一个请求作用域内，用同一个 key 依次取两次数据；两次都拿到结果后，打印 `loads=<底层数据源被触发的次数> value=<取到的值>`。同一个 key 在同一个请求作用域内不应当把底层数据源触发两次。
+
+    3. `topn <path>`：path 指向一个 JSON 数字数组文件（例如内容是 `[12, 3, 9, 1, 7, 5]`）。打印 `top=<从大到小排序后的前 3 个数字，用英文逗号连接、不带空格> mutated=<true 或 false，表示打印这一刻输入数组的内容是否已经被改动过>`；数组里不足 3 个数字时就把全部数字按从大到小输出。
+
+    4. `topn` 的 path 读不出来（文件不存在）时：退出码 1，打印 `error=missing-input`。
+
+    5. 命令名不在上面 1–3 之列时：退出码 1，打印 `error=unknown-command`。
+
+    写完后自己把这几条命令各跑一遍，确认 stdout 内容和退出码都符合要求。
+
+context:
+  files:
+    "scores.json": |
+      [12, 3, 9, 1, 7, 5]
+
+constraints:
+  timeout_seconds: 300
+  max_turns: 4
+
+expect:
+  exit_code: 0
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-react-perf-observable-patterns.sh
+  timeout_seconds: 60

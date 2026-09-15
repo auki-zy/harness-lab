@@ -1,0 +1,66 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）",
+      "passed": true,
+      "evidence": "用户任务原文（transcript 第 0 条）：\"src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。\"; 要求『改完直接写回这个文件』：transcript 第 19 条为对 src/Dashboard.tsx 的 Write 调用，第 20 条返回 \"The file ... has been updated successfully\"；磁盘上该文件（192 行）确实已是优化后版本。; 要求『改动说明放 docs/notes.md』：transcript 第 22 条 Write 调用创建 docs/notes.md，第 23 条返回 \"File created successfully\"；磁盘上该文件存在（148 行）。; 要求『写清每处改动是想解决哪个问题』：docs/notes.md 第 107-121 行有 13 行改动清单表，列为『位置 | 改动 | 解决的问题』，例如第 109 行『数据加载 effect | 串行 await → Promise.all | 首屏 ~1.8s → ~650ms』。; 额外做的 resize 监听器修复、Map 索引、useDeferredValue 等属于任务未要求的附加项，未据此加减分。"
+    },
+    {
+      "text": "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+      "passed": true,
+      "evidence": "两个交付物都存在于磁盘：src/Dashboard.tsx（191 行内容）与 docs/notes.md（147 行内容）。; 语法/编译可用：`bun build src/Dashboard.tsx --external react` 输出 \"Bundled 1 module in 67ms  Dashboard.js 6.73 KB (entry point)\"，TS + JSX 解析零报错。; 可打开/可渲染：用 react 19.3.0 + react-dom/server 的 renderToString 渲染成功，输出完整 HTML（\u003cdiv class=\"dashboard\" style=\"width:1168px\"\u003e、\u003cinput\u003e、\u003cselect\u003e、\u003ctable\u003e\u003cthead\u003e…\u003ctbody\u003e），未抛异常。; 可真实运行与交互：happy-dom + createRoot 客户端渲染测试中，装载后 tbody 行数为 480，总耗时约 1056ms（数据加载本身约 650ms，与并行化后的预期一致）。; 交互与格式正确：切换 select 为 paid 后行数变为 160（480/3，行为与原 .filter 一致）；点击第 4 行后 input 值变为 \"u-27\"、行数变为 8（480/60）、文案为『共 8 条 / 成员 60 人』，说明点击行 setQuery(order.user) 的原有行为被保留。; notes.md 为正常 Markdown 文档，含标题、分节、表格与代码块，格式符合『改动说明』的要求。"
+    },
+    {
+      "text": "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+      "passed": true,
+      "evidence": "症状一『打开要好几秒』有对应改动：原文件（transcript 第 7 条 tool_result，原 67-77 行）为 `const o = await fetchOrders(); ... const m = await fetchMetrics(); ... const u = await fetchUsers();` 三段串行 await；新文件 src/Dashboard.tsx:85-98 改为 `const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()]);`，并加了 cancelled 清理。; 症状二『切筛选卡』有对应改动之一：原文件 79-86 行把派生数据塞进 state（`rows` + `useEffect(() =\u003e {... setRows(next) }, [orders, query, status])`）；新文件已删除该 state 与 effect，改为 src/Dashboard.tsx:112-118 渲染期 `useMemo` 计算 rows。; 症状二对应改动之二：原文件 134-142 行 `Row` 无 memo 且 `style={{ padding: 8 }}`、`onPick={() =\u003e setQuery(o.user)}`、`key={i}` 每次渲染都新建；新文件 src/Dashboard.tsx:59-60 提为模块常量 ROW_STYLE/METRIC_STYLE，160-166 行改 `key={o.id}` 与共享 `onPick={setQuery}`，181 行 `const Row = memo(function Row(...))`。; 实测印证症状二确实被处理：客户端渲染测试中输入 select 切到 paid 后 DOM 行数正确变为 160，打字/点击后行数正确收敛为 8，功能未破坏。; docs/notes.md 中两处症状均有独立章节并标注对应的问题与代码位置：第 7-21 行『一、\"打开要好几秒\" —— 首屏请求瀑布（原 67-77 行）』，第 25-59 行『二、\"切筛选也卡\"（原 79-86 行 / 原 134-142 行）』。; 非『只做无关清理』：改动集中在数据加载路径与筛选重渲染路径，未出现与两个症状无关的重构取代优化的情形。"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 2292,
+          "original_bytes": 2292
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 38809,
+          "original_bytes": 38809
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 4517
+  }
+}

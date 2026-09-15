@@ -18,6 +18,9 @@ import {
   humanDecisionView,
   humanReviewGlyph,
   humanSummary,
+  runDuration,
+  runKindView,
+  runStateView,
   trialDateShort,
   hasEvidenceChain,
   humanReviewLine,
@@ -475,5 +478,54 @@ describe('证据文件访问', () => {
     expect(artifactUrl({ name: 'A', withCapability: false })).toBeNull();
     expect(evidenceList(trial)).toHaveLength(2);
     expect(evidenceList(null)).toEqual([]);
+  });
+});
+
+describe('后台评测的状态文案（「正在评测」那一块）', () => {
+  it('跑着 / 跑完成功 / 跑完失败，三种说法分开', () => {
+    expect(runStateView({ status: 'running' })).toMatchObject({ stamp: '评测中', tone: 'ready' });
+    expect(runStateView({ status: 'running' }).detail).toContain('可以关掉');
+    expect(runStateView({ status: 'done', code: 0 })).toMatchObject({ stamp: '完成', tone: 'adopt' });
+    expect(runStateView({ status: 'done', code: 0 }).detail).toContain('台账已经更新');
+    expect(runStateView({ status: 'done', code: 1 })).toMatchObject({ stamp: '失败', tone: 'reject' });
+    expect(runStateView({ status: 'done', code: 1 }).detail).toContain('看日志');
+  });
+
+  it('三种发起方式各有一句话', () => {
+    expect(runKindView('ask').label).toBe('自己出题');
+    expect(runKindView('auto').label).toBe('一键评测');
+    expect(runKindView('run').label).toBe('跑已有用例');
+    // 认不出的值别抛错，退回最保守的那个说法
+    expect(runKindView('???').label).toBe('跑已有用例');
+  });
+
+  it('时长按人话写：秒 / 分 / 分秒', () => {
+    expect(runDuration(9000)).toBe('9 秒');
+    expect(runDuration(120000)).toBe('2 分');
+    expect(runDuration(305000)).toBe('5 分 5 秒');
+    expect(runDuration(undefined)).toBe('0 秒');
+  });
+});
+
+describe('重复跑（`--repeat N`）在页面上怎么说', () => {
+  const withRepeats = (repeats: Record<string, string>, extra: Record<string, unknown> = {}) =>
+    ({ trialId: 't', capability: { id: 'x' }, measures: { correctness: { A: 0.33, B: 1 }, repeats, ...extra } }) as unknown as Trial;
+
+  it('有重复记录时多出一行"全过几次 / 共几次"', () => {
+    const row = measureRows(withRepeats({ A: '1/3', B: '3/3' })).find((r) => r.label.includes('重复跑'));
+    expect(row).toBeTruthy();
+    expect(row?.values).toEqual({ A: '1/3 次全过', B: '3/3 次全过' });
+  });
+
+  it('每次都对上 → "每次都过"；有波动 → 明说"单次结果不能当结论"', () => {
+    const steady = measureRows(withRepeats({ A: '3/3', B: '3/3' })).find((r) => r.label.includes('重复跑'));
+    expect(steady?.note).toBe('每次都过');
+    const flaky = measureRows(withRepeats({ A: '1/3', B: '3/3' })).find((r) => r.label.includes('重复跑'));
+    expect(flaky?.note).toContain('有波动');
+  });
+
+  it('没有重复记录就不出现这一行（单次运行不打扰）', () => {
+    const only = { trialId: 't', capability: { id: 'x' }, measures: { correctness: { A: 1, B: 1 } } } as unknown as Trial;
+    expect(measureRows(only).some((r) => r.label.includes('重复跑'))).toBe(false);
   });
 });

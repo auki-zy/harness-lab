@@ -1,0 +1,66 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）",
+      "passed": true,
+      "evidence": "任务要求的三件事逐条对照：(1) 优化 src/Dashboard.tsx 的打开慢/切筛选卡；(2) 改完写回同一文件；(3) 改动说明放 docs/notes.md 并写清每处改动解决哪个问题。; 写回原文件：transcript turn 8-9 的 Write 调用 file_path 为 `...\\src\\Dashboard.tsx`，工具返回 'The file ... has been updated successfully'，即写回的是任务指定的那个文件而非新建副本。; 说明文件：turn 9 Write 调用创建 `...\\docs\\notes.md`，并在 turn 23 的 `find . -type f` 输出中确认存在 `./docs/notes.md` 与 `./src/Dashboard.tsx`。; notes.md 开头即写明对应关系：“对应两个现象：**打开要好几秒** → 由改动 1（请求瀑布）导致。**切筛选/打字卡** → 由改动 2–7 共同导致。”，每个改动小节都含“原代码/问题/改法”，即逐条说明了改动解决哪个问题。; 未被任务要求的事项没有被拿来当作扣分点：虚拟滚动、筛选字段语义 bug、`\u003cselect\u003e` 内联回调都只在 notes.md 的“我没有动的地方”里作为知情说明列出，未作为缺陷计入（criterion-1 要求不得用额外标准扣分）。"
+    },
+    {
+      "text": "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+      "passed": true,
+      "evidence": "交付物齐全：改写后的 `src/Dashboard.tsx`（turn 8 Write 成功，220 行）与新建的 `docs/notes.md`（turn 9 Write 成功），turn 23 的文件列表 `./docs/notes.md`、`./src/Dashboard.tsx` 与之吻合。; 格式符合任务要求：产物仍是 TSX 源码文件，保留了原有导出（`export interface Order/Metric/User`、`fetchOrders/fetchMetrics/fetchUsers`、`export function Dashboard`），说明文档为 Markdown 且按“现象 → 改动”组织，与“改动说明放 docs/notes.md”的格式要求一致。; 语法结构自检通过：turn 23 `node .check.js src/Dashboard.tsx --trace` 输出 'balanced OK'（括号/字符串/模板字面量配平），排除了低级语法破损；一次性脚本已按 turn 23 的 `rm -f .check.js` 删除，工作区未留残留物。; 无法运行/编译是环境限制而非产物缺陷：工作区仅有 src/ 与 .claude/，无 package.json/tsconfig.json/node_modules，`npx tsc` 返回“This is not the tsc command you are looking for”，全局也无 typescript/esbuild。agent 在最终消息中如实声明“我没能做类型检查，也没跑起来验证”，并明确说明结构检查“不能替代真实编译”，未把未验证的结论说成已验证。; 代码本身为合法的 React 18 TSX：三个 fetch 用 Promise.all 并行、useMemo/useCallback/memo 用法与依赖数组正确，`Row` 的 onPick 类型 `(user: string) =\u003e void` 与父级 `useCallback((user: string) =\u003e setQuery(user), [])` 匹配，未见会导致运行失败的构造。"
+    },
+    {
+      "text": "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+      "passed": true,
+      "evidence": "症状一（首次打开慢）有对应改动：原代码 useEffect 里 `await fetchOrders()` → `await fetchMetrics()` → `await fetchUsers()` 串行（600+650+550≈1800ms），改写为 `const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()])`（turn 8 Write 内容中的 useEffect 块，第 88-101 行一带），正是首屏耗时的直接成因。; 症状二（切筛选卡）有对应改动，且针对的是卡顿的实际成因：删除 `const [rows, setRows] = useState([])` + 回写 `useEffect(setRows(next))` 的派生状态，改为渲染期 `const rows = useMemo(...)`（只依赖 sortedOrders/deferredQuery/status），消除每次筛选多跑一整轮渲染。; 同一症状的其它针对性改动均在代码中可见：`sortedOrders = useMemo(() =\u003e [...orders].sort(...), [orders])` 把每次筛选的 O(n log n) 排序降为一次性；`userById` Map 索引取代每行 `users.find`；`memo(Row)` + 模块级 `ROW_STYLE` 常量 + `useCallback` 稳定 `handlePick` 修掉三个 memo 打穿点；`key={i}` 改 `key={o.id}`；输入框用 `useDeferredValue(query)`。; 此外修掉一个持续加剧卡顿/泄漏的真实缺陷：`window.addEventListener('resize', ...)` 原本写在渲染体内且从不摘除，现移入 useEffect 并 `return () =\u003e { cancelAnimationFrame(frame); window.removeEventListener('resize', onResize); }`，用 rAF 合并 resize 回调。; 改动与说明互相印证：notes.md 的“改动 1”对应打开慢、“改动 2–7/8”对应切筛选卡，与 Dashboard.tsx 中的实际代码一致，未出现只在文档里声明而代码未改的情况。"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 2603,
+          "original_bytes": 2603
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 62549,
+          "original_bytes": 62549
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 4828
+  }
+}

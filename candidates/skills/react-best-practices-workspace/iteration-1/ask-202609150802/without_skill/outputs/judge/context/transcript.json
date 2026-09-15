@@ -1,0 +1,199 @@
+[
+  {
+    "role": "user",
+    "content": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。",
+    "turn": 1
+  },
+  {
+    "role": "assistant",
+    "content": "I'll start by looking at the file and the project structure.",
+    "turn": 1
+  },
+  {
+    "role": "tool_call",
+    "turn": 1,
+    "tool_call": {
+      "id": "call_00_ET_AtnlItIm3XIY4fD0BnM43580",
+      "name": "Read",
+      "arguments": {
+        "file_path": "C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx"
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 2,
+    "tool_result": {
+      "call_id": "call_00_ET_AtnlItIm3XIY4fD0BnM43580",
+      "status": "success",
+      "content": "1\t/**\n2\t * 内部运营看板（评测用例的输入文件，故意留着几处性能问题给人优化）。\n3\t *\n4\t * 这份文件是 ask 用例 `ask-\u003cid\u003e` 的工作区输入（`context.repo_fixture`），\n5\t * 不是仓库自己的产品代码——改它之前先看 `candidates/skills/react-best-practices/evals/cases/` 下的用例。\n6\t */\n7\timport { useEffect, useState } from 'react';\n8\t\n9\texport interface Order {\n10\t  id: string;\n11\t  user: string;\n12\t  amount: number;\n13\t  status: 'paid' | 'pending' | 'refunded';\n14\t  region: string;\n15\t}\n16\t\n17\texport interface Metric {\n18\t  key: string;\n19\t  label: string;\n20\t  value: number;\n21\t}\n22\t\n23\texport interface User {\n24\t  id: string;\n25\t  name: string;\n26\t  team: string;\n27\t}\n28\t\n29\tconst sleep = (ms: number) =\u003e new Promise((resolve) =\u003e setTimeout(resolve, ms));\n30\t\n31\t/** 模拟接口：各自要几百毫秒 */\n32\texport async function fetchOrders(): Promise\u003cOrder[]\u003e {\n33\t  await sleep(600);\n34\t  return Array.from({ length: 480 }, (_, i) =\u003e ({\n35\t    id: `ord-${i}`,\n36\t    user: `u-${i % 60}`,\n37\t    amount: Math.round((i * 37) % 900) + 20,\n38\t    status: (['paid', 'pending', 'refunded'] as const)[i % 3],\n39\t    region: ['华东', '华北', '华南', '西南'][i % 4],\n40\t  }));\n41\t}\n42\t\n43\texport async function fetchMetrics(): Promise\u003cMetric[]\u003e {\n44\t  await sleep(650);\n45\t  return [\n46\t    { key: 'gmv', label: '今日 GMV', value: 128430 },\n47\t    { key: 'orders', label: '订单数', value: 1742 },\n48\t    { key: 'refund', label: '退款率', value: 0.031 },\n49\t  ];\n50\t}\n51\t\n52\texport async function fetchUsers(): Promise\u003cUser[]\u003e {\n53\t  await sleep(550);\n54\t  return Array.from({ length: 60 }, (_, i) =\u003e ({ id: `u-${i}`, name: `成员 ${i + 1}`, team: ['增长', '交易', '履约'][i % 3] }));\n55\t}\n56\t\n57\texport function Dashboard() {\n58\t  const [orders, setOrders] = useState\u003cOrder[]\u003e([]);\n59\t  const [metrics, setMetrics] = useState\u003cMetric[]\u003e([]);\n60\t  const [users, setUsers] = useState\u003cUser[]\u003e([]);\n61\t  const [rows, setRows] = useState\u003cOrder[]\u003e([]);\n62\t  const [query, setQuery] = useState('');\n63\t  const [status, setStatus] = useState\u003c'all' | Order['status']\u003e('all');\n64\t  const [width, setWidth] = useState(window.innerWidth);\n65\t\n66\t  // 三份数据一个接一个地取\n67\t  useEffect(() =\u003e {\n68\t    const load = async () =\u003e {\n69\t      const o = await fetchOrders();\n70\t      setOrders(o);\n71\t      const m = await fetchMetrics();\n72\t      setMetrics(m);\n73\t      const u = await fetchUsers();\n74\t      setUsers(u);\n75\t    };\n76\t    void load();\n77\t  }, []);\n78\t\n79\t  // 筛选 + 排序放进 effect，并且每敲一个字就重算一遍\n80\t  useEffect(() =\u003e {\n81\t    const next = orders\n82\t      .filter((o) =\u003e (status === 'all' ? true : o.status === status))\n83\t      .filter((o) =\u003e (query ? o.user.toLowerCase().includes(query.toLowerCase()) : true))\n84\t      .sort((a, b) =\u003e b.amount - a.amount);\n85\t    setRows(next);\n86\t  }, [orders, query, status]);\n87\t\n88\t  // 每次渲染都挂一个监听\n89\t  window.addEventListener('resize', () =\u003e setWidth(window.innerWidth));\n90\t\n91\t  const userOf = (id: string) =\u003e users.find((u) =\u003e u.id === id);\n92\t\n93\t  return (\n94\t    \u003cdiv className=\"dashboard\" style={{ width: width - 32 }}\u003e\n95\t      \u003cheader\u003e\n96\t        \u003ch1\u003e运营看板\u003c/h1\u003e\n97\t        \u003cinput\n98\t          placeholder=\"按成员筛选\"\n99\t          value={query}\n100\t          onChange={(e) =\u003e setQuery(e.target.value)}\n101\t        /\u003e\n102\t        \u003cselect value={status} onChange={(e) =\u003e setStatus(e.target.value as Order['status'])}\u003e\n103\t          \u003coption value=\"all\"\u003e全部\u003c/option\u003e\n104\t          \u003coption value=\"paid\"\u003e已支付\u003c/option\u003e\n105\t          \u003coption value=\"pending\"\u003e待支付\u003c/option\u003e\n106\t          \u003coption value=\"refunded\"\u003e已退款\u003c/option\u003e\n107\t        \u003c/select\u003e\n108\t      \u003c/header\u003e\n109\t\n110\t      \u003csection className=\"metrics\"\u003e\n111\t        {metrics.map((m) =\u003e (\n112\t          \u003cdiv className=\"metric\" key={m.key} style={{ padding: 12 }}\u003e\n113\t            \u003cspan\u003e{m.label}\u003c/span\u003e\n114\t            \u003cstrong\u003e{m.value}\u003c/strong\u003e\n115\t          \u003c/div\u003e\n116\t        ))}\n117\t      \u003c/section\u003e\n118\t\n119\t      \u003cp\u003e\n120\t        共 {rows.length} 条 / 成员 {users.length} 人\n121\t      \u003c/p\u003e\n122\t\n123\t      \u003ctable\u003e\n124\t        \u003cthead\u003e\n125\t          \u003ctr\u003e\n126\t            \u003cth\u003e订单\u003c/th\u003e\n127\t            \u003cth\u003e成员\u003c/th\u003e\n128\t            \u003cth\u003e金额\u003c/th\u003e\n129\t            \u003cth\u003e状态\u003c/th\u003e\n130\t            \u003cth\u003e区域\u003c/th\u003e\n131\t          \u003c/tr\u003e\n132\t        \u003c/thead\u003e\n133\t        \u003ctbody\u003e\n134\t          {rows.map((o, i) =\u003e (\n135\t            \u003cRow\n136\t              key={i}\n137\t              order={o}\n138\t              name={userOf(o.user)?.name ?? o.user}\n139\t              style={{ padding: 8 }}\n140\t              onPick={() =\u003e setQuery(o.user)}\n141\t            /\u003e\n142\t          ))}\n143\t        \u003c/tbody\u003e\n144\t      \u003c/table\u003e\n145\t    \u003c/div\u003e\n146\t  );\n147\t}\n148\t\n149\tinterface RowProps {\n150\t  order: Order;\n151\t  name: string;\n152\t  style: React.CSSProperties;\n153\t  onPick: () =\u003e void;\n154\t}\n155\t\n156\tfunction Row({ order, name, style, onPick }: RowProps) {\n157\t  return (\n158\t    \u003ctr style={style} onClick={onPick}\u003e\n159\t      \u003ctd\u003e{order.id}\u003c/td\u003e\n160\t      \u003ctd\u003e{name}\u003c/td\u003e\n161\t      \u003ctd\u003e{order.amount}\u003c/td\u003e\n162\t      \u003ctd\u003e{order.status}\u003c/td\u003e\n163\t      \u003ctd\u003e{order.region}\u003c/td\u003e\n164\t    \u003c/tr\u003e\n165\t  );\n166\t}\n167\t"
+    }
+  },
+  {
+    "role": "tool_call",
+    "turn": 2,
+    "tool_call": {
+      "id": "call_01_ET_hzz6FBagje1urdIIexyM0107",
+      "name": "Bash",
+      "arguments": {
+        "command": "ls -la \"C:/Users/yu.zhao/AppData/Local/Temp/skill-up-2785538792\"",
+        "description": "List project root"
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 3,
+    "tool_result": {
+      "call_id": "call_01_ET_hzz6FBagje1urdIIexyM0107",
+      "status": "success",
+      "content": "total 768\ndrwxr-xr-x 1 yu.zhao 1049089 0 Sep 15 09:50 .\ndrwxr-xr-x 1 yu.zhao 1049089 0 Sep 15 09:50 ..\ndrwxr-xr-x 1 yu.zhao 1049089 0 Sep 15 09:50 src"
+    }
+  },
+  {
+    "role": "tool_call",
+    "turn": 3,
+    "tool_call": {
+      "id": "call_00_Hu9F0zDHtCJyAjsB0qUv9534",
+      "name": "Bash",
+      "arguments": {
+        "command": "cd \"C:/Users/yu.zhao/AppData/Local/Temp/skill-up-2785538792\" \u0026\u0026 ls -R . | head -50 \u0026\u0026 echo \"--- find package.json/tsconfig ---\" \u0026\u0026 find . -maxdepth 3 -name \"package.json\" -o -maxdepth 3 -name \"tsconfig*.json\" -o -maxdepth 3 -name \"*.css\" 2\u003e/dev/null \u0026\u0026 echo \"--- candidates dir? ---\" \u0026\u0026 ls candidates 2\u003e\u00261 | head -5",
+        "description": "Inspect project layout and configs"
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 4,
+    "tool_result": {
+      "call_id": "call_00_Hu9F0zDHtCJyAjsB0qUv9534",
+      "status": "success",
+      "content": ".:\nsrc\n\n./src:\nDashboard.tsx\n--- find package.json/tsconfig ---\n--- candidates dir? ---\nls: cannot access 'candidates': No such file or directory"
+    }
+  },
+  {
+    "role": "assistant",
+    "content": "Only `src/Dashboard.tsx` exists — no `package.json`, no `tsconfig`, no CSS. I'll note that I can't typecheck/build. Now the rewrite:",
+    "turn": 4
+  },
+  {
+    "role": "tool_call",
+    "turn": 4,
+    "tool_call": {
+      "id": "call_00_RieZE2XquTKiYe1QYoDH2480",
+      "name": "Write",
+      "arguments": {
+        "content": "/**\n * 内部运营看板（评测用例的输入文件，故意留着几处性能问题给人优化）。\n *\n * 这份文件是 ask 用例 `ask-\u003cid\u003e` 的工作区输入（`context.repo_fixture`），\n * 不是仓库自己的产品代码——改它之前先看 `candidates/skills/react-best-practices/evals/cases/` 下的用例。\n */\nimport { memo, useCallback, useEffect, useMemo, useState } from 'react';\nimport type { CSSProperties } from 'react';\n\nexport interface Order {\n  id: string;\n  user: string;\n  amount: number;\n  status: 'paid' | 'pending' | 'refunded';\n  region: string;\n}\n\nexport interface Metric {\n  key: string;\n  label: string;\n  value: number;\n}\n\nexport interface User {\n  id: string;\n  name: string;\n  team: string;\n}\n\nconst sleep = (ms: number) =\u003e new Promise((resolve) =\u003e setTimeout(resolve, ms));\n\n/** 模拟接口：各自要几百毫秒 */\nexport async function fetchOrders(): Promise\u003cOrder[]\u003e {\n  await sleep(600);\n  return Array.from({ length: 480 }, (_, i) =\u003e ({\n    id: `ord-${i}`,\n    user: `u-${i % 60}`,\n    amount: Math.round((i * 37) % 900) + 20,\n    status: (['paid', 'pending', 'refunded'] as const)[i % 3],\n    region: ['华东', '华北', '华南', '西南'][i % 4],\n  }));\n}\n\nexport async function fetchMetrics(): Promise\u003cMetric[]\u003e {\n  await sleep(650);\n  return [\n    { key: 'gmv', label: '今日 GMV', value: 128430 },\n    { key: 'orders', label: '订单数', value: 1742 },\n    { key: 'refund', label: '退款率', value: 0.031 },\n  ];\n}\n\nexport async function fetchUsers(): Promise\u003cUser[]\u003e {\n  await sleep(550);\n  return Array.from({ length: 60 }, (_, i) =\u003e ({ id: `u-${i}`, name: `成员 ${i + 1}`, team: ['增长', '交易', '履约'][i % 3] }));\n}\n\n/** 提到模块级：Row 每次渲染都新建 style 对象会让 React.memo 的浅比较永远失败 */\nconst ROW_STYLE: CSSProperties = { padding: 8 };\n\nexport function Dashboard() {\n  const [orders, setOrders] = useState\u003cOrder[]\u003e([]);\n  const [metrics, setMetrics] = useState\u003cMetric[]\u003e([]);\n  const [users, setUsers] = useState\u003cUser[]\u003e([]);\n  const [query, setQuery] = useState('');\n  const [status, setStatus] = useState\u003c'all' | Order['status']\u003e('all');\n  const [width, setWidth] = useState(window.innerWidth);\n\n  // 三份数据并发取，而不是一个接一个地等\n  useEffect(() =\u003e {\n    let cancelled = false;\n    const load = async () =\u003e {\n      const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()]);\n      if (cancelled) return;\n      setOrders(o);\n      setMetrics(m);\n      setUsers(u);\n    };\n    void load();\n    return () =\u003e {\n      cancelled = true;\n    };\n  }, []);\n\n  // 筛选 + 排序改成渲染期派生：不再经过 state，省掉一次多余渲染，也不会先闪一帧旧数据\n  const rows = useMemo(() =\u003e {\n    const q = query.toLowerCase();\n    return orders\n      .filter((o) =\u003e (status === 'all' ? true : o.status === status))\n      .filter((o) =\u003e (q ? o.user.toLowerCase().includes(q) : true))\n      .sort((a, b) =\u003e b.amount - a.amount);\n  }, [orders, query, status]);\n\n  // 原来每行都 users.find 一次（480 × 60 次比较），换成一次建表 O(n+m)\n  const nameById = useMemo(() =\u003e {\n    const map = new Map\u003cstring, string\u003e();\n    for (const u of users) map.set(u.id, u.name);\n    return map;\n  }, [users]);\n\n  // 原来在渲染函数体里 addEventListener：每渲染一次就多挂一个且从不卸载\n  useEffect(() =\u003e {\n    const onResize = () =\u003e setWidth(window.innerWidth);\n    window.addEventListener('resize', onResize);\n    return () =\u003e window.removeEventListener('resize', onResize);\n  }, []);\n\n  // 稳定引用，配合 memo(Row) 让行组件在无关渲染中跳过\n  const handlePick = useCallback((userId: string) =\u003e setQuery(userId), []);\n\n  return (\n    \u003cdiv className=\"dashboard\" style={{ width: width - 32 }}\u003e\n      \u003cheader\u003e\n        \u003ch1\u003e运营看板\u003c/h1\u003e\n        \u003cinput\n          placeholder=\"按成员筛选\"\n          value={query}\n          onChange={(e) =\u003e setQuery(e.target.value)}\n        /\u003e\n        \u003cselect value={status} onChange={(e) =\u003e setStatus(e.target.value as Order['status'])}\u003e\n          \u003coption value=\"all\"\u003e全部\u003c/option\u003e\n          \u003coption value=\"paid\"\u003e已支付\u003c/option\u003e\n          \u003coption value=\"pending\"\u003e待支付\u003c/option\u003e\n          \u003coption value=\"refunded\"\u003e已退款\u003c/option\u003e\n        \u003c/select\u003e\n      \u003c/header\u003e\n\n      \u003csection className=\"metrics\"\u003e\n        {metrics.map((m) =\u003e (\n          \u003cdiv className=\"metric\" key={m.key} style={{ padding: 12 }}\u003e\n            \u003cspan\u003e{m.label}\u003c/span\u003e\n            \u003cstrong\u003e{m.value}\u003c/strong\u003e\n          \u003c/div\u003e\n        ))}\n      \u003c/section\u003e\n\n      \u003cp\u003e\n        共 {rows.length} 条 / 成员 {users.length} 人\n      \u003c/p\u003e\n\n      \u003ctable\u003e\n        \u003cthead\u003e\n          \u003ctr\u003e\n            \u003cth\u003e订单\u003c/th\u003e\n            \u003cth\u003e成员\u003c/th\u003e\n            \u003cth\u003e金额\u003c/th\u003e\n            \u003cth\u003e状态\u003c/th\u003e\n            \u003cth\u003e区域\u003c/th\u003e\n          \u003c/tr\u003e\n        \u003c/thead\u003e\n        \u003ctbody\u003e\n          {rows.map((o) =\u003e (\n            \u003cRow\n              key={o.id}\n              order={o}\n              name={nameById.get(o.user) ?? o.user}\n              onPick={handlePick}\n            /\u003e\n          ))}\n        \u003c/tbody\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e\n  );\n}\n\ninterface RowProps {\n  order: Order;\n  name: string;\n  onPick: (userId: string) =\u003e void;\n}\n\nconst Row = memo(function Row({ order, name, onPick }: RowProps) {\n  return (\n    \u003ctr style={ROW_STYLE} onClick={() =\u003e onPick(order.user)}\u003e\n      \u003ctd\u003e{order.id}\u003c/td\u003e\n      \u003ctd\u003e{name}\u003c/td\u003e\n      \u003ctd\u003e{order.amount}\u003c/td\u003e\n      \u003ctd\u003e{order.status}\u003c/td\u003e\n      \u003ctd\u003e{order.region}\u003c/td\u003e\n    \u003c/tr\u003e\n  );\n});\n",
+        "file_path": "C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx"
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 5,
+    "tool_result": {
+      "call_id": "call_00_RieZE2XquTKiYe1QYoDH2480",
+      "status": "success",
+      "content": "The file C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx has been updated successfully. (file state is current in your context — no need to Read it back)"
+    }
+  },
+  {
+    "role": "tool_call",
+    "turn": 5,
+    "tool_call": {
+      "id": "call_00_3ngvxZL9jcByaMEv8ywG5477",
+      "name": "Edit",
+      "arguments": {
+        "file_path": "C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx",
+        "new_string": "/** 提到模块级：Row 每次渲染都新建 style 对象会让 React.memo 的浅比较永远失败 */\nconst ROW_STYLE: CSSProperties = { padding: 8 };\n\ninterface RowProps {\n  order: Order;\n  name: string;\n  onPick: (userId: string) =\u003e void;\n}\n\n// 定义在 Dashboard 之前：memo() 返回的是 const，没有函数声明那样的提升\nconst Row = memo(function Row({ order, name, onPick }: RowProps) {\n  return (\n    \u003ctr style={ROW_STYLE} onClick={() =\u003e onPick(order.user)}\u003e\n      \u003ctd\u003e{order.id}\u003c/td\u003e\n      \u003ctd\u003e{name}\u003c/td\u003e\n      \u003ctd\u003e{order.amount}\u003c/td\u003e\n      \u003ctd\u003e{order.status}\u003c/td\u003e\n      \u003ctd\u003e{order.region}\u003c/td\u003e\n    \u003c/tr\u003e\n  );\n});\n\nexport function Dashboard() {",
+        "old_string": "/** 提到模块级：Row 每次渲染都新建 style 对象会让 React.memo 的浅比较永远失败 */\nconst ROW_STYLE: CSSProperties = { padding: 8 };\n\nexport function Dashboard() {",
+        "replace_all": false
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 6,
+    "tool_result": {
+      "call_id": "call_00_3ngvxZL9jcByaMEv8ywG5477",
+      "status": "success",
+      "content": "The file C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx has been updated successfully. (file state is current in your context — no need to Read it back)"
+    }
+  },
+  {
+    "role": "tool_call",
+    "turn": 6,
+    "tool_call": {
+      "id": "call_00_ET_hWORCT6E72hDaSc4rEM86336",
+      "name": "Edit",
+      "arguments": {
+        "file_path": "C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx",
+        "new_string": "      \u003c/table\u003e\n    \u003c/div\u003e\n  );\n}",
+        "old_string": "      \u003c/table\u003e\n    \u003c/div\u003e\n  );\n}\n\ninterface RowProps {\n  order: Order;\n  name: string;\n  onPick: (userId: string) =\u003e void;\n}\n\nconst Row = memo(function Row({ order, name, onPick }: RowProps) {\n  return (\n    \u003ctr style={ROW_STYLE} onClick={() =\u003e onPick(order.user)}\u003e\n      \u003ctd\u003e{order.id}\u003c/td\u003e\n      \u003ctd\u003e{name}\u003c/td\u003e\n      \u003ctd\u003e{order.amount}\u003c/td\u003e\n      \u003ctd\u003e{order.status}\u003c/td\u003e\n      \u003ctd\u003e{order.region}\u003c/td\u003e\n    \u003c/tr\u003e\n  );\n});",
+        "replace_all": false
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 7,
+    "tool_result": {
+      "call_id": "call_00_ET_hWORCT6E72hDaSc4rEM86336",
+      "status": "success",
+      "content": "The file C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx has been updated successfully. (file state is current in your context — no need to Read it back)"
+    }
+  },
+  {
+    "role": "assistant",
+    "content": "Now the change notes:",
+    "turn": 7
+  },
+  {
+    "role": "tool_call",
+    "turn": 7,
+    "tool_call": {
+      "id": "call_00_ET_eGoN7Q73oEMrdpO7Zq8c2607",
+      "name": "Write",
+      "arguments": {
+        "content": "# Dashboard.tsx 性能优化说明\n\n优化对象：`src/Dashboard.tsx`\n报的两个现象：**打开要好几秒**、**切筛选（含输入框每敲一个字）卡**。\n\n下面每处改动对应它要解决的问题。行为（筛选语义、排序、点击行回填筛选框、DOM 结构、导出的接口）都保持不变。\n\n---\n\n## 一、首屏慢（打开要好几秒）\n\n### 1. 三个接口改成并发请求\n\n**问题**：原来三个 `await` 串行排列，总耗时是三者相加 ≈ 600 + 650 + 550 = **1800ms** 才开始有第二轮数据，用户感知的\"打开要好几秒\"主要来自这里。\n\n```ts\n// 之前：一个接一个地等\nconst o = await fetchOrders();   // 600ms\nsetOrders(o);\nconst m = await fetchMetrics();  // 再 650ms\nsetMetrics(m);\nconst u = await fetchUsers();    // 再 550ms\nsetUsers(u);\n```\n\n```ts\n// 现在：并发，总耗时 = 最慢的那个 ≈ 650ms\nconst [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()]);\nsetOrders(o); setMetrics(m); setUsers(u);\n```\n\n**顺带的好处**：三次 `setState` 现在落在同一个微任务里，React 会合并成一次渲染，而不是渲染三遍。\n\n**副作用（可接受）**：原来指标区会先于订单表出现，现在要等最慢的那个接口一起出现。首屏整体时间从 ~1800ms 降到 ~650ms，这个交换是划算的。\n\n### 2. 加载 effect 加了取消标记\n\n异步任务回来时组件可能已卸载。加了 `cancelled` 标志，卸载后不再 `setState`。这不影响首屏速度，属于顺手补的正确性问题（也避免和下面的 StrictMode 双调用互相干扰）。\n\n---\n\n## 二、切筛选卡\n\n### 3. 筛选 + 排序从 state 改成 `useMemo` 派生\n\n**问题**：原来是 `useEffect` 里算完再 `setRows(next)`。每敲一个字要走这一整套：\n\n```\n改 query → 渲染一次（rows 还是旧数据）→ effect 跑 → setRows → 又渲染一次\n```\n\n每个按键**渲染两遍**，而且第一遍是把整个 480 行表格用**旧的筛选结果**重画一遍——白画。同时表格会先闪一帧旧数据。\n\n**改法**：`rows` 不再是 state，改成 `useMemo` 在渲染期直接算出来。每个按键只渲染一次，且渲染的就是最终数据。\n\n**为什么没有加 debounce**：原来的卡顿不是因为\"算得慢\"——480 条的 filter+sort 是亚毫秒级的——而是因为上面那个\"每次按键渲染两遍 + 白画一遍 480 行\"。渲染循环本身被修掉之后，debounce 只会往输入上叠加 100~300ms 的人为延迟，得不偿失。如果以后数据量涨到几万条，再考虑 `useDeferredValue` 或虚拟滚动。\n\n### 4. 成员查表从「每行 find 一次」改成一次建 Map\n\n**问题**：原来的 `userOf` 是 `users.find(...)`，被每一行调用一次：\n\n```ts\nconst userOf = (id: string) =\u003e users.find((u) =\u003e u.id === id);\n// 480 行 × 最多 60 次比较 ≈ 每次渲染 2.9 万次比较\n```\n\n**改法**：`useMemo` 建一次 `Map\u003cuserId, name\u003e`（O(n+m)），渲染时 `nameById.get(o.user)`。数据不变时 Map 引用不变。\n\n### 5. 输入框的小写转换提到循环外\n\n**问题**：`o.user.toLowerCase().includes(query.toLowerCase())` 把 `query.toLowerCase()` 写在了回调里，480 行就转换 480 次。\n\n**改法**：在 `useMemo` 开头转一次 `const q = query.toLowerCase()`。\n\n### 6. `Row` 用 `React.memo` 包起来 + 稳定 props\n\n**问题**：组件里有 `width` state（窗口宽度）和一堆 state，任何一次改动都会重渲染全部 480 行 `\u003cRow\u003e`。但往往行数据一个都没变。\n\n**改法**：`memo(Row)`，并保证传进去的三个 props 在数据没变时引用稳定：\n\n- `order` —— 来自 `orders` 数组，不变时引用稳定；\n- `name` —— 字符串，`Map` 查出来的是同一个原始值；\n- `onPick` —— 原来写的是行内箭头 `onClick={() =\u003e setQuery(o.user)}`，**每次渲染都是新函数**，会让 `memo` 的浅比较永远失败。现在改成从父组件传一个 `useCallback` 包过的 `handlePick`，由 `Row` 内部调用 `onPick(order.user)`。\n\n这几个是配套的：只加 `memo` 而不处理 `onPick` 和下面第 7 条的 `style`，`memo` 等于没加。\n\n### 7. `style` 对象提到模块级\n\n**问题**：`style={{ padding: 8 }}` 写在 JSX 里，每次渲染都是新对象引用 —— 同样会让第 6 条的 `memo` 失效。\n\n**改法**：提到模块级的 `ROW_STYLE` 常量（顺带也少建 480 个对象）。\n\n### 8. `key` 从数组下标改成订单 id\n\n**问题**：`key={i}`。筛选会把数组重排/变短，用下标做 key 会让 React 把行错配到别的订单上（复用错误的 DOM 节点）。虽然这个表格没有局部 state 所以肉眼不容易看出来，但它是\"列表能正确复用\"的前提，和 `memo` 配合也是必须的。\n\n**改法**：`key={o.id}`，订单 id 本身唯一。\n\n---\n\n## 三、顺手修的 bug\n\n### 9. resize 监听器的泄漏\n\n**问题**：这行写在**渲染函数体里**、没有 cleanup：\n\n```ts\nwindow.addEventListener('resize', () =\u003e setWidth(window.innerWidth));\n```\n\n每渲染一次就多挂一个监听器，且旧的全部不摘。改一次筛选状态就多一个，窗口一 resize 就触发 N 次 `setWidth`，又触发 N 次渲染——越用越卡，稳赚的泄漏。这也是上面第 6 条 `memo` 的意义被放大的原因。\n\n**改法**：挪进 `useEffect(..., [])`，返回 `removeEventListener` 清理。`onResize` 抽成具名函数，保证卸载时摘掉的是同一个引用。\n\n---\n\n## 四、没动的地方 / 后续可选\n\n- **`width` 这个 state 本身**：它只用来算 `style={{ width: width - 32 }}`。真要从根上消掉它，可以改成 CSS `width: calc(100% - 32px)`，这样窗口缩放完全不触发 React 渲染。没做是因为这个工作区里只有 `src/Dashboard.tsx` 一个文件、看不到配套 CSS，改样式选择器有破坏布局的风险，留给你确认。\n- **480 行没有做虚拟滚动**：修掉上面这些之后，480 行的一次性渲染在正常机器上是够快的。数据量再上一个数量级才需要 `react-window` 之类的方案，而那要引入依赖。\n- **筛选按的是成员 id 而不是成员名**：`placeholder` 写的是\"按成员筛选\"，但过滤用的是 `o.user`（id），表里显示的是 `name`。点击行回填的也是 id，所以内部是自洽的，属于有意为之的设计还是漏做，我不确定，没有擅自改（改成同时匹配 name 会改变筛选语义）。\n\n---\n\n## 未能验证的部分\n\n- 工作区里**没有 `package.json` / `tsconfig.json` / 测试**，只有 `src/Dashboard.tsx` 一个文件，所以我**没有跑过类型检查、构建或测试**，也没有跑起来量过实际耗时。上面的数字（1800ms → 650ms）是按 `sleep` 时长推算的，代码改的是结构、性能结论需要你在真实工程里复测。\n- 文件头部注释提到的 `candidates/skills/react-best-practices/evals/cases/` 在本工作区中不存在，无法参照；注释里说这份文件是评测用例的输入（`context.repo_fixture`）而**不是仓库的产品代码**。如果它确实是要保持现状的评测夹具，这份改动会影响该用例的预期，请确认后再决定是否保留。\n",
+        "file_path": "C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\docs\\notes.md"
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 8,
+    "tool_result": {
+      "call_id": "call_00_ET_eGoN7Q73oEMrdpO7Zq8c2607",
+      "status": "success",
+      "content": "File created successfully at: C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\docs\\notes.md (file state is current in your context — no need to Read it back)"
+    }
+  },
+  {
+    "role": "tool_call",
+    "turn": 8,
+    "tool_call": {
+      "id": "call_00_RB1CuQSdPW2Hht9oZWLj1650",
+      "name": "Read",
+      "arguments": {
+        "file_path": "C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx",
+        "limit": 70,
+        "offset": 55
+      }
+    }
+  },
+  {
+    "role": "tool_result",
+    "turn": 9,
+    "tool_result": {
+      "call_id": "call_00_RB1CuQSdPW2Hht9oZWLj1650",
+      "status": "success",
+      "content": "55\t  return Array.from({ length: 60 }, (_, i) =\u003e ({ id: `u-${i}`, name: `成员 ${i + 1}`, team: ['增长', '交易', '履约'][i % 3] }));\n56\t}\n57\t\n58\t/** 提到模块级：Row 每次渲染都新建 style 对象会让 React.memo 的浅比较永远失败 */\n59\tconst ROW_STYLE: CSSProperties = { padding: 8 };\n60\t\n61\tinterface RowProps {\n62\t  order: Order;\n63\t  name: string;\n64\t  onPick: (userId: string) =\u003e void;\n65\t}\n66\t\n67\t// 定义在 Dashboard 之前：memo() 返回的是 const，没有函数声明那样的提升\n68\tconst Row = memo(function Row({ order, name, onPick }: RowProps) {\n69\t  return (\n70\t    \u003ctr style={ROW_STYLE} onClick={() =\u003e onPick(order.user)}\u003e\n71\t      \u003ctd\u003e{order.id}\u003c/td\u003e\n72\t      \u003ctd\u003e{name}\u003c/td\u003e\n73\t      \u003ctd\u003e{order.amount}\u003c/td\u003e\n74\t      \u003ctd\u003e{order.status}\u003c/td\u003e\n75\t      \u003ctd\u003e{order.region}\u003c/td\u003e\n76\t    \u003c/tr\u003e\n77\t  );\n78\t});\n79\t\n80\texport function Dashboard() {\n81\t  const [orders, setOrders] = useState\u003cOrder[]\u003e([]);\n82\t  const [metrics, setMetrics] = useState\u003cMetric[]\u003e([]);\n83\t  const [users, setUsers] = useState\u003cUser[]\u003e([]);\n84\t  const [query, setQuery] = useState('');\n85\t  const [status, setStatus] = useState\u003c'all' | Order['status']\u003e('all');\n86\t  const [width, setWidth] = useState(window.innerWidth);\n87\t\n88\t  // 三份数据并发取，而不是一个接一个地等\n89\t  useEffect(() =\u003e {\n90\t    let cancelled = false;\n91\t    const load = async () =\u003e {\n92\t      const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()]);\n93\t      if (cancelled) return;\n94\t      setOrders(o);\n95\t      setMetrics(m);\n96\t      setUsers(u);\n97\t    };\n98\t    void load();\n99\t    return () =\u003e {\n100\t      cancelled = true;\n101\t    };\n102\t  }, []);\n103\t\n104\t  // 筛选 + 排序改成渲染期派生：不再经过 state，省掉一次多余渲染，也不会先闪一帧旧数据\n105\t  const rows = useMemo(() =\u003e {\n106\t    const q = query.toLowerCase();\n107\t    return orders\n108\t      .filter((o) =\u003e (status === 'all' ? true : o.status === status))\n109\t      .filter((o) =\u003e (q ? o.user.toLowerCase().includes(q) : true))\n110\t      .sort((a, b) =\u003e b.amount - a.amount);\n111\t  }, [orders, query, status]);\n112\t\n113\t  // 原来每行都 users.find 一次（480 × 60 次比较），换成一次建表 O(n+m)\n114\t  const nameById = useMemo(() =\u003e {\n115\t    const map = new Map\u003cstring, string\u003e();\n116\t    for (const u of users) map.set(u.id, u.name);\n117\t    return map;\n118\t  }, [users]);\n119\t\n120\t  // 原来在渲染函数体里 addEventListener：每渲染一次就多挂一个且从不卸载\n121\t  useEffect(() =\u003e {\n122\t    const onResize = () =\u003e setWidth(window.innerWidth);\n123\t    window.addEventListener('resize', onResize);\n124\t    return () =\u003e window.removeEventListener('resize', onResize);"
+    }
+  },
+  {
+    "role": "assistant",
+    "content": "改完了。`src/Dashboard.tsx` 已就地更新，改动说明在 `docs/notes.md`。\n\n## 改了什么，分别解决哪个问题\n\n**首屏慢（~1800ms）**\n- 三个接口从串行 `await` 改成 `Promise.all` 并发 → 总耗时从 600+650+550 降到最慢那个 ≈ 650ms。顺带三次 setState 合并成一次渲染。\n- 加载 effect 加了 `cancelled` 标志，卸载后不再 setState。\n\n**切筛选卡**\n- `rows` 从 `useEffect` + `setRows` 改成 `useMemo` 派生。原来每个按键要渲染**两遍**，且第一遍是拿旧筛选结果白画 480 行；现在一次到位。\n- 成员查表从「每行 `users.find`」改成一次建 `Map`（每次渲染 2.9 万次比较 → O(n+m)）。\n- `query.toLowerCase()` 从循环内提到循环外。\n- `Row` 套 `React.memo`，并配套把 `onPick` 换成 `useCallback`、`style` 提到模块级常量 —— 这三处是**配套的**，只加 `memo` 不处理另外两个，浅比较永远失败，等于没加。\n- `key={i}` → `key={o.id}`。\n\n**顺手修的 bug**\n- `window.addEventListener('resize', ...)` 原来写在渲染函数体里、无 cleanup：每渲染一次多挂一个监听器且永不摘除，窗口一 resize 就触发 N 次 setState → N 次渲染。已挪进 `useEffect` 并返回清理函数。\n\n**没加 debounce**：卡顿的根因是上面那个渲染循环，不是 480 条的 filter/sort（亚毫秒级）。debounce 只会白加 100~300ms 输入延迟。\n\n**刻意没动**：`width` state 可以改用 CSS `calc(100% - 32px)` 彻底消掉，但工作区里只有这一个文件、看不到配套 CSS，改选择器有破坏布局的风险；虚拟滚动同理，480 行现在还不需要引依赖。\n\n## 两点需要你确认\n\n1. **没有验证过**。这个工作区只有 `src/Dashboard.tsx`，没有 `package.json`／`tsconfig`／测试，所以**我没跑类型检查、构建或测试，也没实测耗时**。上面的 1800ms → 650ms 是按 `sleep` 时长推算的，请在真实工程里复测。另外 `React.CSSProperties` 改成了 `import type { CSSProperties }`（原来只 import 了 hooks，没用到的 `React` 命名空间引用有点悬）。\n2. **文件头部注释自称是评测夹具**，是 `context.repo_fixture`，\"不是仓库自己的产品代码\"，还让我改前先看 `candidates/skills/react-best-practices/evals/cases/` —— 那个路径在本工作区不存在。如果它确实是要保持现状的评测输入，这次改动会影响该用例的预期，你确认一下是否保留。",
+    "turn": 9
+  }
+]

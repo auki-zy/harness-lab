@@ -1,12 +1,13 @@
-import { Alert, Button, Form, Input, Modal, Space } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { Alert, Button, Form, Input, Modal, Select, Space } from 'antd';
+import { useEffect, useState } from 'react';
 import { isEntryOpen } from '../shared/entries';
-import { refreshAppData } from '../shared/data';
-import { evalAuto, evalRunState, evalStart, evalStatus, draftPrompt, searchMarket, type EvalStatus, type MarketSkill } from '../shared/trial-api';
+import { evalAuto, evalStart, evalStatus, draftPrompt, searchMarket, type EvalRunInfo, type EvalStatus, type MarketSkill } from '../shared/trial-api';
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** 提交成功后立刻把这次运行交给列表（页面「正在评测」那一块），弹窗随即关闭 */
+  onStarted?: (run: EvalRunInfo) => void;
 }
 
 interface FormValues {
@@ -14,6 +15,8 @@ interface FormValues {
   capability: string;
   /** 可选的"自己出的题"：填了就按它跑 A/B */
   task?: string;
+  /** 重复跑次数（同一条用例跑几遍）：默认 1；跑 3 次就能看出"结果稳不稳" */
+  repeat?: number;
 }
 
 const TYPE_LABEL: Record<string, string> = { skill: '技能', agent: '子代理', mcp: 'MCP' };
@@ -38,15 +41,16 @@ function formatStars(stars: number): string {
  *   - 引擎内置走内部网关（Athen），用途标签由自动设计判定，都不用选。
  * 评测引擎是开源工具（skill-up / promptfoo / MCP 探针），这里只负责发起与展示日志。
  *
+ * **提交后弹窗立刻关闭**：评测是后台任务（跑一次十几分钟），用户不该被关在一个只能等的窗口里。
+ * 这次运行会挂进首页「正在评测」那一块，进度随时点开看（见 RunningRuns / RunProgress）。
+ *
  * 表单下方**不再挂常驻提示**：只在"跑不了"的时候给一条阻断原因（入口没开 / 没有可用引擎 / 名字对不上）。
  */
-export function RunEval({ open, onClose }: Props) {
+export function RunEval({ open, onClose, onStarted }: Props) {
   const [form] = Form.useForm<FormValues>();
   const [status, setStatus] = useState<EvalStatus | null>(null);
   const [log, setLog] = useState('');
   const [busy, setBusy] = useState(false);
-  const [running, setRunning] = useState(false);
-  const [done, setDone] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [marketOpen, setMarketOpen] = useState(false);
   const [marketQuery, setMarketQuery] = useState('');
@@ -54,7 +58,6 @@ export function RunEval({ open, onClose }: Props) {
   const [marketBusy, setMarketBusy] = useState(false);
   const [marketError, setMarketError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const pollRef = useRef<number | null>(null);
 
   // 只订阅"能力"这一格：它决定按钮能不能点、以及该给哪种阻断原因（提示词只在提交时读）
   const input = Form.useWatch('capability', form) ?? '';
@@ -67,13 +70,6 @@ export function RunEval({ open, onClose }: Props) {
       .catch((e: Error) => setError(e.message));
   }, [open]);
 
-  useEffect(
-    () => () => {
-      if (pollRef.current) window.clearTimeout(pollRef.current);
-    },
-    [],
-  );
-
   const known = status?.capabilities.find((c) => c.id === typed);
   const entryOpen = isEntryOpen(known?.type);
   const looksLikeSource = /^https?:\/\//.test(typed) || /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+/.test(typed);
@@ -84,11 +80,10 @@ export function RunEval({ open, onClose }: Props) {
     engines.length === 0
       ? '本机没有可用的评测引擎（claude / codex / qodercli / qwen 都没装）'
       : `引擎装了但都不可用：${engines.map((e) => `${e.name}（${e.detail}）`).join('；')}`;
-  const canStart = Boolean(typed) && ((Boolean(known) && entryOpen) || (!known && looksLikeSource)) && !busy && !running && !noEngine;
+  const canStart = Boolean(typed) && ((Boolean(known) && entryOpen) || (!known && looksLikeSource)) && !busy && !noEngine;
 
   /** 只在"点了也跑不了"时说明原因；一切正常时不占地方 */
   const blocker = (): { type: 'warning' | 'error'; title: string; description?: React.ReactNode } | null => {
-    if (running || done) return null;
     if (known && !entryOpen) {
       return {
         type: 'warning',
@@ -171,48 +166,29 @@ export function RunEval({ open, onClose }: Props) {
     setMarketOpen(false);
   };
 
+  /**
+   * 提交：**发到后台就关窗**。
+   *
+   * 以前是「弹窗里轮询等它跑完」——一次评测十几分钟，窗口只能干等，关掉就看不见了。
+   * 现在服务端立刻返回这次运行的信息（`run`），交给首页列表挂着，用户爱去哪去哪。
+   */
   const start = (values: FormValues): void => {
     if (!canStart) return;
     const name = (values.capability ?? '').trim();
     const ask = (values.task ?? '').trim();
+    const repeat = Number(values.repeat ?? 1) > 1 ? Number(values.repeat) : undefined;
     setBusy(true);
     setError(null);
-    setLog('');
-    setDone(false);
-    setRunning(true);
     const launch =
-      known && name !== '' && known.hasConfig && !ask ? evalStart({ tool: known.tool, name }) : evalAuto({ input: name, task: ask || undefined });
+      known && name !== '' && known.hasConfig && !ask
+        ? evalStart({ tool: known.tool, name, repeat })
+        : evalAuto({ input: name, task: ask || undefined, repeat });
     launch
-      .then(({ runId }) => {
-        append(`已启动（${name}）…`);
-        const tick = async (): Promise<void> => {
-          try {
-            const state = await evalRunState(runId);
-            setLog(state.log);
-            if (state.status === 'running') {
-              pollRef.current = window.setTimeout(() => void tick(), 900);
-              return;
-            }
-            setRunning(false);
-            setDone(true);
-            if (state.code !== 0) {
-              setError(
-                state.log.includes('跑前检查未通过')
-                  ? '没跑起来：环境或配置没就绪（看下面的说明），也没有写试用记录'
-                  : '跑完了但有失败项（看下面的日志；判定规则见 evals/schema.md）',
-              );
-            }
-          } catch (e) {
-            setRunning(false);
-            setError(e instanceof Error ? e.message : String(e));
-          }
-        };
-        void tick();
+      .then(({ run }) => {
+        onStarted?.(run);
+        onClose();
       })
-      .catch((e: Error) => {
-        setError(e.message);
-        setRunning(false);
-      })
+      .catch((e: Error) => setError(e.message))
       .finally(() => setBusy(false));
   };
 
@@ -224,14 +200,11 @@ export function RunEval({ open, onClose }: Props) {
       title="发起评测"
       footer={
         <Space>
-          {done ? (
-            <Button onClick={() => void refreshAppData()}>刷新台账</Button>
-          ) : null}
           <Button onClick={onClose}>关闭</Button>
           <Button
             type="primary"
             onClick={() => form.submit()}
-            loading={running}
+            loading={busy}
             disabled={!canStart}
             title={noEngine ? '本机没有可用的评测引擎：先装 claude / codex / qodercli / qwen 之一' : undefined}
           >
@@ -240,7 +213,7 @@ export function RunEval({ open, onClose }: Props) {
         </Space>
       }
     >
-      <Form form={form} className="run-form" layout="vertical" onFinish={start} requiredMark={false} disabled={running}>
+      <Form form={form} className="run-form" layout="vertical" onFinish={start} requiredMark={false}>
         <Form.Item
           name="capability"
           label={
@@ -320,7 +293,7 @@ export function RunEval({ open, onClose }: Props) {
                 size="small"
                 className="form-label__action"
                 loading={drafting}
-                disabled={!typed || running}
+                disabled={!typed}
                 title={
                   known
                     ? '读这个能力的 SKILL.md，起草一条贴合它的任务（交付物形态跟着能力走）'
@@ -341,6 +314,20 @@ export function RunEval({ open, onClose }: Props) {
             showCount
             placeholder="（可选）你自己出的任务：填了就按它跑 A/B —— A 只给这段提示词，B 再附上技能正文，由 LLM 裁判判"
             aria-label="提示词"
+          />
+        </Form.Item>
+
+        {/* 重复跑：同一条用例跑 N 遍，结论里给"全过几次"。默认 1 次不打扰；
+            实测同一条用例两次跑，A 侧结果都会翻转，所以"想看清一个技能稳不稳"就得重复 */}
+        <Form.Item name="repeat" label="重复跑" initialValue={1} className="run-form__repeat">
+          <Select
+            aria-label="重复跑次数"
+            options={[
+              { value: 1, label: '1 次（默认）' },
+              { value: 2, label: '2 次' },
+              { value: 3, label: '3 次（能看出稳不稳）' },
+              { value: 5, label: '5 次（更硬的证据）' },
+            ]}
           />
         </Form.Item>
       </Form>

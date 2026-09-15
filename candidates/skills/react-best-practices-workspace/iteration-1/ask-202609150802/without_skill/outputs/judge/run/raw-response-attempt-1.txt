@@ -1,0 +1,42 @@
+```json
+{
+  "results": [
+    {
+      "criterion_id": "criterion-1",
+      "passed": true,
+      "evidence": [
+        "任务三件事：① 优化 src/Dashboard.tsx（首屏慢 / 切筛选卡）② 改完直接写回这个文件 ③ 改动说明放 docs/notes.md 并写清每处改动解决哪个问题。",
+        "① 优化已做：src/Dashboard.tsx:89-102 三接口 Promise.all 并发；src/Dashboard.tsx:105-111 rows 改 useMemo 派生；src/Dashboard.tsx:114-118 建 Map 查表；src/Dashboard.tsx:121-125 resize 监听移入 useEffect 并 cleanup；src/Dashboard.tsx:68-78 Row 用 memo 包裹。",
+        "② 就地写回已做：Write 工具 file_path 为 C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-2785538792\\src\\Dashboard.tsx（transcript turn 4 工具结果 'has been updated successfully'），本次核对磁盘文件仍在该路径且内容完整。",
+        "③ 说明文档已做：docs/notes.md 存在（7256 字节，见目录列表），内容按「一、首屏慢 / 二、切筛选卡 / 三、顺手修的 bug / 四、没动的地方」分节，每条改动都点明对应问题（如 '问题：原来三个 await 串行排列，总耗时是三者相加 ≈ 600 + 650 + 550 = 1800ms'）。",
+        "未按任务外的额外标准扣分：任务未要求跑测试/构建、未要求基准数据、未要求加 debounce 或虚拟滚动，均不计为失分项。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-2",
+      "passed": true,
+      "evidence": [
+        "交付物齐全：src/Dashboard.tsx 已更新（184 行，语法完整的 TSX：闭合标签、JSX 表达式与接口定义自洽），docs/notes.md 存在（7256 字节）。",
+        "代码内部一致、能打开编译：RowProps 仅含 order/name/onPick，与调用处 src/Dashboard.tsx:171-178 传入的 props 一致；CSSProperties 已改为 import type（src/Dashboard.tsx:8），不再依赖未 import 的 React 命名空间；Row 在 src/Dashboard.tsx:68 定义、Dashboard 在 src/Dashboard.tsx:80 之后使用，无 TDZ 问题；三处 Edit 后无重复定义。",
+        "导出的公共接口保持原样：Order/Metric/User、fetchOrders/fetchMetrics/fetchUsers、Dashboard（src/Dashboard.tsx:10-28, 33-56, 80）。",
+        "行为对得上任务要求：筛选语义（按 o.user id 匹配）、排序（b.amount - a.amount）、点击行回填筛选框（onPick(order.user) → setQuery）均与改动前一致；DOM 结构未变。",
+        "限制说明：工作区只有 src/Dashboard.tsx，无 package.json/tsconfig/测试（transcript turn 3 'ls -R' 输出仅 ./src/Dashboard.tsx），故无法实际启动运行；这一点属环境缺依赖，且 agent 在交付说明与 notes.md 中已显式声明『没有跑类型检查、构建或测试，也没实测耗时』，交付物本身未缺失、格式无错。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-3",
+      "passed": true,
+      "evidence": [
+        "症状一（首次打开慢）有对应改动：src/Dashboard.tsx:88-102 把原本串行的三次 await（原文件 67-77 行：fetchOrders→setOrders→fetchMetrics→setMetrics→fetchUsers→setUsers）改为 Promise.all 并发，并合并为一次渲染，直接针对 600+650+550ms 的首屏等待。",
+        "症状二（切筛选卡）有对应改动：src/Dashboard.tsx:104-111 把 rows 从 useEffect+setRows（原文件 80-86 行，每次按键渲染两遍且先画一帧旧数据）改成 useMemo 渲染期派生——这是切筛选卡顿的根因改动。",
+        "症状二配套改动：src/Dashboard.tsx:114-118 用 Map 替代每行 users.find（原 91 行），src/Dashboard.tsx:106 把 query.toLowerCase() 提出循环，src/Dashboard.tsx:68-78 Row 加 memo + src/Dashboard.tsx:59 模块级 ROW_STYLE + src/Dashboard.tsx:128 handlePick useCallback（原行内箭头 onPick 使浅比较失效），src/Dashboard.tsx:173 key={i} → key={o.id}。",
+        "另有针对性修复：原 89 行 window.addEventListener('resize', ...) 写在渲染函数体且无 cleanup，每渲染多挂一个监听器导致 resize 触发 N 次 setState→N 次渲染，现已移入 useEffect 并 removeEventListener（src/Dashboard.tsx:120-125）。",
+        "非无关清理：改动集中在渲染/请求路径，未做文件重排、重命名等无关动作；notes.md 中每个小节标题直接对应一个症状（『一、首屏慢』『二、切筛选卡』）。"
+      ],
+      "failures": []
+    }
+  ]
+}
+```

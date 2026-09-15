@@ -2,8 +2,9 @@ import { Button, Empty, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import type { Capability, PendingTag, Taxonomy } from '../shared/types';
 import { matchesQuery, matchesTagFilters, tagFacets } from '../shared/tags';
-import { CapabilityRow, RunEval, TagFilter } from '../components';
+import { CapabilityRow, RunEval, RunProgress, RunningRuns, TagFilter } from '../components';
 import { isEntryOpen } from '../shared/entries';
+import { useRuns } from '../shared/runs';
 
 interface Props {
   capabilities: Capability[];
@@ -14,11 +15,14 @@ interface Props {
   canWrite?: boolean;
 }
 
-/** 首页：台账 —— 搜索 + 标签筛选 + 一行一个能力的记录列表 */
+/** 首页：台账 —— 搜索 + 标签筛选 + 一行一个能力的记录列表（顶上还挂着后台评测的进度） */
 export function HomePage({ capabilities, taxonomy, pendingTags, onOpen, canWrite = false }: Props) {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<Record<string, string[]>>({});
   const [trialOpen, setTrialOpen] = useState(false);
+  // 正在跑 / 刚跑完的后台评测（发起评测提交完弹窗就关，进度在这里看）
+  const { runs, add } = useRuns(canWrite);
+  const [progressId, setProgressId] = useState<string | null>(null);
 
   // 入口开关：类型筛选只列已开放的类型（MCP / 子代理先注释，见 src/shared/entries.ts）
   const facets = useMemo(() => {
@@ -90,6 +94,8 @@ export function HomePage({ capabilities, taxonomy, pendingTags, onOpen, canWrite
         </div>
       ) : null}
 
+      <RunningRuns runs={runs} onOpen={setProgressId} />
+
       <section className="controls" aria-label="搜索与筛选">
         <div className="controls__search">
           <Input
@@ -144,7 +150,12 @@ export function HomePage({ capabilities, taxonomy, pendingTags, onOpen, canWrite
         </ul>
       )}
 
-      <RunEval open={trialOpen} onClose={() => setTrialOpen(false)} />
+      <RunEval open={trialOpen} onClose={() => setTrialOpen(false)} onStarted={add} />
+      <RunProgress
+        runId={progressId}
+        run={runs.find((r) => r.id === progressId) ?? null}
+        onClose={() => setProgressId(null)}
+      />
     </div>
   );
 }

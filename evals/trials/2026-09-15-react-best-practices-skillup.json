@@ -1,0 +1,85 @@
+{
+  "trialId": "2026-09-15-react-best-practices-skillup",
+  "capability": {
+    "id": "react-best-practices",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "ask-202609150802",
+    "fixture": "candidates/skills/react-best-practices-workspace/iteration-1",
+    "description": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下，改完直接写回这个文件，改动说明放 docs/…（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false
+    },
+    {
+      "name": "B",
+      "withCapability": true
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 0,
+      "B": 0
+    },
+    "tokensIn": {
+      "A": 17317,
+      "B": 18267
+    },
+    "tokensOut": {
+      "A": 434,
+      "B": 622
+    },
+    "tokensTotal": {
+      "A": 17751,
+      "B": 18889
+    },
+    "tokensCached": {
+      "A": 17152,
+      "B": 18048
+    },
+    "durationSec": {
+      "A": 14.7,
+      "B": 22.4
+    },
+    "steps": {
+      "A": 1,
+      "B": 3
+    },
+    "toolCalls": {
+      "A": 3,
+      "B": 5
+    },
+    "toolMix": {
+      "A": "Bash 3",
+      "B": "Bash 5"
+    },
+    "staticChecks": {
+      "A": "用例 0/1 通过；断言 1/3；耗时 14.7s；未过：只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）; 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+      "B": "用例 0/1 通过；断言 1/3；耗时 22.4s；未过：只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）; 产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：ask-202609150802；报告：candidates/skills/react-best-practices-workspace/iteration-1；（注意）这条试用的报告与 A/B 产物在 2026-09-15 的重复跑里被同名 iteration 目录覆盖了（当时 skill-up 的 --iteration 从 1 编号、默认写回 workspace 根）；文件找不回来，所以不再列证据路径。桥接已改为每次运行写独立的 run-<时间戳>/ 输出目录，不会再发生。"
+  },
+  "judge": [
+    "auto",
+    "llm"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "retry",
+    "confidence": "low",
+    "reason": "这次评测的用例本身有问题：提示词要求改 src/Dashboard.tsx，而工作区里没有这个文件——A、B 两边都无从下手（各 0/1），不是\"能力没做到\"。已把待优化的组件作为工作区输入（context.repo_fixture: evals/fixtures/react-slow-dashboard）补进用例并重跑，结论以重跑那次为准。"
+  },
+  "evidence": [],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-15",
+  "recordedAt": "2026-09-15T08:04:04.813Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "candidates/skills/react-best-practices-workspace/iteration-1/result.json"
+  },
+  "selfCheck": false
+}

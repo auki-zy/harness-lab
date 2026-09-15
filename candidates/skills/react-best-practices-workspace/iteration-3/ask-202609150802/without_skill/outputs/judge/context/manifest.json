@@ -1,0 +1,30 @@
+{
+  "profile": "standard",
+  "materialized_dir": "judge/context",
+  "materials": [
+    {
+      "key": "final_message",
+      "mode": "include",
+      "path": "judge/context/final_message.txt",
+      "bytes": 2823,
+      "original_bytes": 2823
+    },
+    {
+      "key": "transcript",
+      "mode": "file_ref",
+      "path": "judge/context/transcript.json",
+      "bytes": 11458,
+      "original_bytes": 11458
+    },
+    {
+      "key": "workspace_diff",
+      "mode": "omit",
+      "bytes": 0
+    },
+    {
+      "key": "generated_files",
+      "mode": "omit",
+      "bytes": 0
+    }
+  ]
+}

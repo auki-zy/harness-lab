@@ -1,0 +1,193 @@
+{
+  "skill_name": "react-best-practices",
+  "schema_version": "v1alpha1",
+  "engine_name": "claude_code",
+  "model_name": "deepseek-v4-flash",
+  "requested_configuration": {
+    "role": "runner",
+    "engine": "claude_code",
+    "protocol": "anthropic",
+    "model": "deepseek-v4-flash"
+  },
+  "applied_configuration": {
+    "role": "runner",
+    "engine": "claude_code",
+    "protocol": "anthropic",
+    "model": "deepseek-v4-flash"
+  },
+  "start_time": "2026-09-15T17:57:25.3374197+08:00",
+  "end_time": "2026-09-15T18:00:33.2912059+08:00",
+  "case_results": [
+    {
+      "case_id": "ask-202609150802",
+      "title": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…",
+      "status": "PASS",
+      "duration_ms": 59239,
+      "turns": 5,
+      "input_tokens": 30442,
+      "output_tokens": 4861,
+      "judge_duration_ms": 65310,
+      "judge_input_tokens": 42189,
+      "judge_output_tokens": 1676,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 5,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）",
+            "passed": true,
+            "evidence": "用户任务原文（transcript 第 0 条）：\"src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。\"; 要求『改完直接写回这个文件』：transcript 第 19 条为对 src/Dashboard.tsx 的 Write 调用，第 20 条返回 \"The file ... has been updated successfully\"；磁盘上该文件（192 行）确实已是优化后版本。; 要求『改动说明放 docs/notes.md』：transcript 第 22 条 Write 调用创建 docs/notes.md，第 23 条返回 \"File created successfully\"；磁盘上该文件存在（148 行）。; 要求『写清每处改动是想解决哪个问题』：docs/notes.md 第 107-121 行有 13 行改动清单表，列为『位置 | 改动 | 解决的问题』，例如第 109 行『数据加载 effect | 串行 await → Promise.all | 首屏 ~1.8s → ~650ms』。; 额外做的 resize 监听器修复、Map 索引、useDeferredValue 等属于任务未要求的附加项，未据此加减分。"
+          },
+          {
+            "text": "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+            "passed": true,
+            "evidence": "两个交付物都存在于磁盘：src/Dashboard.tsx（191 行内容）与 docs/notes.md（147 行内容）。; 语法/编译可用：`bun build src/Dashboard.tsx --external react` 输出 \"Bundled 1 module in 67ms  Dashboard.js 6.73 KB (entry point)\"，TS + JSX 解析零报错。; 可打开/可渲染：用 react 19.3.0 + react-dom/server 的 renderToString 渲染成功，输出完整 HTML（\u003cdiv class=\"dashboard\" style=\"width:1168px\"\u003e、\u003cinput\u003e、\u003cselect\u003e、\u003ctable\u003e\u003cthead\u003e…\u003ctbody\u003e），未抛异常。; 可真实运行与交互：happy-dom + createRoot 客户端渲染测试中，装载后 tbody 行数为 480，总耗时约 1056ms（数据加载本身约 650ms，与并行化后的预期一致）。; 交互与格式正确：切换 select 为 paid 后行数变为 160（480/3，行为与原 .filter 一致）；点击第 4 行后 input 值变为 \"u-27\"、行数变为 8（480/60）、文案为『共 8 条 / 成员 60 人』，说明点击行 setQuery(order.user) 的原有行为被保留。; notes.md 为正常 Markdown 文档，含标题、分节、表格与代码块，格式符合『改动说明』的要求。"
+          },
+          {
+            "text": "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+            "passed": true,
+            "evidence": "症状一『打开要好几秒』有对应改动：原文件（transcript 第 7 条 tool_result，原 67-77 行）为 `const o = await fetchOrders(); ... const m = await fetchMetrics(); ... const u = await fetchUsers();` 三段串行 await；新文件 src/Dashboard.tsx:85-98 改为 `const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()]);`，并加了 cancelled 清理。; 症状二『切筛选卡』有对应改动之一：原文件 79-86 行把派生数据塞进 state（`rows` + `useEffect(() =\u003e {... setRows(next) }, [orders, query, status])`）；新文件已删除该 state 与 effect，改为 src/Dashboard.tsx:112-118 渲染期 `useMemo` 计算 rows。; 症状二对应改动之二：原文件 134-142 行 `Row` 无 memo 且 `style={{ padding: 8 }}`、`onPick={() =\u003e setQuery(o.user)}`、`key={i}` 每次渲染都新建；新文件 src/Dashboard.tsx:59-60 提为模块常量 ROW_STYLE/METRIC_STYLE，160-166 行改 `key={o.id}` 与共享 `onPick={setQuery}`，181 行 `const Row = memo(function Row(...))`。; 实测印证症状二确实被处理：客户端渲染测试中输入 select 切到 paid 后 DOM 行数正确变为 160，打字/点击后行数正确收敛为 8，功能未破坏。; docs/notes.md 中两处症状均有独立章节并标注对应的问题与代码位置：第 7-21 行『一、\"打开要好几秒\" —— 首屏请求瀑布（原 67-77 行）』，第 25-59 行『二、\"切筛选也卡\"（原 79-86 行 / 原 134-142 行）』。; 非『只做无关清理』：改动集中在数据加载路径与筛选重渲染路径，未出现与两个症状无关的重构取代优化的情形。"
+          }
+        ],
+        "summary": {
+          "passed": 4,
+          "failed": 0,
+          "total": 4,
+          "pass_rate": 1
+        },
+        "judge_context": {
+          "profile": "standard",
+          "materialized_dir": "judge/context",
+          "manifest": {
+            "profile": "standard",
+            "materialized_dir": "judge/context",
+            "materials": [
+              {
+                "key": "final_message",
+                "mode": "include",
+                "path": "judge/context/final_message.txt",
+                "bytes": 2292,
+                "original_bytes": 2292
+              },
+              {
+                "key": "transcript",
+                "mode": "file_ref",
+                "path": "judge/context/transcript.json",
+                "bytes": 38809,
+                "original_bytes": 38809
+              },
+              {
+                "key": "workspace_diff",
+                "mode": "omit",
+                "bytes": 0
+              },
+              {
+                "key": "generated_files",
+                "mode": "omit",
+                "bytes": 0
+              }
+            ]
+          },
+          "prompt_delivery": "inline",
+          "prompt_bytes": 4517
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。\n",
+      "response": "Done — `src/Dashboard.tsx` rewritten in place, notes at `docs/notes.md`.\n\n## 改了什么\n\n**首屏慢的主因是请求瀑布**：三个互不依赖的接口串行 `await`（600+650+550 ≈ 1.8s）。改成 `Promise.all` 后 ≈ 650ms。\n\n**切筛选卡的主因有两层**：\n\n1. `rows` 是纯派生值却被存成了 state + effect —— 每次筛选变化都要多跑一轮渲染整表，还多一份可能不一致的真相。改成渲染期 `useMemo`。\n2. 480 行 `Row` 没有 memo，而传给它的 props 每次渲染都是新的（内联 `style={{padding:8}}`、每行现造的 `onPick` 闭包、`key={i}`），memo 就算加上也全失效。改成模块级常量 + 共享 `setQuery` + `key={o.id}`。\n\n另外 `users.find()` 每行一次 → 480×60 ≈ 28,800 次比较，换成 `Map` 索引降到 480 次。\n\n**还有一处你没提但更严重的**：`window.addEventListener('resize', ...)` 写在渲染体里，每次渲染注册一个、从不解绑。它和上面的渲染次数互相放大 —— N 次渲染后就有 N 个监听器，每次 resize 触发 N 次 `setWidth` → 又 N 次渲染。已挪进 `useEffect` 并加了解绑。\n\n打字响应加了 `useDeferredValue`。\n\n## 两件需要你知道的\n\n**没有验证**：工作区里没有 package.json / 构建 / 测试配置，Node 也没装 TypeScript，所以我没能编译或跑起来。改动是按代码推导的，请在你的环境里确认（`docs/notes.md` 末尾列了三条具体的验证方法）。其中 `toSorted()` 我在 Node 22 上确认了运行时支持，但兼容更老运行时的话改回 `.sort()` 结果一致 —— 原代码那个 `sort` 作用在 `filter` 的新数组上，本来就没改到 `orders`，不是 bug，换 `toSorted` 只是把意图写明确。\n\n**一个矛盾点**：`src/Dashboard.tsx` 顶部的注释说这文件是 ask 用例的工作区输入（`context.repo_fixture`）、\"不是仓库自己的产品代码\"，还提示改之前先看 `candidates/skills/react-best-practices/evals/cases/` 下的用例。我在工作区里找不到 `candidates/` 目录（根目录只有 `.claude/` 和 `src/`），没法照做。我按你的要求改了、原注释保留未动 —— 但如果它确实是评测夹具、会影响评分或覆盖预期答案，先确认再用。"
+    },
+    {
+      "case_id": "ask-202609150802",
+      "title": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/…",
+      "status": "PASS",
+      "duration_ms": 41779,
+      "turns": 3,
+      "input_tokens": 25719,
+      "output_tokens": 5553,
+      "judge_duration_ms": 20785,
+      "judge_input_tokens": 30478,
+      "judge_output_tokens": 1767,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 3,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）",
+            "passed": true,
+            "evidence": "任务要求三项：优化 src/Dashboard.tsx、改完写回该文件、改动说明放 docs/notes.md 并写清每处改动解决哪个问题。; 写回原文件已执行：transcript 中 Write 调用 file_path 为 src/Dashboard.tsx，磁盘上该文件大小为 6315 字节、修改时间 10:00，内容为优化后的版本。; docs/notes.md 已创建（磁盘 5200 字节），开头写明「优化对象：`src/Dashboard.tsx`。症状是「打开要好几秒」「切筛选卡」。下面每处改动都标明它针对的是哪个问题。」; notes 按症状分节：一、首屏慢；二、切筛选卡；三、顺带修掉的 bug；每条改动用「**问题**」「**改法**」两段明确对应到具体问题（如第 1 条写明串行 await 耗时相加 600+650+550≈1800ms）。; 任务未要求交付物之外的东西，产物未出现遗漏或偏离；额外的 bug 修复（key、resize 监听、CSSProperties 导入）未被当作扣分点。"
+          },
+          {
+            "text": "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+            "passed": true,
+            "evidence": "交付物齐全且在正确路径：src/Dashboard.tsx（6315 B）与 docs/notes.md（5200 B）均在磁盘上存在，目录列表可见。; 格式正确：Dashboard.tsx 为完整可解析的 TSX 模块，保留原有 Order/Metric/User 接口与 fetchOrders/fetchMetrics/fetchUsers 导出，import 语句齐全（memo, useCallback, useEffect, useMemo, useState, type CSSProperties 均在文件中被使用）。; 语法/类型层面未见错误：useState(() =\u003e window.innerWidth) 惰性初始化合法；new Map\u003cstring, User\u003e(users.map((u): [string, User] =\u003e [u.id, u])) 类型标注合法；memo(function Row(...)) 与 CSSProperties 类型的 ROW_STYLE 常量匹配；handlePick 的 (userId: string) =\u003e void 与 RowProps.onPick 一致。; 行为等价性保持：Row 内 onClick={() =\u003e onPick(order.user)} 与原来 onPick={() =\u003e setQuery(o.user)} 语义一致；筛选/排序逻辑（status 过滤、query 匹配、b.amount - a.amount 降序）与原始实现一致。; 工作区确实不存在 package.json/tsconfig/测试（find 结果显示仅 ./src/Dashboard.tsx），无法运行构建；agent 在最终消息与 notes 顶部均明确披露「只做了静态审查，没能跑类型检查或测试」，未虚报验证结果。这是环境缺工具链所致，非交付物本身不可用。"
+          },
+          {
+            "text": "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+            "passed": true,
+            "evidence": "症状一「首次打开慢」有对应代码改动：useEffect 中原三行串行 await（fetchOrders→fetchMetrics→fetchUsers）改为 const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()])（Dashboard.tsx:74），并发后总耗时由 600+650+550≈1800ms 降为最慢的 ≈650ms。; 首屏另有一处改动：const [width, setWidth] = useState(() =\u003e window.innerWidth)（Dashboard.tsx:67）由每次渲染求值改为惰性初始化。; 症状二「切筛选卡」有对应代码改动：rows 由 useState + useEffect(setRows) 改为渲染期派生的 useMemo（Dashboard.tsx:89-95），消除每轮筛选多出的一整轮渲染。; 针对筛选重渲染主因的改动：Row 用 memo 包裹（Dashboard.tsx:179），并把每渲染新建的 style={{padding:8}} 提为模块常量 ROW_STYLE（Dashboard.tsx:58, 160）、onPick 由内联闭包改为 useCallback 的 handlePick（Dashboard.tsx:112, 161）。; 针对筛选计算量的改动：query.toLowerCase() 提到 filter 外算一次存为 q（Dashboard.tsx:90），成员查找由 users.find 改为 useMemo 构建的 Map 查表 userMap.get(o.user)（Dashboard.tsx:98-101, 159）。; 改动与两个症状直接相关，非无关清理：列表 key 由下标 i 改为 o.id（Dashboard.tsx:157）与 resize 监听改入 useEffect 带 cleanup（Dashboard.tsx:105-109）属附带修复，且 notes 中标注为「顺带修掉的 bug」，未挤占或替代上述两处核心性能改动。"
+          }
+        ],
+        "summary": {
+          "passed": 4,
+          "failed": 0,
+          "total": 4,
+          "pass_rate": 1
+        },
+        "judge_context": {
+          "profile": "standard",
+          "materialized_dir": "judge/context",
+          "manifest": {
+            "profile": "standard",
+            "materialized_dir": "judge/context",
+            "materials": [
+              {
+                "key": "final_message",
+                "mode": "include",
+                "path": "judge/context/final_message.txt",
+                "bytes": 1901,
+                "original_bytes": 1901
+              },
+              {
+                "key": "transcript",
+                "mode": "file_ref",
+                "path": "judge/context/transcript.json",
+                "bytes": 24719,
+                "original_bytes": 24719
+              },
+              {
+                "key": "workspace_diff",
+                "mode": "omit",
+                "bytes": 0
+              },
+              {
+                "key": "generated_files",
+                "mode": "omit",
+                "bytes": 0
+              }
+            ]
+          },
+          "prompt_delivery": "inline",
+          "prompt_bytes": 4122
+        }
+      },
+      "configuration": "without_skill",
+      "prompt": "src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。\n",
+      "response": "改完了。`src/Dashboard.tsx` 已写回，说明在 `docs/notes.md`。\n\n**首屏慢** —— 三个接口原来串行 await，耗时相加 ≈1.8s：\n1. 改 `Promise.all` 并发，总耗时降到最慢那个 ≈650ms，一次批量提交。\n2. `useState(window.innerWidth)` 改惰性初始化，不再每次渲染都读一次布局。\n\n**切筛选卡** —— 主要成本是 480 行全量重渲染：\n3. `rows` 从「effect + setRows」改成 `useMemo` 渲染期派生，省掉每轮变化多出的一整轮渲染，也消掉两份可能不同步的状态。\n4. `query.toLowerCase()` 提到循环外，原来 480 行各算一次。\n5. 成员查找 `users.find` → `useMemo` 建的 `Map`，原来每次渲染 480×60 ≈ 2.9 万次比较。\n6. `Row` 加 `memo`，并把两个每次渲染都新建的 prop 稳定下来：`style={{padding:8}}` 提成模块常量，`onPick` 改 `useCallback`。这是卡顿的主因。\n\n**顺带的两个 bug**：\n7. `key={i}` → `key={o.id}`，排序/筛选重排行序时按位置复用 DOM 容易张冠李戴。\n8. resize 监听原来写在函数体里、每次渲染挂一个且从不移除 —— 无限累积，且每次 `setWidth` 又挂新的，形成放大循环；改成 `useEffect` 挂载一次 + cleanup 移除。\n\n**没做的**：列表虚拟化（480 行 DOM 不是瓶颈）和输入防抖（筛选本身很轻，防抖反而让结果滞后于输入），理由写在 notes 里了。\n\n一点需要说明的：这个工作区只有 `src/Dashboard.tsx`，没有 `package.json`、tsconfig 或测试，所以这些改动**只做了静态审查，我没能跑类型检查或测试**。其中第 8 条改动前是真实的行为缺陷（监听器泄漏），但如果你那边有测试断言了某些时序细节（比如数据分三批渐进出现），并发改造后行为会变成一次性出现 —— 建议在有工具链的环境里跑一遍确认。"
+    }
+  ],
+  "total_tokens": 66575,
+  "judge_tokens": 76110,
+  "overall_tokens": 142685
+}

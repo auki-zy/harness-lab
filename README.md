@@ -79,6 +79,8 @@ npm run typecheck && npm run lint && npm test && npm run build
 >
 > **内部网关（Athen）**：`claude_code` 可以完全不走官方登录——只要 `$ANTHROPIC_AUTH_TOKEN` / `$ANTHROPIC_API_KEY` / `$DEEPSEEK_API_KEY` 之一有值，或者 DSH 的凭据文件（`~/.dsh/.credentials.yaml`）里有 key，桥接就会给子进程注入 `ANTHROPIC_BASE_URL=https://athenai.mihoyo.com` + token，**模型默认 `deepseek-v4-flash`**（`ATHEN_MODEL` 可换）。key 只在运行时从环境/凭据文件读，**不落进本仓库、也不打印**。实测：`deepseek-v4-flash` 走网关能被 Claude Code 正常驱动（含工具调用、写文件），一条用例约 5–50 秒。
 > 换引擎：`node tools/skillup-bridge.mjs run --name <名字> --engine codex`，或在页面的「更多选项 → 引擎」里选（默认会挑本机可用的那个）。子代理（promptfoo exec provider）与 MCP 探针不需要引擎。
+>
+> 「根据能力生成」和「自动设计用例」这两步也直接调网关的 `/v1/chat/completions`：**默认等 5 分钟，超时自动重试一次**，还不行就报一句人话（而不是裸的 `DOMException` + 调用栈）；宽紧都能用 **`ATHEN_TIMEOUT_MS`**（毫秒）调。踩过（2026-09-14）：原来写死 120 秒又不重试，而自动设计的第二次尝试是 `max_tokens: 32000`（更慢），必超时。
 
 也可以**只导入报告**（不需要装工具/引擎）：`…-bridge.mjs import --name <名字> --result <报告路径>`。
 
@@ -102,8 +104,9 @@ node tools/skillup-bridge.mjs import --name ponytail --result candidates/skills/
 |---|---|---|
 | **能力**（Input） | 候选/已采纳里的**名字** | 直接用它的评测配置跑（工具按类型自动定：技能→skill-up、子代理→promptfoo、MCP→协议探针） |
 | | **链接**（见下），或点右边的「**技能市场**」搜 | 拉取进候选池 → **按 `SKILL.md` 自动设计针对性用例** → 校验 → 跑 → 落账（技能路径） |
-| **提示词**（TextArea，可选） | 你自己出的任务 | 按它跑 A/B：**A 只给这段提示词 / B 再附上技能正文**，由 LLM 裁判判达标。label 右边有「**根据能力生成**」：读这个能力的 `SKILL.md` 起草一条贴合它的任务（视觉类给页面、代码类给小程序），**只填进框里，你改完再提交** |
-| 页脚右下角 | **关闭** + **提交** | 「提交」就是开始跑（跑完多一颗「刷新台账」） |
+| **提示词**（TextArea，可选） | 你自己出的任务 | 按它跑 A/B：**A 只给这段提示词 / B 再附上技能正文**，由 LLM 裁判判达标。label 右边有「**根据能力生成**」：读这个能力的 `SKILL.md` 起草一条贴合它的任务（视觉类给页面、组件类给组件文件、代码类给小程序），**只填进框里，你改完再提交** |
+| **重复跑**（Select，默认 1 次） | 同一条用例跑几遍（1 / 2 / 3 / 5） | N 次合成**一条**试用，结论里写清"全过几次 / 共几次"（例：`3 次重复里 B 全过 3/3、A 全过 1/3`）。**单次运行只是一个样本**：实测同一条用例两次跑，A 侧结果会翻转（1/1 → 0/1），所以想看清"稳不稳"就重复几次 |
+| 页脚右下角 | **关闭** + **提交** | 「提交」发到后台就关窗，进度在首页「正在评测」那一块看 |
 
 **链接怎么写**（把浏览器地址栏里的东西直接粘进来就行）：
 

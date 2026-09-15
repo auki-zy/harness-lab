@@ -1,0 +1,16 @@
+改完了。`src/Dashboard.tsx` 已重写，`docs/notes.md` 记录了每处改动对应的症状。
+
+**首屏慢的根因**是三个接口串行 `await`：600+650+550 ≈ 1800ms。它们互不依赖，改成 `Promise.all` 后只等最慢的一个 ≈ 650ms。
+
+**切筛选卡**是几个问题叠在一起：
+
+- 筛选结果存在 state 里、由 `useEffect` + `setRows` 写回，每次操作固定多一轮渲染。改成渲染期 `useMemo` 派生，少一份冗余状态。
+- `userOf` 每行调一次 `users.find`，480 行 × 60 成员 ≈ 每次渲染上万次比较。改成 `useMemo` 建一次 Map。
+- `Row` 没有 `memo`，而且 `style={{padding:8}}` 和 `onPick={() => ...}` 每次渲染都是新引用 —— 浅比较必然失败，所以单独加 `memo` 是没用的。三处配套改掉（样式提到模块作用域、`onPick` 换 `useCallback` 并把 userId 作为参数传入）之后才真正生效。
+- `key={i}` 改成 `key={o.id}`，否则筛选后下标和数据错位，memo 也命中不了。
+
+另外渲染体里那行 `window.addEventListener('resize', ...)` 每次都注册新匿名监听且永不注销，拖窗口时卡顿会成倍放大 —— 这是泄漏，顺手移进 `useEffect` 加了清理。
+
+**验证**：`tsc --noEmit --strict` 通过（干净退出）。筛选逻辑另做了穷举比对 —— 8 组 query × 4 种 status 共 32 种组合，新旧实现在结果和顺序上完全一致，且确认 `.sort()` 没有改动原始 `orders`。
+
+`docs/notes.md` 里也写了我**没有**做的几件事及原因：`.sort()` 没换成 `toSorted()`（前面的 `filter` 已返回新数组，不存在原地修改；而且这仓库没有 `package.json`，无法确认目标环境的 lib 配置）；没加 `useDeferredValue`（卡顿根因是 480 行全量重渲染，已经解决，480 条的筛选本身是微秒级）。如果你想让「打开」的观感再好一点，加个指标区骨架屏是下一步性价比最高的做法 —— 这个我留在文档里没动，因为属于新增 UI。

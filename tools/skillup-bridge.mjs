@@ -35,6 +35,7 @@ import {
 } from './lib/trial-record.mjs';
 import { askAthen } from './lib/athen.mjs';
 import { materializeRefs, pickCommit, skillMaterial, withRefSkills } from './lib/skill-content.mjs';
+import { repeatNote, repeatsLabel, summarizeRuns } from './lib/repeats.mjs';
 import {
   ATHEN_HOST,
   KNOWN_ENGINES,
@@ -96,6 +97,10 @@ cases:
     max_turns: 3
     collect_artifacts:
       - "**/*.mjs"
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.ts"
+      - "**/*.tsx"           # 组件类交付物（改好的 src/Xxx.tsx 要能摆进 A/B 对照）
       - "**/*.md"
       - "**/*.html"          # 视觉 / UI 类技能的交付物是页面：不收就摆不进 A/B 对照
 
@@ -546,42 +551,60 @@ function judgeTypes(evalConfigPath) {  if (!evalConfigPath || !existsSync(evalCo
   return { auto: true, llm: /type:\s*agent_judge/.test(text) };
 }
 
-function buildTrial({ name, result, iterationDir, evalConfigPath }) {
-  const cases = result.case_results ?? [];
+/**
+ * 把一次评测（可能是 N 次重复跑）翻译成一条试用记录。
+ *
+ * `runs` 是每次运行的 `{ result, iterationDir }`（`--repeat N` 时长度 N；不传就是单次）。
+ * 合并口径在 `tools/lib/repeats.mjs`：结论里必须写清"B 在几次里全过了几次"——
+ * 实测同一条用例两次跑，A 侧结果会翻转（1/1 → 0/1），n=1 分不清技能效果与方差。
+ */
+function buildTrial({ name, runs, result: singleResult, iterationDir: singleIterationDir, evalConfigPath }) {
+  const list = (runs ?? [{ result: singleResult, iterationDir: singleIterationDir }]).filter((r) => r?.result);
+  const last = list[list.length - 1] ?? {};
+  const result = last.result ?? {};
+  const iterationDir = last.iterationDir;
+  const cases = list.flatMap((r) => r.result.case_results ?? []);
+  const summary = summarizeRuns(list.map((r) => ({ cases: r.result.case_results ?? [] })));
   const byConfig = { A: cases.filter((c) => c.configuration === 'without_skill'), B: cases.filter((c) => c.configuration === 'with_skill') };
   const onlyB = cases.filter((c) => c.configuration !== 'without_skill');
   const hasAB = byConfig.A.length > 0 && byConfig.B.length > 0;
-  const side = (list, key) => (list.length ? list : key === 'B' ? onlyB : []);
+  const side = (s) => (summary[s].total ? cases.filter((c) => (s === 'B' ? c.configuration !== 'without_skill' : c.configuration === 'without_skill')) : []);
 
-  const summaryOf = (list) => {
-    const passed = list.filter((c) => c.status === 'PASS').length;
-    return { total: list.length, passed, passRate: list.length ? passed / list.length : 0 };
+  /** 从**某一次运行**的结果里挑出某一侧的用例（B 侧在没有 A 时用全部结果兜底，与单次口径一致） */
+  const sideCases = (res, sideKey) => {
+    const all = res?.case_results ?? [];
+    const mine = all.filter((c) => c.configuration === (sideKey === 'B' ? 'with_skill' : 'without_skill'));
+    if (sideKey === 'B' && !mine.length) return all.filter((c) => c.configuration !== 'without_skill');
+    return mine;
   };
-  const a = side(byConfig.A, 'A');
-  const b = side(byConfig.B, 'B');
-  const sumA = summaryOf(a);
-  const sumB = summaryOf(b);
 
-  const artifactOf = (list, configName) => {
-    const first = list[0];
-    if (!first) return { entry: null, files: [] };
-    const found = collectArtifacts(iterationDir, first.case_id, configName);
+  const sumA = { total: summary.A.total, passed: summary.A.passed, passRate: summary.A.passRate };
+  const sumB = { total: summary.B.total, passed: summary.B.passed, passRate: summary.B.passRate };
+  const a = side('A');
+  const b = side('B');
+
+  const artifactOf = (sideKey) => {
+    const mine = sideCases(last.result, sideKey);
+    if (!mine.length) return { entry: null, files: [] };
+    const found = collectArtifacts(iterationDir, mine[0].case_id, sideKey === 'B' ? 'with_skill' : 'without_skill');
     return { entry: found.entry, files: found.files };
   };
-  const artA = artifactOf(a, 'without_skill');
-  const artB = artifactOf(b, 'with_skill');
+  const artA = artifactOf('A');
+  const artB = artifactOf('B');
   const bytesOf = (art) => (art.entry ? art.entry.bytes : 0);
   const kb = (n) => (n ? Math.round((n / 1024) * 10) / 10 : 0);
 
-  const checks = (list, sum) => {
-    const first = list[0];
-    const g = first?.grading;
+  /** 只描述**最后一次**运行的判分细节（断言、耗时、未过项）；重复跑的汇总在上面的"全过几次"里 */
+  const checks = (sideKey, sum) => {
+    const mine = sideCases(last.result, sideKey);
+    const g = mine[0]?.grading;
     const assertions = g?.assertion_results?.length ?? 0;
     const failedText = (g?.assertion_results ?? []).filter((x) => !x.passed).map((x) => x.text).join('; ');
     return [
       `用例 ${sum.passed}/${sum.total} 通过`,
+      summary.n > 1 ? `重复 ${summary.n} 次：全过 ${summary[sideKey].perfectRuns}/${summary.n}` : '',
       assertions ? `断言 ${g.summary?.passed ?? 0}/${g.summary?.total ?? assertions}` : '',
-      first?.duration_ms !== undefined ? `耗时 ${(first.duration_ms / 1000).toFixed(1)}s` : '',
+      mine[0]?.duration_ms !== undefined ? `最后一次耗时 ${(mine[0].duration_ms / 1000).toFixed(1)}s` : '',
       failedText ? `未过：${failedText}` : '',
     ]
       .filter(Boolean)
@@ -590,22 +613,32 @@ function buildTrial({ name, result, iterationDir, evalConfigPath }) {
 
   /**
    * 成本与效率维度（2026-09 起成为默认对照）：token / 耗时 / 轮次 / 工具调用 / 缓存命中。
-   * 每条用例的 token 与耗时来自 result.json，工具调用与缓存来自引擎转录；同侧多条用例则累加
-   * （缓存命中取单条最大值——同一份缓存每轮都会重读，累加会虚高）。
+   * 每条用例的 token 与耗时来自 result.json，工具调用与缓存来自引擎转录；同侧多条用例**以及多次重复**都累加
+   * （缓存命中取最大值——同一份缓存每轮都会重读，累加会虚高）。
+   * 注意每次重复的转录在**各自的 iteration 目录**里，所以按 run 遍历、别拿最后那个目录去读所有用例。
    */
-  const costOf = (list, configName) => {
-    const tokensIn = list.reduce((n, c) => n + (c.input_tokens ?? 0), 0);
-    const tokensOut = list.reduce((n, c) => n + (c.output_tokens ?? 0), 0);
-    const durationMs = list.reduce((n, c) => n + (c.duration_ms ?? 0), 0);
-    const steps = list.reduce((n, c) => n + (c.turns ?? 0), 0);
+  const costOf = (sideKey) => {
+    const configName = sideKey === 'B' ? 'with_skill' : 'without_skill';
+    let tokensIn = 0;
+    let tokensOut = 0;
+    let durationMs = 0;
+    let steps = 0;
     let toolCalls = 0;
     let cachedMax = 0;
+    let count = 0;
     const tools = {};
-    for (const c of list) {
-      const run = collectAgentRun(iterationDir, c.case_id, configName);
-      toolCalls += Object.values(run.tools).reduce((n, v) => n + v, 0);
-      for (const [name, count] of Object.entries(run.tools)) tools[name] = (tools[name] ?? 0) + count;
-      if (run.cachedMax > cachedMax) cachedMax = run.cachedMax;
+    for (const run of list) {
+      for (const c of sideCases(run.result, sideKey)) {
+        count += 1;
+        tokensIn += c.input_tokens ?? 0;
+        tokensOut += c.output_tokens ?? 0;
+        durationMs += c.duration_ms ?? 0;
+        steps += c.turns ?? 0;
+        const agentRun = collectAgentRun(run.iterationDir, c.case_id, configName);
+        toolCalls += Object.values(agentRun.tools).reduce((n, v) => n + v, 0);
+        for (const [tool, n] of Object.entries(agentRun.tools)) tools[tool] = (tools[tool] ?? 0) + n;
+        if (agentRun.cachedMax > cachedMax) cachedMax = agentRun.cachedMax;
+      }
     }
     return {
       tokensIn,
@@ -613,16 +646,16 @@ function buildTrial({ name, result, iterationDir, evalConfigPath }) {
       tokensTotal: tokensIn + tokensOut,
       cachedMax,
       durationSec: durationMs ? Math.round(durationMs / 100) / 10 : null,
-      steps: list.length ? steps : null,
+      steps: count ? steps : null,
       toolCalls,
       toolMix: Object.entries(tools)
         .sort((x, y) => y[1] - x[1])
-        .map(([name, count]) => `${name} ${count}`)
+        .map(([tool, n]) => `${tool} ${n}`)
         .join(' / '),
     };
   };
-  const costA = costOf(a, 'without_skill');
-  const costB = costOf(b, 'with_skill');
+  const costA = costOf('A');
+  const costB = costOf('B');
   /** 把一侧的数字塞进 {A,B} 形状，只在有数时加进去 */
   const perSide = (pick) => {
     const out = {};
@@ -647,12 +680,13 @@ function buildTrial({ name, result, iterationDir, evalConfigPath }) {
   const errorNote = (cases.map((c) => c.error).find(Boolean) ?? '').replace(/\s+/g, ' ').trim().slice(0, 180);
   // 一次运行可以覆盖多条用例：都记进 task.id（`a+b`），读者才知道这次试的是几个场景
   const caseIds = [...new Set(cases.map((c) => c.case_id).filter(Boolean))];
-  const evidence = [rel(path.join(iterationDir, 'result.json')), rel(path.join(iterationDir, 'benchmark.json'))].filter((p) =>
-    existsSync(P(p)),
-  );
-  for (const p of ['report.html', 'benchmark.md']) {
-    const abs = path.join(iterationDir, p);
-    if (existsSync(abs)) evidence.push(rel(abs));
+  // 证据：**每次重复**的报告都列上（不然读者无从核对"另一次跑成什么样"）
+  const evidence = [];
+  for (const run of list) {
+    for (const p of ['result.json', 'benchmark.json', 'report.html', 'benchmark.md']) {
+      const abs = path.join(run.iterationDir, p);
+      if (existsSync(abs)) evidence.push(rel(abs));
+    }
   }
   for (const art of [artA, artB]) for (const f of art.files) evidence.push(rel(f.path));
 
@@ -666,8 +700,9 @@ function buildTrial({ name, result, iterationDir, evalConfigPath }) {
     hasAB ? '两边都跑了（with_skill / without_skill = B / A）' : '只跑了 with_skill（没有对照）',
     refs.length ? `B 侧同时装了 ${refs.join('、')}（这份 SKILL.md 是转发壳，内容实际来自那里）` : '',
     caseIds.length ? `用例 ${caseIds.length} 条：${caseIds.join('、')}` : '',
+    repeatNote(summary),
     artA.entry && artB.entry ? `产物大小 A ${kb(bytesOf(artA))} KB / B ${kb(bytesOf(artB))} KB` : '',
-    `报告：${rel(iterationDir)}`,
+    `报告：${summary.n > 1 ? `${rel(path.dirname(iterationDir))}/（${summary.n} 轮）` : rel(iterationDir)}`,
   ]
     .filter(Boolean)
     .join('；');
@@ -680,32 +715,44 @@ function buildTrial({ name, result, iterationDir, evalConfigPath }) {
     ],
     measures: {
       correctness: { ...(a.length ? { A: sumA.passRate } : {}), B: sumB.passRate },
+      ...(summary.n > 1 ? { repeats: repeatsLabel(summary) } : {}),
       ...(artA.entry && artB.entry ? { sizeKB: { A: kb(bytesOf(artA)), B: kb(bytesOf(artB)) } } : {}),
       ...costMeasures,
-      staticChecks: { ...(a.length ? { A: checks(a, sumA) } : {}), B: checks(b, sumB) },
+      staticChecks: { ...(a.length ? { A: checks('A', sumA) } : {}), B: checks('B', sumB) },
       notes,
     },
     judge: judgment.llm ? ['auto', 'llm'] : ['auto'],
     evidence: [...new Set(evidence)],
     task: {
       id: caseIds.join('+') || 'skill-up',
-      fixture: rel(iterationDir),
-      description: `${cases[0]?.title ?? 'skill-up 用例'}（skill-up ${result.schema_version ?? ''}：${caseIds.length || 1} 条用例，每条都跑 with_skill / without_skill）`,
+      fixture: summary.n > 1 ? `${rel(path.dirname(iterationDir))}（${summary.n} 轮重复）` : rel(iterationDir),
+      description:
+        `${cases[0]?.title ?? 'skill-up 用例'}（skill-up ${result.schema_version ?? ''}：${caseIds.length || 1} 条用例，每条都跑 with_skill / without_skill` +
+        `${summary.n > 1 ? `，重复 ${summary.n} 次` : ''}）`,
     },
     model: `${result.engine_name ?? '?'} / ${result.model_name ?? '?'}`,
     hasAB,
     sums: { A: sumA, B: sumB },
+    summary,
     errorsB,
     errorNote,
   };
 }
 
-function importResult({ name, resultInput, evalConfigPath, dryRun, purpose, description, descriptionSource }) {
+function importResult({ name, resultInput, resultInputs, evalConfigPath, dryRun, purpose, description, descriptionSource }) {
   const found = findCapability(name, 'skill');
   const capDir = found?.dir ?? null;
-  const { resultFile, iterationDir } = resolveResultPath(resultInput);
-  const result = readJson(resultFile);
-  const built = buildTrial({ name, result, iterationDir, evalConfigPath: evalConfigPath ?? (capDir ? path.join(capDir, 'evals', 'eval.yaml') : null) });
+  // 一条试用可以覆盖多次重复跑（`--repeat N`）：`resultInputs` 是 N 个 iteration 目录，
+  // 合成**一条**记录（结论里写清 B 在几次里全过了几次），而不是记 N 条 —— 记 N 条等于把
+  // "同一条用例反复跑"伪装成 N 次独立试用。
+  const inputs = (resultInputs?.length ? resultInputs : [resultInput]).filter(Boolean);
+  const runs = inputs.map((input) => {
+    const { resultFile, iterationDir } = resolveResultPath(input);
+    return { result: readJson(resultFile), iterationDir, resultFile };
+  });
+  const result = runs[runs.length - 1]?.result ?? {};
+  const resultFile = runs[runs.length - 1]?.resultFile;
+  const built = buildTrial({ name, runs, evalConfigPath: evalConfigPath ?? (capDir ? path.join(capDir, 'evals', 'eval.yaml') : null) });
   // 判定规则只此一处（tools/lib/trial-record.mjs），各 bridge 不另写一套
   // 引擎是 stub（离线自检用的假引擎）时，这条记录只能证明链路通，不能当采纳依据
   const selfCheck = /stub/i.test(String(result.engine_name ?? ''));
@@ -716,6 +763,9 @@ function importResult({ name, resultInput, evalConfigPath, dryRun, purpose, desc
     errorNote: built.errorNote,
     selfCheck,
     name,
+    runs: built.summary.n,
+    perfectRunsB: built.summary.B.perfectRuns,
+    perfectRunsA: built.summary.A.total ? built.summary.A.perfectRuns : undefined,
     extra: built.hasAB
       ? `对照 A ${built.sums.A.passed}/${built.sums.A.total}`
       : '本次没有对照',
@@ -891,8 +941,18 @@ async function autoEval(args) {
     if (!registered) {
       // 还没登记：先自动设计一次，主要是为了拿到用途标签（登记要求），用例本身这次不跑
       log('▶ 这个技能还没登记，先自动设计一次（用来登记用途标签；这次的用例不跑）');
-      const design = spawnSync(process.execPath, [P('tools', 'gen-eval.mjs'), '--name', name], { stdio: 'inherit', env: process.env });
-      if (design.status !== 0) fail('自动设计失败（看上面的输出）');
+      // 收下子进程输出：既要让它照常显示（log 走 stderr，页面日志面板两路都收），
+      // 又要在失败时把**原因**写进这一行 —— 以前是 stdio:'inherit' + "看上面的输出"，用户只看到一坨调用栈
+      const design = spawnSync(process.execPath, [P('tools', 'gen-eval.mjs'), '--name', name], {
+        encoding: 'utf8',
+        env: process.env,
+      });
+      const designOut = `${design.stdout ?? ''}${design.stderr ?? ''}`.trim();
+      if (designOut) log(designOut);
+      if (design.status !== 0) {
+        const why = designOut.split('\n').filter((l) => l.trim()).slice(-2).join(' ').slice(0, 300);
+        fail(`自动设计失败：${why || `gen-eval 退出码 ${design.status}（没留下输出）`}`);
+      }
     }
     const ask = spawnSync(
       process.execPath,
@@ -990,29 +1050,49 @@ function runSkillUp(args) {
   const model = args.model ?? (/^(auto)?$/i.test(configuredModel(evalConfig)) && athenKey() ? athenModel() : null);
   if (model) argv.push('--model', model);
   if (args.parallelism) argv.push('--parallelism', args.parallelism);
+  // 重复跑：`--repeat N` → skill-up 的 `--iteration N`（实测会跑 N 遍、写 N 个 iteration 目录，
+  // 并打印 "Iteration stability summary"）。这么做的理由见 tools/lib/repeats.mjs：
+  // 同一条用例两次跑，A 侧结果都翻转过，n=1 分不清技能效果与方差。
+  const repeat = Number(args.repeat ?? 1);
+  if (Number.isInteger(repeat) && repeat > 1) {
+    argv.push('--iteration', String(repeat));
+    log(`🔁 重复跑 ${repeat} 次（同一条用例跑 ${repeat} 遍，结论里会给"全过几次"）`);
+  }
   // 网关模式：给子进程注入 ANTHROPIC_BASE_URL / token，Claude Code 就不再要官方登录
   const extraEnv = engineEnv(engine.name);
   if (extraEnv) log(`🌐 ${engine.name} 走内部网关 ${ATHEN_HOST}（模型 ${extraEnv.ANTHROPIC_MODEL}）`);
-  // 跑之前先记下已有的 iteration：跑完只能导入**这次新产生**的那一轮。
-  // （踩过：配置校验失败时 skill-up 退出码非 0、什么都没跑，而"取最后一个 iteration"会把上一轮的旧报告当成新结果再记一遍。）
+  // 跑之前先算好**这次运行的独立输出目录**。
+  //
+  // 为什么不直接用它默认的 `<name>-workspace/iteration-N`（2026-09-15 踩的坑，代价是两条试用的报告）：
+  // skill-up 的 `--iteration N` **从 1 开始编号**，而默认输出目录就是 workspace 根 —— 重复跑会把
+  // 已有的 `iteration-1`、`iteration-2`……**原地覆盖**。那次重复跑正好盖掉了两次旧运行的报告与
+  // A/B 产物，台账里的证据链接就指到了别人的数据上。现在每次运行都写进 `run-<时间戳>/`，
+  // 覆盖不可能再发生，"这次新产生的报告"也不再需要靠 diff 猜（那个 before/fresh 逻辑一并退休）。
   const wsRoot = path.join(path.dirname(found.dir), `${name}-workspace`);
-  const before = existsSync(wsRoot) ? new Set(readdirSync(wsRoot).filter((d) => d.startsWith('iteration-'))) : new Set();
+  const runDir = path.join(wsRoot, `run-${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}`);
+  mkdirSync(runDir, { recursive: true });
+  argv.push('--output-dir', runDir);
   log(`▶ ${bin} ${argv.join(' ')}`);
   const res = spawnSync(bin, argv, { cwd: root, stdio: 'inherit', env: extraEnv ? { ...process.env, ...extraEnv } : process.env });
-  const iters = existsSync(wsRoot) ? readdirSync(wsRoot).filter((d) => d.startsWith('iteration-')).sort() : [];
-  const fresh = iters.filter((d) => !before.has(d));
-  if (fresh.length === 0) {
+  const iters = existsSync(runDir)
+    ? readdirSync(runDir)
+        .filter((d) => d.startsWith('iteration-'))
+        .sort((a, b) => Number(a.split('-')[1] ?? 0) - Number(b.split('-')[1] ?? 0))
+    : [];
+  if (iters.length === 0) {
     fail(
       [
-        `✗ skill-up 没有产生新的报告（退出码 ${res.status}），这次没有写试用记录。`,
+        `✗ skill-up 没有产生报告（退出码 ${res.status}），这次没有写试用记录。`,
         '  常见原因：配置校验没过（看上面的 validation errors）、引擎/凭据没就绪、或用例被过滤掉了。',
-        `  已有报告仍在 ${rel(wsRoot)}/；修好配置再来一次。`,
+        `  这次用的输出目录：${rel(runDir)}；修好配置再来一次。`,
       ].join('\n'),
     );
   }
   if (res.status !== 0) log(`⚠️ skill-up 退出码 ${res.status}（报告已生成，继续导入）`);
+  if (repeat > 1 && iters.length < repeat) log(`⚠ 要求重复 ${repeat} 次，实际只拿到 ${iters.length} 轮报告（按实际的算）`);
   // 注意用 evalConfigPath 这个键名：importResult 读的是它（踩过——传 args.eval 会让判分方检测一直读主配置 eval.yaml）
-  return importResult({ ...args, evalConfigPath: evalConfig, resultInput: path.join(wsRoot, fresh[fresh.length - 1]) });
+  // 重复跑时 `iters` 有 N 个目录：**全部**交给 importResult，合成一条试用（不是记 N 条）
+  return importResult({ ...args, evalConfigPath: evalConfig, resultInputs: iters.map((d) => path.join(runDir, d)) });
 }
 
 function status(args) {
@@ -1085,7 +1165,7 @@ if (command === 'import') {
   log('  node tools/skillup-bridge.mjs auto      --input <能力名|owner/repo|链接> [--prompt "<你的任务提示词>"] [--task <用例 id>] [--dry-run]   # 一句话：拉取 →（出题）→ 跑 → 落账');
   log('  node tools/skillup-bridge.mjs prepare   --source <owner/repo|链接> [--name <能力名>] [--json]   # 只拉取 + 脚手架（不设计用例、不跑）');
   log('  node tools/skillup-bridge.mjs import   --name <能力> --result <result.json|iteration 目录> [--purpose <已登记用途>] [--description "<一句话说明>"] [--description-source "<这句话哪来的>"] [--dry-run]');
-  log('  node tools/skillup-bridge.mjs run      --name <能力> [--eval <eval.yaml>] [--engine <name>] [--skill-up <bin>]');
+  log('  node tools/skillup-bridge.mjs run      --name <能力> [--eval <eval.yaml>] [--engine <name>] [--skill-up <bin>] [--repeat <N>]   # --repeat N：同一条用例跑 N 遍，合成一条试用（结论里给"全过几次"）');
   log('  node tools/skillup-bridge.mjs add-case --name <能力> --task <用例 id>    # 加第二条用例（第二次试用更值得换用例）');
   log('  node tools/skillup-bridge.mjs refs     --name <能力>                  # 转发壳技能：把它引用的技能拉进 refs/ 并挂进 eval 配置');
   log('  node tools/skillup-bridge.mjs remap    --trial <trialId> --result <报告>  # 按最新映射重算指标（不动结论与人评）');

@@ -1,0 +1,66 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）",
+      "passed": false,
+      "evidence": "任务原文（transcript turn 1）要求三件事：优化 src/Dashboard.tsx 的首屏慢与切筛选卡、「改完直接写回这个文件」、「改动说明放 docs/notes.md，写清每处改动是想解决哪个问题」。; assistant 最终回复开头即声明「我先只读探查了一下，没有动文件」，全文未执行任何 Write/Edit 调用；transcript 中仅有 3 次工具调用：一次 Bash ls、一次 Read src/Dashboard.tsx、一次 Bash find，全部为只读探查。; 工作区文件系统核查结果只有 C:/Users/yu.zhao/AppData/Local/Temp/skill-up-3801824050/src/Dashboard.tsx 一个文件，docs/notes.md 不存在。; 回复以「需要你定一下」结尾并给出 (A)/(B) 两个待选项，把任务执行权交回用户，未产出任务要求的任何交付物。 | Failures: 未按要求修改 src/Dashboard.tsx 并写回该文件（文件保持原样）。; 未创建任务明确要求的 docs/notes.md 改动说明文档。; 仅输出了问题清单与确认请求，任务要求的最终产出（优化后的代码 + 说明文档）全部缺失。"
+    },
+    {
+      "text": "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+      "passed": false,
+      "evidence": "交付物缺失：工作区实际文件列表（find 结果）只有 src/Dashboard.tsx，且其内容与 transcript turn 2 中读取的原始 fixture 完全一致，未被修改。; 任务指定的输出文件 docs/notes.md 在整个工作区不存在，无法打开、无法核对格式。; 整体输出是一段面向用户的问答式文本（问题分析表格 + (A)/(B) 选项），不是任务要求的「已优化的源码文件 + 说明文档」这一格式。; 由于没有产出任何可运行/可打开的交付物，无法验证其是否能跑起来。 | Failures: 任务要求的交付物（写回后的 src/Dashboard.tsx）不存在实际改动。; 任务要求的交付物 docs/notes.md 完全不存在。; 输出格式与任务要求不符：任务要的是落地文件，实际给的是一份待确认的方案说明。"
+    },
+    {
+      "text": "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+      "passed": false,
+      "evidence": "针对「首次打开慢」：回复只以文字列出 :67-77 三个接口串行 await（600+650+550=1800ms）并称「改 Promise.all 后降到 650ms」，但 transcript 中无任何 Edit/Write 调用，代码里没有对应的 Promise.all 改动。; 针对「切筛选卡」：回复只以文字列出 :80-86 筛选排序放 effect、:89 resize 监听泄漏、:91 userOf 线性扫描、:136 key={i}、:139/156 未 memo 等问题，同样没有任何一行代码被实际改动。; transcript 中全部工具调用均为只读（ls / find / Read），不存在任何写入或编辑操作；工作区文件系统核查也确认没有任何新文件或修改痕迹。; 因此两个症状在代码层面均无对应改动，连「无关的清理」都没有发生——输出停留在分析层面。 | Failures: 「首次打开慢」在代码中没有对应改动（串行 await 未改为并行）。; 「切筛选卡」在代码中没有对应改动（effect 内派生状态、resize 监听泄漏、O(n²) 查找、索引 key、缺少 memo 等均未修改）。; 产出仅为止于文字的问题定位与待选方案，没有任何实际代码变更。"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 3,
+    "total": 4,
+    "pass_rate": 0.25
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 2823,
+          "original_bytes": 2823
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 11458,
+          "original_bytes": 11458
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 5048
+  }
+}

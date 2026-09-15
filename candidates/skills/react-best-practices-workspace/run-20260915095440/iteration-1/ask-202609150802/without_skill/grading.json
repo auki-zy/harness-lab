@@ -1,0 +1,66 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）",
+      "passed": true,
+      "evidence": "任务三项要求：(1) 优化 src/Dashboard.tsx 打开慢/切筛选卡；(2) 改完直接写回这个文件；(3) 改动说明放 docs/notes.md，写清每处改动对应解决哪个问题。; (1) 性能优化已做：Promise.all 并行取数、useMemo 派生 rows、Map 预建成员索引、Row memo、key 改 o.id、toLowerCase 提出循环、resize 监听改 useEffect+清理（transcript 中 Write 调用对 src/Dashboard.tsx 的完整内容）。; (2) 改动确实写回同一个文件：Write 工具调用 file_path 为 C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-3445873044\\src\\Dashboard.tsx，工具返回 \"has been updated successfully\"；磁盘上 src/Dashboard.tsx 由 4726 字节变为 5671 字节。; (3) docs/notes.md 已创建（工具返回 \"File created successfully\"，磁盘 6303 字节），且按改动逐条写明了对应症状，例如「### 1. 三个接口从串行改成并行」下明写「**症状**：打开要好几秒」，「### 5. 筛选 + 排序从 state + useEffect 改成 useMemo 派生值」下明写「**症状**：切筛选卡」。; 未发现应扣分项：任务没有要求跑测试、跑浏览器、加防抖或虚拟化，这些属于任务外内容，agent 也在 notes.md 第四节明确列出「这次没有做的事」，不据此扣分。"
+    },
+    {
+      "text": "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+      "passed": true,
+      "evidence": "两个交付物都在磁盘上：src/Dashboard.tsx（5671 字节，09:56）与 docs/notes.md（6303 字节，09:57），路径与任务要求一致。; 格式正确：Dashboard.tsx 仍是 TS/TSX 模块，保留了原有 export interface Order / Metric / User 与 fetchOrders / fetchMetrics / fetchUsers / Dashboard 导出，仅新增 memo、useCallback、useMemo、CSSProperties 导入，未改变对外接口形状。; 可编译：agent 在工作区外临时目录用 typescript + @types/react，strict: true / jsx: react-jsx 单编该文件，Bash 返回 \"TSC EXIT: 0\"（无报错）。; 任务未要求可运行的应用或测试通过；工作区内没有 package.json/tsconfig/测试，agent 在 final_message 与 notes.md 中如实说明「没跑过测试、没在浏览器里跑过」，未把未做的验证谎报成已完成。; notes.md 内容与任务要求的格式吻合：按「一、打开慢 / 二、切筛选卡 / 三、顺带修的 bug / 四、没有做的事 / 五、需要确认的事」分节，每条改动都带症状标注与原因解释。"
+    },
+    {
+      "text": "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+      "passed": true,
+      "evidence": "症状一「首次打开慢」有对应代码改动：useEffect 内改为 `const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()])`，替代原先 600ms→650ms→550ms 的串行 await（原文件 67-77 行），消除约 1150ms 的无效等待。; 症状一「首次打开慢」另有：`userOf`（每行一次 `users.find`）改为 `const nameById = useMemo(() =\u003e new Map(users.map(u =\u003e [u.id, u.name])), [users])`，并在渲染中用 `nameById.get(o.user) ?? o.user`，把 480×60 次线性查找降为 O(1)。; 症状一/二共同相关：`const Row = memo(function Row(...))`，同时把 `style={{padding:8}}` 提到模块级常量 `ROW_STYLE`/`METRIC_STYLE`，并把 `onPick={() =\u003e setQuery(o.user)}` 换成 `handlePick = useCallback((user: string) =\u003e setQuery(user), [])` + 行内 `onClick={() =\u003e onPick(order.user)}`，使 memo 的比较真正生效。; 症状一：列表 key 由 `key={i}` 改为 `key={o.id}`，避免筛选后数组长度变化导致的下标错配复用。; 症状二「切筛选卡」有对应代码改动：`rows` 由 `useState\u003cOrder[]\u003e` + `useEffect(() =\u003e {...setRows(next)}, [orders, query, status])` 的双渲染流程，改为 `const rows = useMemo(() =\u003e {...}, [orders, query, status])` 派生值，去掉中间态与多出的一轮渲染。; 症状二：`query.toLowerCase()` 由 filter 回调内（480 次迭代各算一遍）提到 useMemo 顶部 `const q = query.trim().toLowerCase()`，循环内只用 `q`。; 两处症状之外还修了会放大卡顿的 resize 监听 bug：由组件函数体内的 `window.addEventListener('resize', () =\u003e setWidth(window.innerWidth))`（每次渲染挂一个且不解绑）改为带有 `removeEventListener` 清理的 `useEffect(..., [])`；此改动在 notes.md 第三节标题即写明「顺带修掉的一个 bug（不是性能问题，但会放大卡顿）」，属于加成而非偏题。"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 2388,
+          "original_bytes": 2388
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 31525,
+          "original_bytes": 31525
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 4613
+  }
+}

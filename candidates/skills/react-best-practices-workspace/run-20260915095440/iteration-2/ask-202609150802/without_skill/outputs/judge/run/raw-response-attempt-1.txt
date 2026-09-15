@@ -1,0 +1,43 @@
+```json
+{
+  "results": [
+    {
+      "criterion_id": "criterion-1",
+      "passed": true,
+      "evidence": [
+        "任务要求三项：优化 src/Dashboard.tsx、改完写回该文件、改动说明放 docs/notes.md 并写清每处改动解决哪个问题。",
+        "写回原文件已执行：transcript 中 Write 调用 file_path 为 src/Dashboard.tsx，磁盘上该文件大小为 6315 字节、修改时间 10:00，内容为优化后的版本。",
+        "docs/notes.md 已创建（磁盘 5200 字节），开头写明「优化对象：`src/Dashboard.tsx`。症状是「打开要好几秒」「切筛选卡」。下面每处改动都标明它针对的是哪个问题。」",
+        "notes 按症状分节：一、首屏慢；二、切筛选卡；三、顺带修掉的 bug；每条改动用「**问题**」「**改法**」两段明确对应到具体问题（如第 1 条写明串行 await 耗时相加 600+650+550≈1800ms）。",
+        "任务未要求交付物之外的东西，产物未出现遗漏或偏离；额外的 bug 修复（key、resize 监听、CSSProperties 导入）未被当作扣分点。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-2",
+      "passed": true,
+      "evidence": [
+        "交付物齐全且在正确路径：src/Dashboard.tsx（6315 B）与 docs/notes.md（5200 B）均在磁盘上存在，目录列表可见。",
+        "格式正确：Dashboard.tsx 为完整可解析的 TSX 模块，保留原有 Order/Metric/User 接口与 fetchOrders/fetchMetrics/fetchUsers 导出，import 语句齐全（memo, useCallback, useEffect, useMemo, useState, type CSSProperties 均在文件中被使用）。",
+        "语法/类型层面未见错误：useState(() => window.innerWidth) 惰性初始化合法；new Map<string, User>(users.map((u): [string, User] => [u.id, u])) 类型标注合法；memo(function Row(...)) 与 CSSProperties 类型的 ROW_STYLE 常量匹配；handlePick 的 (userId: string) => void 与 RowProps.onPick 一致。",
+        "行为等价性保持：Row 内 onClick={() => onPick(order.user)} 与原来 onPick={() => setQuery(o.user)} 语义一致；筛选/排序逻辑（status 过滤、query 匹配、b.amount - a.amount 降序）与原始实现一致。",
+        "工作区确实不存在 package.json/tsconfig/测试（find 结果显示仅 ./src/Dashboard.tsx），无法运行构建；agent 在最终消息与 notes 顶部均明确披露「只做了静态审查，没能跑类型检查或测试」，未虚报验证结果。这是环境缺工具链所致，非交付物本身不可用。"
+      ],
+      "failures": []
+    },
+    {
+      "criterion_id": "criterion-3",
+      "passed": true,
+      "evidence": [
+        "症状一「首次打开慢」有对应代码改动：useEffect 中原三行串行 await（fetchOrders→fetchMetrics→fetchUsers）改为 const [o, m, u] = await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()])（Dashboard.tsx:74），并发后总耗时由 600+650+550≈1800ms 降为最慢的 ≈650ms。",
+        "首屏另有一处改动：const [width, setWidth] = useState(() => window.innerWidth)（Dashboard.tsx:67）由每次渲染求值改为惰性初始化。",
+        "症状二「切筛选卡」有对应代码改动：rows 由 useState + useEffect(setRows) 改为渲染期派生的 useMemo（Dashboard.tsx:89-95），消除每轮筛选多出的一整轮渲染。",
+        "针对筛选重渲染主因的改动：Row 用 memo 包裹（Dashboard.tsx:179），并把每渲染新建的 style={{padding:8}} 提为模块常量 ROW_STYLE（Dashboard.tsx:58, 160）、onPick 由内联闭包改为 useCallback 的 handlePick（Dashboard.tsx:112, 161）。",
+        "针对筛选计算量的改动：query.toLowerCase() 提到 filter 外算一次存为 q（Dashboard.tsx:90），成员查找由 users.find 改为 useMemo 构建的 Map 查表 userMap.get(o.user)（Dashboard.tsx:98-101, 159）。",
+        "改动与两个症状直接相关，非无关清理：列表 key 由下标 i 改为 o.id（Dashboard.tsx:157）与 resize 监听改入 useEffect 带 cleanup（Dashboard.tsx:105-109）属附带修复，且 notes 中标注为「顺带修掉的 bug」，未挤占或替代上述两处核心性能改动。"
+      ],
+      "failures": []
+    }
+  ]
+}
+```

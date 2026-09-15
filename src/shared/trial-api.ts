@@ -35,6 +35,33 @@ export interface EvalLog {
   log: string;
 }
 
+/** 这次跑的是哪条路：用户自己出题（ask）/ 一键评测（auto）/ 直接跑已有用例（run） */
+export type EvalRunKind = 'ask' | 'auto' | 'run';
+
+/**
+ * 一次后台评测（页面「正在评测」那一块用它）。
+ *
+ * 发起评测是**后台任务**：提交完弹窗就关，任务在服务端继续跑，列表里挂着这一条、
+ * 点「看进度」能看日志。所以这里只有一行进度（`tail`），日志正文另走 `evalRunState(id)`。
+ */
+export interface EvalRunInfo {
+  id: string;
+  /** 跑的是哪个能力（填链接发起时就是那段链接） */
+  name: string;
+  tool: string;
+  /** 工具的人话名字（服务端按 TOOLS 给的，页面不用再抄一套） */
+  toolLabel: string;
+  kind: EvalRunKind;
+  /** 重复跑次数（同一条用例跑几遍）；1 = 不重复。跑完的结论里会给"全过几次" */
+  repeat?: number;
+  status: 'running' | 'done';
+  code: number | null;
+  startedAt: number;
+  durationMs: number;
+  /** 日志最后一行：列表里一眼看出跑到哪了 */
+  tail: string;
+}
+
 async function call<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...init,
@@ -50,6 +77,7 @@ export const evalStatus = (): Promise<EvalStatus> => call<EvalStatus>('/api/eval
 export const evalPrepare = (input: { source: string; name?: string }): Promise<EvalLog> =>
   call<EvalLog>('/api/eval/prepare', { method: 'POST', body: JSON.stringify(input) });
 
+/** 发起：直接跑某个能力已有的用例（服务端立刻返回，任务在后台跑） */
 export const evalStart = (input: {
   tool: string;
   name: string;
@@ -57,14 +85,22 @@ export const evalStart = (input: {
   config?: string;
   purpose?: string;
   inspector?: boolean;
-}): Promise<{ runId: string }> => call<{ runId: string }>('/api/eval/run', { method: 'POST', body: JSON.stringify(input) });
+  /** 重复跑次数（1–5）：同一条用例跑 N 遍，结论里给"全过几次"，免得拿一次运行当结论 */
+  repeat?: number;
+}): Promise<{ runId: string; run: EvalRunInfo }> =>
+  call<{ runId: string; run: EvalRunInfo }>('/api/eval/run', { method: 'POST', body: JSON.stringify(input) });
 
-export const evalRunState = (id: string): Promise<{ status: 'running' | 'done'; code: number | null; log: string }> =>
-  call<{ status: 'running' | 'done'; code: number | null; log: string }>(`/api/eval/run?id=${encodeURIComponent(id)}`);
+export const evalRunState = (id: string): Promise<{ status: 'running' | 'done'; code: number | null; log: string; run?: EvalRunInfo }> =>
+  call<{ status: 'running' | 'done'; code: number | null; log: string; run?: EvalRunInfo }>(
+    `/api/eval/run?id=${encodeURIComponent(id)}`,
+  );
+
+/** 后台在跑 / 最近跑过的评测：关掉弹窗、刷新页面之后，列表里照样能看到并点进去看进度 */
+export const evalRuns = (): Promise<{ runs: EvalRunInfo[] }> => call<{ runs: EvalRunInfo[] }>('/api/eval/runs');
 
 /** 一句话评测：能力名直接用；看着像链接就拉取 + 自动设计用例再跑；带 task 就按用户自己出的题跑 A/B */
-export const evalAuto = (input: { input: string; task?: string }): Promise<{ runId: string }> =>
-  call<{ runId: string }>('/api/eval/auto', { method: 'POST', body: JSON.stringify(input) });
+export const evalAuto = (input: { input: string; task?: string; repeat?: number }): Promise<{ runId: string; run: EvalRunInfo }> =>
+  call<{ runId: string; run: EvalRunInfo }>('/api/eval/auto', { method: 'POST', body: JSON.stringify(input) });
 
 export const evalImport = (input: { tool: string; name: string; result: string; purpose?: string }): Promise<EvalLog> =>
   call<EvalLog>('/api/eval/import', { method: 'POST', body: JSON.stringify(input) });

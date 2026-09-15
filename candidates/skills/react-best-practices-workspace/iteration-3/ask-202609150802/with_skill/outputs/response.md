@@ -1,0 +1,24 @@
+改完了。`src/Dashboard.tsx` 已写回，说明在 `docs/notes.md`。
+
+## 两个症状对应两处根因
+
+**「打开要好几秒」** — 三个接口串行 `await`（600+650+550）。它们互不依赖，改成 `Promise.all` 并行，等待时间从三者之和变成最大值：**约 1800ms → 约 650ms**。
+
+**「切筛选卡」** — 三个叠加的浪费：
+- `rows` 是派生值却存进 state 再由 effect 回写，每次筛选多一轮「渲染→effect→setState→再渲染」的往返
+- 每敲一个字就在同帧里做 480 条过滤+排序，输入本身被拖慢 → 改用 `useDeferredValue`
+- 每行都 `users.find` 线性查找，单次渲染约 2.9 万次比较 → 建 `Map` 降到 480 次
+
+顺带修了一个你没提但同源的隐性 bug：`window.addEventListener('resize')` 写在组件函数体里，**每次渲染都挂一个且从不清理**，渲染 N 次就累积 N 个监听器，之后每次缩放触发 N 次 `setWidth`——越用越卡。改用 `useSyncExternalStore` 订阅，监听器恒为 1 个且自动清理。
+
+另外把 `Row` 用 `memo` 包上、静态样式提为常量、回调改稳定引用、`key` 从下标改成 `o.id`（原下标 key 在筛选改变顺序时会让 React 复用错行）。
+
+## 两点需要你知道
+
+**我推翻了自己的一个改动。** 我一度给 `<tr>` 加了 `content-visibility: auto` 来跳过视口外行的绘制——这是 skill 里推荐的 long-list 做法。查证后撤掉了：CSS Containment 规定 size containment 对内部表格盒不生效，而 `content-visibility` 的适用性跟随 `contain: size`，[Chromium](https://chromium.journaldev.googlesource.com/external/w3c/web-platform-tests/+/3655e3aff112efa40cb776147c67e9384158e62c) 和 [Firefox](https://phabricator.services.mozilla.com/rMOZILLACENTRAL228f4a8ccf96b3bd724b82c7bd6ad92b4e7ba8ef) 都已明确不对其生效。加在 `<tr>` 上是空操作，只会留下一条误导性注释。要真生效得把表格换成 div 列表或上虚拟滚动，属于结构改动，没做。同样评估后未改的还有 `.sort()`→`.toSorted()`（此处 sort 作用于 filter 的新数组，不改 state，且 `toSorted` 需要 ES2023 而此处无 tsconfig 可确认）。
+
+**数字是算出来的，不是测出来的。** 这个工作区没有 `package.json`/`tsconfig.json`/`node_modules`，我无法运行 `tsc` 也无法起应用实测。唯一实际做过的验证是用 `bun build` 转译通过，确认无语法错误——类型层面和运行时行为**均未验证**。所有耗时数字都是基于 fixture 里 `sleep()` 固定值的算术推算。
+
+还有个前提：`useDeferredValue` 和 `useSyncExternalStore` 都需要 **React 18+**，这里无法确认实际装的版本，升级前请核对。建议在真实环境用 Profiler 复核一下筛选时的渲染次数。
+
+（另：原文件注释引用的 `candidates/skills/.../evals/cases/` 在当前工作区不存在，实际依据是 `.claude/skills/react-best-practices/SKILL.md`，已在注释和 notes 里注明。）

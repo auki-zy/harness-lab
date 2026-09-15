@@ -1,0 +1,66 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "只按用户给出的这条任务要求评判：任务里明确要的东西都在，就算做到了；任务没要求的，不许拿来扣分（也别用别的标准）",
+      "passed": true,
+      "evidence": "任务原文（transcript 第 0 条 user 消息）只提出三项要求：'src/Dashboard.tsx 打开要好几秒，切筛选也卡，帮我优化一下。改完直接写回这个文件，改动说明放 docs/notes.md，写清每处改动是想解决哪个问题。'; 要求(1) 优化——src/Dashboard.tsx 已被改写为优化版本（workspace 中该文件 6146 字节，含 Promise.all、useMemo、memo、Map 索引等改动）; 要求(2) 直接写回原文件——transcript 第 14/15 条显示工具调用为 Write，目标路径为 C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-3531760712\\src\\Dashboard.tsx，结果为 'The file ... has been updated successfully'；未新建副本; 要求(3) 改动说明放 docs/notes.md——该文件存在（8050 字节），且非空；transcript 第 19/20 条显示其内容由 Write 创建于 ...\\docs\\notes.md; notes.md 逐条标注了「解决哪个问题」：正文以 '一、「打开要好几秒」' 与 '二、「切筛选也卡」' 两大节组织，9 条改动每条都写明『问题』与『改法』两段（如第 1 条对应打开慢、第 3/4/5/6/7 条对应切筛选卡）; 任务未要求类型检查、实机运行或 Profiler 实测，因此 final_message 中自述『没有做类型检查、没有实机运行、没有 Profiler 实测』不构成本条扣分项；同理任务未要求保留原文件头部注释或使用 toSorted()，agent 对这两处的保留/说明也不扣分"
+    },
+    {
+      "text": "产出要能用：交付物在、能跑起来 / 能打开、格式没错；跑不起来、交付物缺失、输出对不上任务要求的格式，才算没做到",
+      "passed": true,
+      "evidence": "交付物齐全：src/Dashboard.tsx（6146 字节）与 docs/notes.md（8050 字节）均实际存在于工作区 C:\\Users\\yu.zhao\\AppData\\Local\\Temp\\skill-up-3531760712; 格式正确：交付物是任务指定的两个路径/两种格式——一个 .tsx 源码文件写回原路径，一份 Markdown 说明写在新路径 docs/notes.md，与任务 '改动说明放 docs/notes.md' 的要求一致; 语法可解析：独立复跑 npx esbuild@0.24.0 src/Dashboard.tsx --target=es2020 --format=esm，exit=0、stderr 为空、产出 87 行 JS，说明该 TSX 能被正常解析/编译；transcript 第 33/34 条中 agent 的同一检查亦为 exit=0; 代码自洽可运行：src/Dashboard.tsx 中 Promise.all 并行加载、userById Map、useMemo 派生 rows、memo(Row)、key={o.id} 相互一致，未残留被删状态（Grep 结果见 transcript 第 22/23 条，仅命中注释中的 'setRows'/'userOf' 文字，无实际 setRows/userOf/key={i} 调用残留）; 对外行为与改造前一致：Row 的点击仍为 setQuery(order.user)（第 159/177 行 onPick={setQuery} 与 onClick={() =\u003e onPick(order.user)}），行内渲染字段与排序逻辑（filter → sort by amount 降序）和原实现相同；ROW_STYLE={padding:8} 等价于原先每行传入的 style={{padding:8}}; 说明：工作区内不存在 package.json / tsconfig.json / CSS 文件（transcript 第 37 条 find 结果仅列出 .claude、docs/notes.md、src/Dashboard.tsx），无可运行入口是工作区本身限制，非交付物缺陷；agent 已在 final_message 与 notes.md 开头显式披露这一点与残留风险（useDeferredValue 需 React 18+、未做 tsc 类型检查）"
+    },
+    {
+      "text": "针对用户说的两个症状（首次打开慢、切筛选卡）在代码里有对应改动，而不是只做了无关的清理",
+      "passed": true,
+      "evidence": "症状一『打开要好几秒』有对应改动：原文件（transcript 第 3 条读到的原始内容，第 66-77 行）中 load() 内为 const o = await fetchOrders(); setOrders(o); const m = await fetchMetrics(); ... 串行执行，三接口分别为 sleep(600)/sleep(650)/sleep(550)；改后 src/Dashboard.tsx:71-83 在同一 useEffect 内改为 await Promise.all([fetchOrders(), fetchMetrics(), fetchUsers()])，把首屏耗时从 1800ms 量级降到约 650ms; 症状二『切筛选卡』改动 1：原文件第 88-89 行把 window.addEventListener('resize', ...) 直接写在组件函数体内且无清理；改后 src/Dashboard.tsx:107-111 移入 useEffect 并在返回函数中 removeEventListener，消除了每次渲染叠加监听导致的泄漏与卡顿; 症状二改动 2：原文件第 91 行 userOf = (id) =\u003e users.find(...) 并在每行调用（第 138 行）；改后 src/Dashboard.tsx:86 建立 useMemo(() =\u003e new Map(...))，第 158 行改为 userById.get(o.user)?.name，把每渲染约 28,800 次比较降为 O(1); 症状二改动 3：原文件第 79-86 行把 filter/sort 放在 useEffect 中 setRows 写回 state（派生数据冗余一轮渲染）；改后 src/Dashboard.tsx:93-102 删除 rows state 与对应 effect，改为渲染期 useMemo 直接派生; 症状二改动 4：原文件第 134-142 行用 key={i}、每行新建 style={{padding:8}} 与 onPick={() =\u003e setQuery(o.user)} 闭包，且 Row（第 156 行）未 memo；改后 src/Dashboard.tsx:59 提出模块级 ROW_STYLE、第 156 行 key={o.id}、第 159 行传稳定的 setQuery、第 175 行 const Row = memo(function Row(...))，四处共同消除全量 480 行重渲染; 症状二改动 5（加固）：src/Dashboard.tsx:89 引入 useDeferredValue(query)，第 102 行依赖数组相应改为 [orders, deferredQuery, status]，并把 q = deferredQuery.trim().toLowerCase() 提到循环外; 每条改动均在 docs/notes.md 中与症状显式对应：第 12-31 行小节标题为「一、『打开要好几秒』」，第 34-36 行小节标题为「二、『切筛选也卡』」并在开头写明『卡顿不是一个原因造成的，是下面几处叠加』，逐条编号 1-9 说明各自解决哪个问题"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1
+  },
+  "judge_context": {
+    "profile": "standard",
+    "materialized_dir": "judge/context",
+    "manifest": {
+      "profile": "standard",
+      "materialized_dir": "judge/context",
+      "materials": [
+        {
+          "key": "final_message",
+          "mode": "include",
+          "path": "judge/context/final_message.txt",
+          "bytes": 2871,
+          "original_bytes": 2871
+        },
+        {
+          "key": "transcript",
+          "mode": "file_ref",
+          "path": "judge/context/transcript.json",
+          "bytes": 45998,
+          "original_bytes": 45998
+        },
+        {
+          "key": "workspace_diff",
+          "mode": "omit",
+          "bytes": 0
+        },
+        {
+          "key": "generated_files",
+          "mode": "omit",
+          "bytes": 0
+        }
+      ]
+    },
+    "prompt_delivery": "inline",
+    "prompt_bytes": 5096
+  }
+}

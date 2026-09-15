@@ -1,0 +1,26 @@
+改完了。`src/Dashboard.tsx` 已就地更新，改动说明在 `docs/notes.md`。
+
+## 改了什么，分别解决哪个问题
+
+**首屏慢（~1800ms）**
+- 三个接口从串行 `await` 改成 `Promise.all` 并发 → 总耗时从 600+650+550 降到最慢那个 ≈ 650ms。顺带三次 setState 合并成一次渲染。
+- 加载 effect 加了 `cancelled` 标志，卸载后不再 setState。
+
+**切筛选卡**
+- `rows` 从 `useEffect` + `setRows` 改成 `useMemo` 派生。原来每个按键要渲染**两遍**，且第一遍是拿旧筛选结果白画 480 行；现在一次到位。
+- 成员查表从「每行 `users.find`」改成一次建 `Map`（每次渲染 2.9 万次比较 → O(n+m)）。
+- `query.toLowerCase()` 从循环内提到循环外。
+- `Row` 套 `React.memo`，并配套把 `onPick` 换成 `useCallback`、`style` 提到模块级常量 —— 这三处是**配套的**，只加 `memo` 不处理另外两个，浅比较永远失败，等于没加。
+- `key={i}` → `key={o.id}`。
+
+**顺手修的 bug**
+- `window.addEventListener('resize', ...)` 原来写在渲染函数体里、无 cleanup：每渲染一次多挂一个监听器且永不摘除，窗口一 resize 就触发 N 次 setState → N 次渲染。已挪进 `useEffect` 并返回清理函数。
+
+**没加 debounce**：卡顿的根因是上面那个渲染循环，不是 480 条的 filter/sort（亚毫秒级）。debounce 只会白加 100~300ms 输入延迟。
+
+**刻意没动**：`width` state 可以改用 CSS `calc(100% - 32px)` 彻底消掉，但工作区里只有这一个文件、看不到配套 CSS，改选择器有破坏布局的风险；虚拟滚动同理，480 行现在还不需要引依赖。
+
+## 两点需要你确认
+
+1. **没有验证过**。这个工作区只有 `src/Dashboard.tsx`，没有 `package.json`／`tsconfig`／测试，所以**我没跑类型检查、构建或测试，也没实测耗时**。上面的 1800ms → 650ms 是按 `sleep` 时长推算的，请在真实工程里复测。另外 `React.CSSProperties` 改成了 `import type { CSSProperties }`（原来只 import 了 hooks，没用到的 `React` 命名空间引用有点悬）。
+2. **文件头部注释自称是评测夹具**，是 `context.repo_fixture`，"不是仓库自己的产品代码"，还让我改前先看 `candidates/skills/react-best-practices/evals/cases/` —— 那个路径在本工作区不存在。如果它确实是要保持现状的评测输入，这次改动会影响该用例的预期，你确认一下是否保留。

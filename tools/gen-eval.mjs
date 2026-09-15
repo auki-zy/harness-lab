@@ -15,7 +15,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { P, fail, findCapability, log, readJson, registeredPurposes, rel } from './lib/trial-record.mjs';
-import { askAthen, extractJson } from './lib/athen.mjs';
+import { askAthen, extractJson, resolveTimeout } from './lib/athen.mjs';
+import { normalizeDeliverable } from './lib/deliverable.mjs';
 import { athenModel } from './lib/engines.mjs';
 import { refDirName, skillMaterial, thinReason, withRefSkills } from './lib/skill-content.mjs';
 
@@ -37,7 +38,11 @@ const DRAFT_DELIVERABLE_RULE = [
   '看 SKILL.md 管的是什么：',
   '  · 管**界面 / 视觉 / 排版 / 交互 / 设计系统**（UI、UX、前端视觉、图表、幻灯片）→ 交付**一个自包含的 `index.html`**',
   '    （内联 CSS/JS，不装依赖、不跑构建），浏览器打开就能看到效果；别人一眼能对比两版好不好看。',
-  '  · 管**代码质量 / 写法 / 精简 / 性能** → 交付**一个小程序**（`xxx.mjs`，只用 Node 自带能力），',
+  '  · 管**前端组件 / 框架写法**（React、Vue、Svelte、组件库、hooks、状态管理、渲染性能）→ 交付**组件源码文件本身**，',
+  '    路径跟着任务语境走（`src/Dashboard.tsx`、`src/Card.vue` 都行），**保持框架原有的后缀**；',
+  '    需要看效果时另附一个最小可打开的页面。**绝对不要把它降级成 `impl.mjs` 那种命令行小程序**——',
+  '    那测的就不是这个技能的写法了（踩过：react-best-practices 被出成"写一个 Node 脚本验并行/去重"，产物跟 React 无关）。',
+  '  · 管**代码质量 / 写法 / 精简 / 性能**（命令行、算法、脚本、纯逻辑）→ 交付**一个小程序**（`xxx.mjs`，只用 Node 自带能力），',
   '    跑起来、看退出码与 stdout 就能判。',
   '  · 管**流程 / 计划 / 拆解 / 文档** → 交付**一份 markdown 或 JSON**（结构固定，能逐字段检查）。',
 ].join('\n');
@@ -61,10 +66,13 @@ ${DRAFT_DELIVERABLE_RULE}
 3. 用例（cases）必须**机器可判定**：
    - **程序类**（.mjs）：靠退出码、stdout 精确相等、或 stdout 包含/不包含来判断；
    - **页面类**（.html）：靠页面里的**字面量**判断——该出现的结构/文案（mustContain）、不该出现的（mustNotContain），外加一个最小字节数（minBytes）。别写"看起来协调"这种判据。
+   - **组件类**（.tsx / .jsx / .vue / .svelte）：**代码好不好退出码判不了**，只能查文件里的**字面量**（mustContain / mustNotContain：导出名、props 名、必须保留的行为、必须出现的 data-* 之类）+ minBytes。
+     **组件类用例里绝对不许要求"用了某个 API 就是对的"**（别写"必须有 useMemo / memo / useCallback / useDeferredValue"）——
+     那是拿技能自己的做法考技能（循环论证），A 侧没读过技能就必然不达标。要验的是**外部可观察的结果**（例如"同一个组件仍然导出 X、props 形状没变、列表项仍然渲染出 data-id"）。
 4. 至少一个"正常路径"用例 + 至少一个"边界/异常"用例（缺文件、空输入、坏输入之类；页面类可以是"必须在窄屏下也有 X 结构"这类结构要求）。
 5. 所有期望值必须是**你自己算准的**，而且**必须和你在 taskPrompt 里写的口径严格一致**（口径说"行数 = \n 的个数"，期望值就得按这个算——不许出现口径说 1 行、期望写 2 行这种自相矛盾）。口径按最直白的常识写，别绕。
 6. **程序类优先用 stdoutEquals（精确相等）**；页面类优先用 mustContain 里那些**任务里明确要求过**的字面量（例如任务要求"每张卡片必须有 data-role 属性"，就检查 data-role）。
-7. 再给一份 referenceSolution：**满足全部用例的完整交付物**（程序类给源码，页面类给完整 HTML）。我们会拿它在本地跑一遍你设计的 check 脚本——**跑不过就说明用例或期望值有错，会被打回重来**。
+7. 再给一份 referenceSolution：**满足全部用例的完整交付物**（程序类给源码，页面类给完整 HTML，组件类给完整的组件文件）。我们会拿它在本地跑一遍你设计的 check 脚本——**跑不过就说明用例或期望值有错，会被打回重来**。
 8. 初始输入文件（inputs）只在任务需要时给；内容要短（几行），判分只依赖这些内容。
 9. **末尾换行不算内容**：判分脚本用 bash 捕获 stdout，末尾换行会被吃掉。所以写 stdoutEquals 时按"**去掉末尾换行后**的内容"写（实现用 console.log('x') 打出 "x" 加换行，期望值就写 x）。任务说明里也别去抠末尾换行这种细节。
 
@@ -109,7 +117,7 @@ function refsNote(dir) {
 function renderCheck(spec) {
   // 页面类交付物（视觉 / UI 技能）：**不去"运行"它**，检查页面本身的结构标记。
   // 好不好看由人打开页面看——两版产物就在对照板里，一点就开；机器只管底线（文件在不在、该有的东西有没有）。
-  if (isPageDeliverable(spec.deliverable)) return renderPageCheck(spec);
+  if (isFileCheckDeliverable(spec.deliverable)) return renderPageCheck(spec);
 
   const lines = [
     '#!/usr/bin/env bash',
@@ -173,22 +181,51 @@ const shellQuote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
 /** 页面类交付物：`.html`（视觉 / UI 技能走这条） */
 const isPageDeliverable = (name) => /\.html?$/i.test(String(name ?? ''));
 
+/** 组件类交付物：`.tsx/.jsx/.vue/.svelte`（框架写法类技能走这条——产物就是组件文件本身） */
+const isComponentDeliverable = (name) => /\.(tsx|jsx|vue|svelte)$/i.test(String(name ?? ''));
+
+/** 只查文件结构与字面量的那两类：页面与组件源码（都不"运行"它们） */
+const isFileCheckDeliverable = (name) => isPageDeliverable(name) || isComponentDeliverable(name);
+
 /**
- * 页面类交付物的判分脚本。
- * 每条用例给的是**页面里必须出现 / 不该出现的字面量**（结构、文案、可访问性属性），
+ * 这条评测该收集什么产物：**交付物本身**一定收（按完整路径，`src/Dashboard.tsx` 也算），
+ * 再按形态补一类通配（页面收 html 兄弟文件、组件收同后缀的其他文件……）。
+ * 踩过：收集清单里只列了 TypeScript 的 `.ts` 通配，React 技能改出来的 `.tsx` 一个都没收到，
+ * 对照板上只剩一份说明文档。
+ */
+function artifactGlob(deliverable) {
+  const ext = String(deliverable).match(/\.([A-Za-z0-9]+)$/)?.[1]?.toLowerCase() ?? '';
+  if (ext === 'html' || ext === 'htm') return '**/*.html';
+  if (ext === 'tsx' || ext === 'jsx' || ext === 'vue' || ext === 'svelte' || ext === 'ts' || ext === 'js') {
+    return `**/*.${ext}`;
+  }
+  return '**/*.md';
+}
+
+/**
+ * 页面 / 组件类交付物的判分脚本（**不"运行"它们**，只读文件）。
+ * 每条用例给的是**文件里必须出现 / 不该出现的字面量**（结构、导出名、文案、可访问性属性），
  * 以及一个最小体量（挡住"交了个空壳"）。参考实现自检同样跑这个脚本：
- * 把模型给的 index.html 写进临时目录、跑一遍检查——**过不了说明它自己写的用例和参考实现矛盾**。
+ * 把模型给的交付物写进临时目录、跑一遍检查——**过不了说明它自己写的用例和参考实现矛盾**。
+ *
+ * 组件类（`.tsx` 等）只能查到这个程度：**代码好不好，退出码判不了**——那部分交给 ask + LLM 裁判。
+ * 也正因为如此，用例里**不许**要求"用了 useMemo / memo / useDeferredValue"这类**技能自己的做法**，
+ * 那是拿技能的标准考技能（循环论证），只许查外部可观察的结构与签名。
  */
 function renderPageCheck(spec) {
   const cases = spec.cases ?? [];
+  const component = isComponentDeliverable(spec.deliverable);
+  const fallback = component ? '' : ' index.html';
   const lines = [
     '#!/usr/bin/env bash',
-    `# 脚本裁判（${spec.taskId}，页面类交付物，由 tools/gen-eval.mjs 按 SKILL.md 自动生成）：退出码 0 = 通过。`,
-    '# 只查页面本身的结构与文案；"好不好看"由人打开页面看（两版产物在台账的对照板里）。',
+    `# 脚本裁判（${spec.taskId}，${component ? '组件源码' : '页面'}类交付物，由 tools/gen-eval.mjs 按 SKILL.md 自动生成）：退出码 0 = 通过。`,
+    component
+      ? '# 只查文件本身的结构与签名（导出名、必须出现的字面量）；"代码写得好不好"由 LLM 裁判 / 人来判。'
+      : '# 只查页面本身的结构与文案；"好不好看"由人打开页面看（两版产物在台账的对照板里）。',
     'set -u',
     '',
     'ENTRY=""',
-    `for f in ${spec.deliverable} index.html; do`,
+    `for f in ${spec.deliverable}${fallback}; do`,
     '  if [ -f "$f" ]; then ENTRY="$f"; break; fi',
     'done',
     'if [ -z "$ENTRY" ]; then',
@@ -231,7 +268,15 @@ const normalizeStdout = (s) => String(s).replace(/(?:\r?\n)+$/, '');
 
 const ASK_EVAL = 'evals/eval.ask.yaml';
 
-function renderAskCase({ taskId, prompt, criteria, model }) {
+/**
+ * 渲染一条"用户自己出题"的用例。
+ *
+ * `fixture`：任务要是**改一个现有文件**（"src/Dashboard.tsx 打开要好几秒，帮我优化"），
+ * 那个文件必须在工作区里存在——否则两边都无从下手，跑出来的 0/0 是**用例的错**，不是能力的错
+ * （踩过：react-best-practices 那条 ask 用例就是这么被判成 reject 的）。
+ * 工作区输入交给 skill-up 的 `context.repo_fixture`（相对**技能目录**的路径），实测能用。
+ */
+function renderAskCase({ taskId, prompt, criteria, model, fixture }) {
   const body = String(prompt).trim().split('\n').map((l) => `    ${l}`.trimEnd());
   return [
     `id: ${taskId}`,
@@ -241,6 +286,7 @@ function renderAskCase({ taskId, prompt, criteria, model }) {
     'input:',
     '  prompt: |',
     ...body,
+    ...(fixture ? ['', 'context:', `  repo_fixture: ${fixture}`] : []),
     '',
     'constraints:',
     // 整页级别的任务（视觉类技能）本来就慢：实测一边 300–450 秒，600 秒会把"做得慢"直接判成 ERROR，
@@ -294,13 +340,21 @@ cases:
     collect_artifacts:
       # 页面也算产物：视觉类技能的"效果"就是那个页面，不收上来台账里根本打不开（踩过：
       # ui-ux-pro-max 两条 ask 记录都只有结论、没有可打开的 A/B 页面）
+      # 组件 / 前端源码也算：react-best-practices 那条用例的交付物就是改好的 src/Dashboard.tsx，
+      # 而清单里只列到 **/*.ts —— 两版改出来的 .tsx 一个都没收到，对照板上只剩那份说明
+      # （踩过：iteration-2 的产物路径是 docs/notes.md，代码本身没留档）
       - "**/*.html"
       - "**/*.htm"
       - "**/*.css"
       - "**/*.mjs"
       - "**/*.js"
+      - "**/*.jsx"
       - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.vue"
+      - "**/*.svelte"
       - "**/*.py"
+      - "**/*.go"
       - "**/*.md"
       - "**/*.txt"
       - "**/*.json"
@@ -342,7 +396,7 @@ function askCriteria(extra) {
 }
 
 /** 把用户的任务提示词变成一条用例 + 一份单独的评测配置 */
-function writeAskCase({ dir, prompt, task, criteria }) {
+function writeAskCase({ dir, prompt, task, criteria, fixture }) {
   const model = athenModel();
   const taskId = (task ?? `ask-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}`).replace(/[^A-Za-z0-9._-]/g, '-');
   const list = askCriteria(criteria);
@@ -350,7 +404,13 @@ function writeAskCase({ dir, prompt, task, criteria }) {
   const caseFile = path.join(evalsDir, 'cases', `${taskId}.yaml`);
   const evalFile = path.join(evalsDir, 'eval.ask.yaml');
   mkdirSync(path.dirname(caseFile), { recursive: true });
-  writeFileSync(caseFile, renderAskCase({ taskId, prompt, criteria: list, model }), 'utf8');
+  writeFileSync(caseFile, renderAskCase({ taskId, prompt, criteria: list, model, fixture }), 'utf8');
+  if (fixture) {
+    // 工作区输入是"改动类"任务的前提：目录不存在就别跑，免得又跑出一条 0/0 的无效对照
+    const abs = path.join(dir, fixture);
+    if (!existsSync(abs)) fail(`✗ 找不到工作区输入 ${rel(abs)}——先把待改的文件放进这个目录（相对技能目录写 --fixture）`);
+    log(`✔ 工作区输入：${fixture}（${rel(abs)}，跑之前会拷进 agent 的工作区）`);
+  }
   const refNames = resolvedRefNames(dir);
   if (!existsSync(evalFile)) writeFileSync(evalFile, renderAskEval(model, list, refNames), 'utf8');
   ensureRefSkills(evalFile, refNames);
@@ -502,7 +562,7 @@ cases:
     max_turns: 4
     collect_artifacts:
       - "${spec.deliverable}"
-      - "**/*.${isPageDeliverable(spec.deliverable) ? 'html' : 'md'}"
+      - "${artifactGlob(spec.deliverable)}"
 
 benchmark:
   enabled: true
@@ -563,7 +623,11 @@ async function draftOnce({ system, user, name }) {
     prompt = clean((await askAthen({ system, user, maxTokens: 8000 })).text);
   } catch (err) {
     log(`⚠ 第一次没拿到提示词（${err instanceof Error ? err.message : err}），加大预算重试…`);
-    prompt = clean((await askAthen({ system, user, maxTokens: 24000 })).text);
+    try {
+      prompt = clean((await askAthen({ system, user, maxTokens: 24000, timeoutMs: Math.max(resolveTimeout(), 600000) })).text);
+    } catch (err2) {
+      fail(`✗ 生成提示词失败：${err2 instanceof Error ? err2.message : err2}\n  没有写任何文件，稍后重试即可。`);
+    }
   }
   if (!prompt) fail('模型没给出提示词，再试一次');
 
@@ -571,8 +635,13 @@ async function draftOnce({ system, user, name }) {
   if (problems.length) {
     log(`⚠ 起草的提示词有问题，带着问题重写一次：${problems.join('；')}`);
     const retry = `${user}\n\n=== 上一次你写的提示词（不合格，请重写）===\n${prompt}\n\n=== 问题 ===\n${problems.join('\n')}\n请重写：更短更简单，不要编排，不要写技能的做法与态度，交付物文件名也不要带能力名。`;
-    const again = clean((await askAthen({ system, user: retry, maxTokens: 8000 })).text);
-    if (again) prompt = again;
+    try {
+      const again = clean((await askAthen({ system, user: retry, maxTokens: 8000 })).text);
+      if (again) prompt = again;
+    } catch (err) {
+      // 重写这一步失败不该让整件事失败：手上这条虽然有问题，但用户还能自己改
+      log(`⚠ 重写没成功（${err instanceof Error ? err.message : err}），先把上一条给你，提交前自己扫一眼`);
+    }
   }
 
   prompt = neutralizeName(prompt, name);
@@ -602,22 +671,39 @@ export async function designEval({ name, dir, purposes, feedback = '' }) {
     ? `\n\n=== 上一次的设计没通过自检：请修正后重新输出完整 JSON ===\n拿你给的 referenceSolution 跑你设计的用例时失败了：\n${feedback}\n（常见原因：期望值和 taskPrompt 里的口径不一致、stdout 算错、漏算末尾换行、或参考实现本身不满足你写的口径）`
     : '';
   const user = `技能名：${name}\n\n=== 技能素材（SKILL.md 的 description + 正文；转发壳技能还含它引用的那个技能）===\n${text}${retryHint}`;
-  let raw;
+  let raw = '';
   try {
     raw = (await askAthen({ system, user, maxTokens: 12000 })).text;
   } catch (err) {
     log(`⚠ 第一次没拿到设计（${err instanceof Error ? err.message : err}），加大预算重试…`);
-    raw = (await askAthen({ system, user, maxTokens: 32000 })).text;
+    try {
+      // 预算从 12k 加到 32k 意味着生成更久，超时也得跟着放宽（默认 5 分钟不够它用）
+      raw = (await askAthen({ system, user, maxTokens: 32000, timeoutMs: Math.max(resolveTimeout(), 600000) })).text;
+    } catch (err2) {
+      fail(
+        `✗ 自动设计失败：${err2 instanceof Error ? err2.message : err2}\n` +
+          '  这一步只是"按技能设计用例"，没有写任何文件；稍后重跑，或改用「根据能力生成」手写提示词再跑（那条路更稳）。',
+      );
+    }
   }
   const spec = extractJson(raw);
   if (!spec.taskId || !spec.taskPrompt || !Array.isArray(spec.cases) || spec.cases.length === 0) {
     fail(`模型给的设计不完整（缺 taskId / taskPrompt / cases）：${JSON.stringify(spec).slice(0, 300)}`);
   }
   spec.taskId = String(spec.taskId).replace(/[^A-Za-z0-9._-]/g, '-').slice(0, 48) || 'auto-task';
-  spec.deliverable = String(spec.deliverable ?? 'impl.mjs').replace(/[^A-Za-z0-9._-]/g, '');
   spec.purpose = purposes.includes(spec.purpose) ? spec.purpose : purposes[0];
-  // 交付物形态要认：页面（视觉 / UI 技能）、程序、文档；认不出就退回小程序
-  if (!/\.(mjs|cjs|js|html|htm|md|json)$/i.test(spec.deliverable)) spec.deliverable = 'impl.mjs';
+  // 交付物形态：页面 / **组件源码** / 小程序 / 文档（见 tools/lib/deliverable.mjs）。
+  // 认不出的形状兜底成小程序，但**必须说出来**——以前是静默改写，React 技能被无声降级成 Node 脚本，
+  // 用户看到产物才发现（`src/Dashboard.tsx` → `impl.mjs`）。
+  const shape = normalizeDeliverable(spec.deliverable);
+  spec.deliverableKind = shape.kind;
+  spec.deliverable = shape.name;
+  if (shape.rewritten) {
+    log(
+      `⚠ 模型给的交付物${shape.from ? `「${shape.from}」` : ''}不是我们认识的形状，已兜底成 ${shape.name}（小程序）；` +
+        '如果这个技能本该交页面 / 组件代码，说明形态规则或设计提示词要改，别直接跑。',
+    );
+  }
   return spec;
 }
 
@@ -688,7 +774,7 @@ if (!found) fail(`找不到技能：candidates/skills/${name}`);
 
 // 用户自己出的题：不走"先设计任务"那套，直接把提示词落成用例并跑 A/B（LLM 裁判）
 if (fromPrompt) {
-  writeAskCase({ dir: found.dir, prompt: fromPrompt, task, criteria: args.criteria });
+  writeAskCase({ dir: found.dir, prompt: fromPrompt, task, criteria: args.criteria, fixture: args.fixture });
   log(`  任务提示词（原样照抄，未润色）：${firstLine(fromPrompt)}`);
   // 只提醒不拦：一次 A/B 要跑十几分钟，提示词里要是写了技能的做法，那次对照就白跑了
   const risk = draftProblems(fromPrompt, name);
