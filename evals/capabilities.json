@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-16",
+  "updatedAt": "2026-09-17",
   "capabilities": [
     {
       "id": "frontend-design",
@@ -159,8 +159,8 @@
         "stage": "trialing",
         "source": "community"
       },
-      "description": "PDF files: create, read, merge, fill, OCR, edit text.",
-      "descriptionSource": "取自 SKILL.md 的 description（上游原文，未翻译）",
+      "description": "PDF 文件的处理：创建、读取、合并、填写表单、OCR、识别与编辑文本。",
+      "descriptionSource": "上游 SKILL.md frontmatter 的 description 直译（模型翻译，未人工校对；原文见该文件）",
       "summary": "待观察：skill-up 一次可复核试用全过，再来一次通过即可采纳。",
       "howToUse": "harness-tool add pdf"
     }
