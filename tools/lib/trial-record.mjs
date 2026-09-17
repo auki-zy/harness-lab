@@ -297,6 +297,21 @@ export function decide({
   const repeated = runs > 1;
   const perfectB = perfectRunsB ?? (passRateB >= 1 ? runs : 0);
   const evidence = repeated ? `（${runs} 次重复里 B 全过 ${perfectB}/${runs}${perfectRunsA !== undefined ? `、A 全过 ${perfectRunsA}/${runs}` : ''}）` : '';
+  /**
+   * 区分度提示（2026-09-15 加）：B 全过固然"达标"，但**对照 A 也全过**时，这条题说明不了技能有用
+   * ——react-best-practices 三次重复就是 B 3/3、A 3/3。这不是"能力不行"，是**题不行**。
+   * 口径：只提示、不改判定（达标依旧是达标），但必须让人看见"该换题了"。
+   */
+  const discrimination =
+    perfectRunsA === undefined
+      ? ''
+      : perfectRunsA === runs
+        ? repeated
+          ? `；但对照 A 也 ${runs}/${runs} 全过——**这条题分不出技能的作用**，要证明它有用得换一条能区分 A/B 的用例`
+          : '；不过对照 A 这次也过了——这条题可能分不出技能的作用（重复跑几次再看）'
+        : repeated
+          ? `；对照 A 只全过 ${perfectRunsA}/${runs}，两边有区别`
+          : '';
   if (!totalB) {
     return { decision: 'retry', confidence: 'low', reason: `报告里没有"带能力"的结果${because}——先确认评测真的跑了` };
   }
@@ -331,7 +346,7 @@ export function decide({
       decision: 'ready',
       // 重复跑全过 → 证据更硬；单次运行仍旧只是"中等"
       confidence: repeated && perfectB === runs ? 'high' : 'medium',
-      reason: `机器判定达标${evidence}：可复核试用已通过 ${prev + 1} 次、无退步${extra ? `；${extra}` : ''}——采纳与否由你定（在能力详情里给结论）`,
+      reason: `机器判定达标${evidence}：可复核试用已通过 ${prev + 1} 次、无退步${extra ? `；${extra}` : ''}${discrimination}——采纳与否由你定（在能力详情里给结论）`,
     };
   }
   if (probeOnly) {
@@ -360,7 +375,7 @@ export function decide({
     decision: 'hold',
     confidence: 'medium',
     reason:
-      `带能力这一次全过${evidence}${extra ? `（${extra}）` : ''}；` +
+      `带能力这一次全过${evidence}${extra ? `（${extra}）` : ''}${discrimination}；` +
       (repeated
         ? `重复 ${runs} 次都对上了，但这是第一次可复核试用——再来一次（换一条用例更值）就能采纳`
         : '按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）'),

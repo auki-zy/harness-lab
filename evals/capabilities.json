@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-15",
+  "updatedAt": "2026-09-16",
   "capabilities": [
     {
       "id": "frontend-design",
@@ -137,6 +137,32 @@
         "verdict": "adopt",
         "reviewedAt": "2026-09-15"
       }
+    },
+    {
+      "id": "pdf",
+      "type": "skill",
+      "source": {
+        "repo": "NousResearch/hermes-agent",
+        "path": "skills/productivity/pdf/SKILL.md",
+        "license": "MIT",
+        "commit": "fb56a7e06dde62e9f645ff744c82cb47b60c469e"
+      },
+      "localPath": "candidates/skills/pdf",
+      "status": "trialing",
+      "priorEvidence": "2026-09-16 skill-up(pdf-routing-plan)：A 1/1 / B 1/1 → hold",
+      "addedAt": "2026-09-16",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "docs"
+        ],
+        "stage": "trialing",
+        "source": "community"
+      },
+      "description": "PDF files: create, read, merge, fill, OCR, edit text.",
+      "descriptionSource": "取自 SKILL.md 的 description（上游原文，未翻译）",
+      "summary": "待观察：skill-up 一次可复核试用全过，再来一次通过即可采纳。",
+      "howToUse": "harness-tool add pdf"
     }
   ],
   "note": "候选池按需精简：未采纳的在 candidates/，已采纳的移到 adopted/；两边都用 harness-tool add <名字> 装进项目。",

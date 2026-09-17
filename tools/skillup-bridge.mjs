@@ -14,6 +14,7 @@
  * `import` 不需要——把别人跑好的 result.json 丢进来即可。
  */
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import {
@@ -36,6 +37,7 @@ import {
 import { askAthen } from './lib/athen.mjs';
 import { materializeRefs, pickCommit, skillMaterial, withRefSkills } from './lib/skill-content.mjs';
 import { repeatNote, repeatsLabel, summarizeRuns } from './lib/repeats.mjs';
+import { compareWithInput, describeComparison } from './lib/artifacts.mjs';
 import {
   ATHEN_HOST,
   KNOWN_ENGINES,
@@ -558,6 +560,26 @@ function judgeTypes(evalConfigPath) {  if (!evalConfigPath || !existsSync(evalCo
  * 合并口径在 `tools/lib/repeats.mjs`：结论里必须写清"B 在几次里全过了几次"——
  * 实测同一条用例两次跑，A 侧结果会翻转（1/1 → 0/1），n=1 分不清技能效果与方差。
  */
+/**
+ * 从评测配置 + 用例文件里读出**工作区输入**（`context.repo_fixture`，相对能力目录的路径）。
+ * 用例没写就返回 ''（没有基准就不做产物核验，别硬编一个结论）。
+ * 只做最朴素的文本匹配：我们生成的用例格式是固定的（`evals/cases/*.yaml` 里的 `repo_fixture:`）。
+ */
+function fixtureDirOf(evalConfigPath) {
+  if (!evalConfigPath || !existsSync(evalConfigPath)) return '';
+  const config = readFileSync(evalConfigPath, 'utf8');
+  // 用例路径相对**技能目录**（配置在 `<技能>/evals/eval.ask.yaml`，用例在 `<技能>/evals/cases/*.yaml`）
+  const skillDir = path.dirname(path.dirname(path.resolve(evalConfigPath)));
+  const caseFiles = [...config.matchAll(/^\s*-\s*(evals\/cases\/\S+\.ya?ml)\s*$/gm)].map((m) => m[1]);
+  for (const relFile of caseFiles) {
+    const file = path.join(skillDir, relFile);
+    if (!existsSync(file)) continue;
+    const m = readFileSync(file, 'utf8').match(/^\s*repo_fixture:\s*(\S+)\s*$/m);
+    if (m) return m[1];
+  }
+  return '';
+}
+
 function buildTrial({ name, runs, result: singleResult, iterationDir: singleIterationDir, evalConfigPath }) {
   const list = (runs ?? [{ result: singleResult, iterationDir: singleIterationDir }]).filter((r) => r?.result);
   const last = list[list.length - 1] ?? {};
@@ -585,17 +607,38 @@ function buildTrial({ name, runs, result: singleResult, iterationDir: singleIter
 
   const artifactOf = (sideKey) => {
     const mine = sideCases(last.result, sideKey);
-    if (!mine.length) return { entry: null, files: [] };
+    if (!mine.length) return { entry: null, files: [], workspaceDir: null };
     const found = collectArtifacts(iterationDir, mine[0].case_id, sideKey === 'B' ? 'with_skill' : 'without_skill');
-    return { entry: found.entry, files: found.files };
+    return { entry: found.entry, files: found.files, workspaceDir: found.workspaceDir };
   };
   const artA = artifactOf('A');
   const artB = artifactOf('B');
+
+  /**
+   * 产物核验：交付物相对**工作区输入**改了多少。
+   *
+   * 为什么要它：判官的材料是 final_message + transcript（`generated_files` 不可配），它只能"看到"
+   * transcript 里写过什么，看不到磁盘上的最终状态。react-best-practices 那次真正说明问题的事实——
+   * **A 侧产物与输入逐字节相同（一个字没改）**——是我手工 diff 出来的。这种事该由机器算。
+   */
+  const capDir = [P('candidates', 'skills', name), P('adopted', 'skills', name)].find((d) => existsSync(d)) ?? '';
+  const fixtureRel = fixtureDirOf(evalConfigPath);
+  const artifactRel = (art) =>
+    art.entry ? (art.entry.rel ?? path.relative(art.workspaceDir ?? '', art.entry.path).replace(/\\/g, '/')) : '';
+  const compareArtifact = (art) => {
+    const inner = artifactRel(art);
+    if (!inner || !fixtureRel || !capDir) return null;
+    return compareWithInput(path.join(capDir, fixtureRel, inner), art.entry.path);
+  };
+  const cmpA = compareArtifact(artA);
+  const cmpB = compareArtifact(artB);
+  /** 写进"静态检查"那一行的人话（`src/Dashboard.tsx 比输入 +2037 B，改了 12 处`） */
+  const artifactCheck = (art, cmp) => (cmp ? describeComparison(artifactRel(art), cmp) : '');
   const bytesOf = (art) => (art.entry ? art.entry.bytes : 0);
   const kb = (n) => (n ? Math.round((n / 1024) * 10) / 10 : 0);
 
-  /** 只描述**最后一次**运行的判分细节（断言、耗时、未过项）；重复跑的汇总在上面的"全过几次"里 */
-  const checks = (sideKey, sum) => {
+/** 只描述**最后一次**运行的判分细节（断言、耗时、未过项）；重复跑的汇总在上面的"全过几次"里 */
+  const checks = (sideKey, sum, artifactText) => {
     const mine = sideCases(last.result, sideKey);
     const g = mine[0]?.grading;
     const assertions = g?.assertion_results?.length ?? 0;
@@ -605,6 +648,7 @@ function buildTrial({ name, runs, result: singleResult, iterationDir: singleIter
       summary.n > 1 ? `重复 ${summary.n} 次：全过 ${summary[sideKey].perfectRuns}/${summary.n}` : '',
       assertions ? `断言 ${g.summary?.passed ?? 0}/${g.summary?.total ?? assertions}` : '',
       mine[0]?.duration_ms !== undefined ? `最后一次耗时 ${(mine[0].duration_ms / 1000).toFixed(1)}s` : '',
+      artifactText,
       failedText ? `未过：${failedText}` : '',
     ]
       .filter(Boolean)
@@ -690,6 +734,21 @@ function buildTrial({ name, runs, result: singleResult, iterationDir: singleIter
   }
   for (const art of [artA, artB]) for (const f of art.files) evidence.push(rel(f.path));
 
+  /**
+   * 产物与主报告的 sha256。
+   *
+   * 为什么要哈希：2026-09-15 那次重复跑把两条旧试用的 `iteration-1/2` **原地覆盖**了——
+   * 路径都还在、内容换成了别人的数据，"证据路径存在"这种检查根本发现不了。
+   * 记下哈希，守卫测试（`src/shared/ledger.test.ts`）就能在"内容被换过"时直接报红。
+   */
+  const sha = (file) => {
+    try {
+      return createHash('sha256').update(readFileSync(file)).digest('hex').slice(0, 16);
+    } catch {
+      return '';
+    }
+  };
+
   // 转发壳技能：B 侧其实装了两个技能（壳 + 它引用的那个）——这是判定条件的一部分，得写进记录
   const refs = skillMaterial(P('candidates', 'skills', name))
     .refs.filter((r) => r.resolved)
@@ -710,15 +769,22 @@ function buildTrial({ name, runs, result: singleResult, iterationDir: singleIter
   return {
     kind: hasAB ? 'controlled' : 'mock',
     conditions: [
-      ...(a.length ? [{ name: 'A', withCapability: false, artifact: artA.entry ? rel(artA.entry.path) : undefined }] : []),
-      ...(b.length ? [{ name: 'B', withCapability: true, artifact: artB.entry ? rel(artB.entry.path) : undefined }] : []),
+      ...(a.length
+        ? [{ name: 'A', withCapability: false, artifact: artA.entry ? rel(artA.entry.path) : undefined, artifactSha256: artA.entry ? sha(artA.entry.path) : undefined }]
+        : []),
+      ...(b.length
+        ? [{ name: 'B', withCapability: true, artifact: artB.entry ? rel(artB.entry.path) : undefined, artifactSha256: artB.entry ? sha(artB.entry.path) : undefined }]
+        : []),
     ],
     measures: {
       correctness: { ...(a.length ? { A: sumA.passRate } : {}), B: sumB.passRate },
       ...(summary.n > 1 ? { repeats: repeatsLabel(summary) } : {}),
       ...(artA.entry && artB.entry ? { sizeKB: { A: kb(bytesOf(artA)), B: kb(bytesOf(artB)) } } : {}),
       ...costMeasures,
-      staticChecks: { ...(a.length ? { A: checks('A', sumA) } : {}), B: checks('B', sumB) },
+      staticChecks: {
+        ...(a.length ? { A: checks('A', sumA, artifactCheck(artA, cmpA)) } : {}),
+        B: checks('B', sumB, artifactCheck(artB, cmpB)),
+      },
       notes,
     },
     judge: judgment.llm ? ['auto', 'llm'] : ['auto'],

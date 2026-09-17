@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-15T10:28:07.518Z",
+  "generatedAt": "2026-09-16T08:42:21.539Z",
   "taxonomy": {
     "version": 1,
     "policy": {
@@ -90,12 +90,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html"
+              "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html",
+              "artifactSha256": "91e539639c147638"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html"
+              "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html",
+              "artifactSha256": "26f3a909e416e39a"
             }
           ],
           "measures": {
@@ -154,12 +156,14 @@
           {
             "name": "A",
             "withCapability": false,
-            "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html"
+            "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-a.html",
+            "artifactSha256": "91e539639c147638"
           },
           {
             "name": "B",
             "withCapability": true,
-            "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html"
+            "artifact": "adopted/skills/frontend-design/benchmarks/tasks/page-card/version-b.html",
+            "artifactSha256": "26f3a909e416e39a"
           }
         ],
         "measures": {
@@ -306,12 +310,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs"
+              "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs",
+              "artifactSha256": "be2ac2a8b26eae6b"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs"
+              "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs",
+              "artifactSha256": "3178c8f2cbd1d07e"
             }
           ],
           "measures": {
@@ -366,12 +372,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/without_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/without_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "ed3e23f2db1a7f46"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/with_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-3/wc-cli/with_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "5852d99f61e201bd"
             }
           ],
           "measures": {
@@ -463,12 +471,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/without_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/without_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "fa29035c774548f9"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/with_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-4/wc-cli/with_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "004eaad20af55974"
             }
           ],
           "measures": {
@@ -560,12 +570,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-5/wc-cli/without_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-5/wc-cli/without_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "69221bbd33988209"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-5/wc-cli/with_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-5/wc-cli/with_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "cb46a56d4d39c2ca"
             }
           ],
           "measures": {
@@ -657,12 +669,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "ddb7069e36501014"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs",
+              "artifactSha256": "99575a4b706ebd9b"
             }
           ],
           "measures": {
@@ -760,12 +774,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs",
+              "artifactSha256": "3944443a81fc5143"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+              "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs",
+              "artifactSha256": "7bbad342eb29a040"
             }
           ],
           "measures": {
@@ -875,12 +891,14 @@
           {
             "name": "A",
             "withCapability": false,
-            "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs"
+            "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs",
+            "artifactSha256": "3944443a81fc5143"
           },
           {
             "name": "B",
             "withCapability": true,
-            "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+            "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs",
+            "artifactSha256": "7bbad342eb29a040"
           }
         ],
         "measures": {
@@ -1018,12 +1036,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs"
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs",
+              "artifactSha256": "ff5b8b1edd42919d"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs",
+              "artifactSha256": "cb4c21d3be36c8e7"
             }
           ],
           "measures": {
@@ -1117,12 +1137,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs"
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs",
+              "artifactSha256": "0889f6b75e366342"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+              "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-3/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs",
+              "artifactSha256": "7da1c34fec5438fe"
             }
           ],
           "measures": {
@@ -1540,12 +1562,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs"
+              "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs",
+              "artifactSha256": "629f981ffef39154"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs"
+              "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs",
+              "artifactSha256": "a32a3a8b4b2e070c"
             }
           ],
           "measures": {
@@ -1640,12 +1664,14 @@
           {
             "name": "A",
             "withCapability": false,
-            "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs"
+            "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs",
+            "artifactSha256": "629f981ffef39154"
           },
           {
             "name": "B",
             "withCapability": true,
-            "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs"
+            "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs",
+            "artifactSha256": "a32a3a8b4b2e070c"
           }
         ],
         "measures": {
@@ -1942,12 +1968,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+              "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+              "artifactSha256": "780d927bc512641b"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+              "artifact": "candidates/skills/react-best-practices-workspace/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx",
+              "artifactSha256": "76e7b5046c58726b"
             }
           ],
           "measures": {
@@ -2046,12 +2074,14 @@
             {
               "name": "A",
               "withCapability": false,
-              "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+              "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+              "artifactSha256": "923cb95f3eaa9ad8"
             },
             {
               "name": "B",
               "withCapability": true,
-              "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+              "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx",
+              "artifactSha256": "9a0eecc5aec3f103"
             }
           ],
           "measures": {
@@ -2164,12 +2194,14 @@
           {
             "name": "A",
             "withCapability": false,
-            "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+            "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+            "artifactSha256": "923cb95f3eaa9ad8"
           },
           {
             "name": "B",
             "withCapability": true,
-            "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+            "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx",
+            "artifactSha256": "9a0eecc5aec3f103"
           }
         ],
         "measures": {
@@ -2262,6 +2294,215 @@
         "source": {
           "tool": "skill-up",
           "report": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/result.json"
+        },
+        "selfCheck": false
+      }
+    },
+    {
+      "id": "pdf",
+      "type": "skill",
+      "status": "trialing",
+      "summary": "待观察：skill-up 一次可复核试用全过，再来一次通过即可采纳。",
+      "description": "PDF files: create, read, merge, fill, OCR, edit text.",
+      "descriptionSource": "取自 SKILL.md 的 description（上游原文，未翻译）",
+      "howToUse": "harness-tool add pdf",
+      "humanDecision": null,
+      "source": {
+        "repo": "NousResearch/hermes-agent",
+        "path": "skills/productivity/pdf/SKILL.md",
+        "license": "MIT",
+        "commit": "fb56a7e06dde62e9f645ff744c82cb47b60c469e"
+      },
+      "localPath": "candidates/skills/pdf",
+      "tags": {
+        "type": "skill",
+        "purpose": [
+          "docs"
+        ],
+        "stage": "trialing",
+        "source": "community"
+      },
+      "trials": [
+        {
+          "trialId": "2026-09-16-pdf-skillup",
+          "capability": {
+            "id": "pdf",
+            "type": "skill"
+          },
+          "kind": "controlled",
+          "task": {
+            "id": "pdf-routing-plan",
+            "fixture": "candidates/skills/pdf-workspace/run-20260916084141/iteration-1",
+            "description": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+          },
+          "conditions": [
+            {
+              "name": "A",
+              "withCapability": false
+            },
+            {
+              "name": "B",
+              "withCapability": true
+            }
+          ],
+          "measures": {
+            "correctness": {
+              "A": 1,
+              "B": 1
+            },
+            "tokensIn": {
+              "A": 18873,
+              "B": 19505
+            },
+            "tokensOut": {
+              "A": 1620,
+              "B": 1424
+            },
+            "tokensTotal": {
+              "A": 20493,
+              "B": 20929
+            },
+            "tokensCached": {
+              "A": 18688,
+              "B": 19328
+            },
+            "durationSec": {
+              "A": 15.4,
+              "B": 21.3
+            },
+            "steps": {
+              "A": 3,
+              "B": 4
+            },
+            "toolCalls": {
+              "A": 4,
+              "B": 6
+            },
+            "toolMix": {
+              "A": "Read 3 / Write 1",
+              "B": "Read 3 / Bash 2 / Write 1"
+            },
+            "staticChecks": {
+              "A": "用例 1/1 通过；断言 2/2；最后一次耗时 15.4s",
+              "B": "用例 1/1 通过；断言 2/2；最后一次耗时 21.3s"
+            },
+            "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：pdf-routing-plan；报告：candidates/skills/pdf-workspace/run-20260916084141/iteration-1"
+          },
+          "judge": [
+            "auto"
+          ],
+          "humanReview": null,
+          "verdict": {
+            "decision": "hold",
+            "confidence": "medium",
+            "reason": "带能力这一次全过（对照 A 1/1）；不过对照 A 这次也过了——这条题可能分不出技能的作用（重复跑几次再看）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+          },
+          "evidence": [
+            "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/result.json",
+            "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/benchmark.json",
+            "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/report.html",
+            "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/benchmark.md",
+            "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/pdf-routing-plan/with_skill/outputs/workspace/.claude/skills/pdf/SKILL.md",
+            "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/pdf-routing-plan/with_skill/outputs/workspace/.claude/skills/pdf/SOURCE.md"
+          ],
+          "model": "claude_code / deepseek-v4-flash",
+          "date": "2026-09-16",
+          "recordedAt": "2026-09-16T08:42:21.447Z",
+          "source": {
+            "tool": "skill-up",
+            "report": "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/result.json"
+          },
+          "selfCheck": false
+        }
+      ],
+      "latestTrial": {
+        "trialId": "2026-09-16-pdf-skillup",
+        "capability": {
+          "id": "pdf",
+          "type": "skill"
+        },
+        "kind": "controlled",
+        "task": {
+          "id": "pdf-routing-plan",
+          "fixture": "candidates/skills/pdf-workspace/run-20260916084141/iteration-1",
+          "description": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+        },
+        "conditions": [
+          {
+            "name": "A",
+            "withCapability": false
+          },
+          {
+            "name": "B",
+            "withCapability": true
+          }
+        ],
+        "measures": {
+          "correctness": {
+            "A": 1,
+            "B": 1
+          },
+          "tokensIn": {
+            "A": 18873,
+            "B": 19505
+          },
+          "tokensOut": {
+            "A": 1620,
+            "B": 1424
+          },
+          "tokensTotal": {
+            "A": 20493,
+            "B": 20929
+          },
+          "tokensCached": {
+            "A": 18688,
+            "B": 19328
+          },
+          "durationSec": {
+            "A": 15.4,
+            "B": 21.3
+          },
+          "steps": {
+            "A": 3,
+            "B": 4
+          },
+          "toolCalls": {
+            "A": 4,
+            "B": 6
+          },
+          "toolMix": {
+            "A": "Read 3 / Write 1",
+            "B": "Read 3 / Bash 2 / Write 1"
+          },
+          "staticChecks": {
+            "A": "用例 1/1 通过；断言 2/2；最后一次耗时 15.4s",
+            "B": "用例 1/1 通过；断言 2/2；最后一次耗时 21.3s"
+          },
+          "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：pdf-routing-plan；报告：candidates/skills/pdf-workspace/run-20260916084141/iteration-1"
+        },
+        "judge": [
+          "auto"
+        ],
+        "humanReview": null,
+        "verdict": {
+          "decision": "hold",
+          "confidence": "medium",
+          "reason": "带能力这一次全过（对照 A 1/1）；不过对照 A 这次也过了——这条题可能分不出技能的作用（重复跑几次再看）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+        },
+        "evidence": [
+          "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/result.json",
+          "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/benchmark.json",
+          "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/report.html",
+          "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/benchmark.md",
+          "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/pdf-routing-plan/with_skill/outputs/workspace/.claude/skills/pdf/SKILL.md",
+          "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/pdf-routing-plan/with_skill/outputs/workspace/.claude/skills/pdf/SOURCE.md"
+        ],
+        "model": "claude_code / deepseek-v4-flash",
+        "date": "2026-09-16",
+        "recordedAt": "2026-09-16T08:42:21.447Z",
+        "source": {
+          "tool": "skill-up",
+          "report": "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/result.json"
         },
         "selfCheck": false
       }

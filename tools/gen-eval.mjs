@@ -17,6 +17,7 @@ import { spawnSync } from 'node:child_process';
 import { P, fail, findCapability, log, readJson, registeredPurposes, rel } from './lib/trial-record.mjs';
 import { askAthen, extractJson, resolveTimeout } from './lib/athen.mjs';
 import { normalizeDeliverable } from './lib/deliverable.mjs';
+import { expectFilesFromPrompt } from './lib/artifacts.mjs';
 import { athenModel } from './lib/engines.mjs';
 import { refDirName, skillMaterial, thinReason, withRefSkills } from './lib/skill-content.mjs';
 
@@ -276,7 +277,7 @@ const ASK_EVAL = 'evals/eval.ask.yaml';
  * （踩过：react-best-practices 那条 ask 用例就是这么被判成 reject 的）。
  * 工作区输入交给 skill-up 的 `context.repo_fixture`（相对**技能目录**的路径），实测能用。
  */
-function renderAskCase({ taskId, prompt, criteria, model, fixture }) {
+function renderAskCase({ taskId, prompt, criteria, model, fixture, expectFiles = [] }) {
   const body = String(prompt).trim().split('\n').map((l) => `    ${l}`.trimEnd());
   return [
     `id: ${taskId}`,
@@ -296,6 +297,9 @@ function renderAskCase({ taskId, prompt, criteria, model, fixture }) {
     '',
     'expect:',
     '  exit_code: 0',
+    // 零成本门槛：任务说"改完写回这个文件"，那这个文件结束时必须还在
+    //（判官看不见磁盘，它只知道 transcript 里写过——那就可能出现"写了又删"却判达标）
+    ...(expectFiles.length ? ['  files_exist:', ...expectFiles.map((f) => `    - ${f}`)] : []),
     '',
     'judge:',
     '  type: agent_judge',
@@ -404,12 +408,17 @@ function writeAskCase({ dir, prompt, task, criteria, fixture }) {
   const caseFile = path.join(evalsDir, 'cases', `${taskId}.yaml`);
   const evalFile = path.join(evalsDir, 'eval.ask.yaml');
   mkdirSync(path.dirname(caseFile), { recursive: true });
-  writeFileSync(caseFile, renderAskCase({ taskId, prompt, criteria: list, model, fixture }), 'utf8');
+  // 工作区输入存在时，顺手把"提示词点名、且输入里真的有"的文件做成 expect.files_exist：
+  // 交付物结束时必须还在（"写了又删"这种要零成本拦下来，别等判官）
+  const fixtureAbs = fixture ? path.join(dir, fixture) : '';
+  const expectFiles = expectFilesFromPrompt(prompt, fixtureAbs);
+  writeFileSync(caseFile, renderAskCase({ taskId, prompt, criteria: list, model, fixture, expectFiles }), 'utf8');
   if (fixture) {
     // 工作区输入是"改动类"任务的前提：目录不存在就别跑，免得又跑出一条 0/0 的无效对照
     const abs = path.join(dir, fixture);
     if (!existsSync(abs)) fail(`✗ 找不到工作区输入 ${rel(abs)}——先把待改的文件放进这个目录（相对技能目录写 --fixture）`);
     log(`✔ 工作区输入：${fixture}（${rel(abs)}，跑之前会拷进 agent 的工作区）`);
+    if (expectFiles.length) log(`✔ 交付物门槛（expect.files_exist）：${expectFiles.join('、')}`);
   }
   const refNames = resolvedRefNames(dir);
   if (!existsSync(evalFile)) writeFileSync(evalFile, renderAskEval(model, list, refNames), 'utf8');

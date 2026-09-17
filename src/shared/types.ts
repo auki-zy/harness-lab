@@ -24,6 +24,8 @@ export interface TrialCondition {
   name: string;
   withCapability: boolean;
   artifact?: string;
+  /** 产物的 sha256 前 16 位：内容被换过（比如同名目录被后来的运行覆盖）时守卫测试能发现 */
+  artifactSha256?: string;
 }
 
 export interface HumanReview {

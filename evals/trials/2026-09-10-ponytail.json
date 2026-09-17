@@ -1,6 +1,9 @@
 {
   "trialId": "2026-09-10-ponytail",
-  "capability": { "id": "ponytail", "type": "skill" },
+  "capability": {
+    "id": "ponytail",
+    "type": "skill"
+  },
   "kind": "mock",
   "task": {
     "id": "wc-cli",
@@ -8,19 +11,38 @@
     "description": "固定任务：写一个只用 Node 自带的 wc.mjs（输出 lines/words/chars 的 JSON，只交付这一个文件）。A 不加载能力、B 加载 ponytail，各一次独立实现，产物与检查脚本都留在仓库里"
   },
   "conditions": [
-    { "name": "A", "withCapability": false, "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs" },
-    { "name": "B", "withCapability": true, "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs" }
+    {
+      "name": "A",
+      "withCapability": false,
+      "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-a/wc.mjs",
+      "artifactSha256": "be2ac2a8b26eae6b"
+    },
+    {
+      "name": "B",
+      "withCapability": true,
+      "artifact": "adopted/skills/ponytail/benchmarks/tasks/wc-cli/version-b/wc.mjs",
+      "artifactSha256": "3178c8f2cbd1d07e"
+    }
   ],
   "measures": {
-    "correctness": { "A": 1.0, "B": 1.0 },
-    "sizeKB": { "A": 0.6, "B": 0.4 },
+    "correctness": {
+      "A": 1,
+      "B": 1
+    },
+    "sizeKB": {
+      "A": 0.6,
+      "B": 0.4
+    },
     "staticChecks": {
       "A": "非空代码行 19；第三方 import 0；交付文件 2（wc.mjs + test.mjs，task 明确要求只交付 wc.mjs）",
       "B": "非空代码行 10；第三方 import 0；交付文件 1（只有 wc.mjs）"
     },
     "notes": "两版输出都正确（5/10/58）、缺文件都 exit 1 且 stdout 为空；差别在省不省与是否守约束：B 用不到一半的代码达成同一结果且只交付一个文件，A 多交付了任务禁止的 test.mjs，并写了未要求的 usage 分支与 try/catch（B 靠 Node 原生 ENOENT 满足缺文件条款）。B 的次要瑕疵：无参数调用会抛未捕获栈回溯（exit 1、stdout 空，仍符合口径）。"
   },
-  "judge": ["auto", "llm"],
+  "judge": [
+    "auto",
+    "llm"
+  ],
   "humanReview": null,
   "verdict": {
     "decision": "hold",

@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "skill_name": "pdf",
+    "skill_path": "D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\pdf",
+    "timestamp": "2026-09-16T08:42:21Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 21.305,
+        "tokens": 20929,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\pdf\\evals\\fixtures\\scripts\\check-pdf-routing-plan.sh",
+          "passed": true,
+          "evidence": "PASS: plan.json 通过 3 条用例（structure、normal-decrypt-and-merge、edge-scanned-no-text-layer）"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 15.42,
+        "tokens": 20493,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.exit_code",
+          "passed": true,
+          "evidence": "all checks passed"
+        },
+        {
+          "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\pdf\\evals\\fixtures\\scripts\\check-pdf-routing-plan.sh",
+          "passed": true,
+          "evidence": "PASS: plan.json 通过 3 条用例（structure、normal-decrypt-and-merge、edge-scanned-no-text-layer）"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 21.305,
+        "stddev": 0,
+        "min": 21.305,
+        "max": 21.305
+      },
+      "tokens": {
+        "mean": 20929,
+        "stddev": 0,
+        "min": 20929,
+        "max": 20929
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 15.42,
+        "stddev": 0,
+        "min": 15.42,
+        "max": 15.42
+      },
+      "tokens": {
+        "mean": 20493,
+        "stddev": 0,
+        "min": 20493,
+        "max": 20493
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+5.9",
+      "tokens": "+436.0"
+    }
+  }
+}

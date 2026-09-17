@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "expect.exit_code",
+      "passed": true,
+      "evidence": "all checks passed"
+    },
+    {
+      "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\pdf\\evals\\fixtures\\scripts\\check-pdf-routing-plan.sh",
+      "passed": true,
+      "evidence": "PASS: plan.json 通过 3 条用例（structure、normal-decrypt-and-merge、edge-scanned-no-text-layer）"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

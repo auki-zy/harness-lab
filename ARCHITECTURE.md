@@ -1,4 +1,4 @@
-﻿# ARCHITECTURE.md
+# ARCHITECTURE.md
 
 这份文件是系统的顶层地图：领域地图、分层与依赖规则，以及这个仓库的工程约定。保持简短。
 

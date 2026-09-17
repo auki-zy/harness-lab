@@ -1,0 +1,91 @@
+{
+  "trialId": "2026-09-16-pdf-skillup",
+  "capability": {
+    "id": "pdf",
+    "type": "skill"
+  },
+  "kind": "controlled",
+  "task": {
+    "id": "pdf-routing-plan",
+    "fixture": "candidates/skills/pdf-workspace/run-20260916084141/iteration-1",
+    "description": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划（skill-up v1alpha1：1 条用例，每条都跑 with_skill / without_skill）"
+  },
+  "conditions": [
+    {
+      "name": "A",
+      "withCapability": false
+    },
+    {
+      "name": "B",
+      "withCapability": true
+    }
+  ],
+  "measures": {
+    "correctness": {
+      "A": 1,
+      "B": 1
+    },
+    "tokensIn": {
+      "A": 18873,
+      "B": 19505
+    },
+    "tokensOut": {
+      "A": 1620,
+      "B": 1424
+    },
+    "tokensTotal": {
+      "A": 20493,
+      "B": 20929
+    },
+    "tokensCached": {
+      "A": 18688,
+      "B": 19328
+    },
+    "durationSec": {
+      "A": 15.4,
+      "B": 21.3
+    },
+    "steps": {
+      "A": 3,
+      "B": 4
+    },
+    "toolCalls": {
+      "A": 4,
+      "B": 6
+    },
+    "toolMix": {
+      "A": "Read 3 / Write 1",
+      "B": "Read 3 / Bash 2 / Write 1"
+    },
+    "staticChecks": {
+      "A": "用例 1/1 通过；断言 2/2；最后一次耗时 15.4s",
+      "B": "用例 1/1 通过；断言 2/2；最后一次耗时 21.3s"
+    },
+    "notes": "引擎 claude_code / 模型 deepseek-v4-flash；两边都跑了（with_skill / without_skill = B / A）；用例 1 条：pdf-routing-plan；报告：candidates/skills/pdf-workspace/run-20260916084141/iteration-1"
+  },
+  "judge": [
+    "auto"
+  ],
+  "humanReview": null,
+  "verdict": {
+    "decision": "hold",
+    "confidence": "medium",
+    "reason": "带能力这一次全过（对照 A 1/1）；不过对照 A 这次也过了——这条题可能分不出技能的作用（重复跑几次再看）；按规则只有 1 次可复核试用，再跑一次且全过即可采纳——换一条用例更值（新场景的证明力比同一条重跑强）"
+  },
+  "evidence": [
+    "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/result.json",
+    "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/benchmark.json",
+    "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/report.html",
+    "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/benchmark.md",
+    "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/pdf-routing-plan/with_skill/outputs/workspace/.claude/skills/pdf/SKILL.md",
+    "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/pdf-routing-plan/with_skill/outputs/workspace/.claude/skills/pdf/SOURCE.md"
+  ],
+  "model": "claude_code / deepseek-v4-flash",
+  "date": "2026-09-16",
+  "recordedAt": "2026-09-16T08:42:21.447Z",
+  "source": {
+    "tool": "skill-up",
+    "report": "candidates/skills/pdf-workspace/run-20260916084141/iteration-1/result.json"
+  },
+  "selfCheck": false
+}

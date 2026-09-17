@@ -1,0 +1,95 @@
+{
+  "skill_name": "pdf",
+  "schema_version": "v1alpha1",
+  "engine_name": "claude_code",
+  "model_name": "deepseek-v4-flash",
+  "requested_configuration": {
+    "role": "runner",
+    "engine": "claude_code",
+    "protocol": "anthropic",
+    "model": "deepseek-v4-flash"
+  },
+  "applied_configuration": {
+    "role": "runner",
+    "engine": "claude_code",
+    "protocol": "anthropic",
+    "model": "deepseek-v4-flash"
+  },
+  "start_time": "2026-09-16T16:41:41.4827764+08:00",
+  "end_time": "2026-09-16T16:42:21.3579732+08:00",
+  "case_results": [
+    {
+      "case_id": "pdf-routing-plan",
+      "title": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划",
+      "status": "PASS",
+      "duration_ms": 21305,
+      "turns": 4,
+      "input_tokens": 19505,
+      "output_tokens": 1424,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 4,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\pdf\\evals\\fixtures\\scripts\\check-pdf-routing-plan.sh",
+            "passed": true,
+            "evidence": "PASS: plan.json 通过 3 条用例（structure、normal-decrypt-and-merge、edge-scanned-no-text-layer）"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "工作目录下有 request.txt、contract-meta.json、archive-meta.json 三个文件。读完后在项目根目录写出 plan.json，把完成 request.txt 里那件事所需要的操作按执行顺序排成一份计划。\n\nplan.json 的格式固定如下（字段名照抄）：\n\n{\n  \"steps\": [\n    {\"tool\": \"工具或文档的名字\", \"args\": [\"参数1\", \"参数2\"], \"why\": \"这一步做什么，一句话\"},\n    {\"...\": \"...\"}\n  ],\n  \"ocrRequired\": false\n}\n\n要求：\n- steps 数组的顺序就是执行顺序，把完成请求所需的每一步都列进去，一步一个对象，每步都要有 tool / args / why 三个字段。\n- tool 写这一步实际要调用的工具或要查阅的文档名；args 写传给它的参数列表，必须与 request.txt 里出现的具体文件名、输出文件名、密码等信息对得上。\n- ocrRequired 是布尔值：这次请求里是否包含必须做 OCR 才能拿到内容的部分。\n- 只写这一个文件，不要修改已有的三个输入文件。\n",
+      "response": "已写出 `plan.json`，只新建了这一个文件，三个输入文件未改动。\n\n**计划要点（8 步，按执行顺序）：**\n\n1. 查 `pdf` 技能文档 — 确认 OCR / 解密 / 合并三个子命令的用法\n2. `pdf info contract.pdf` — 确认扫描件状态\n3. `pdf ocr contract.pdf contract-ocr.txt` — 提取文字\n4. 读 `contract-ocr.txt` — 摘出甲方名称和签署日期\n5. `pdf info archive.pdf` — 确认加密、2 页\n6. `pdf decrypt archive.pdf hunter2 archive-decrypted.pdf` — 用给的密码解密\n7. `pdf merge ... merged.pdf` — 合并成 5 页存档\n8. `pdf info merged.pdf` — 校验成品页数与加密状态\n\n**`ocrRequired: true`** — 依据是 `contract-meta.json`：3 页的 `text_chars` 全为 0，且三页都被标为 `likely_scanned_pages`，所以甲方名称和签署日期只能靠 OCR 拿到。`archive.pdf` 虽然加密，但用户已给密码，属于解密而非 OCR。\n\n一处需你确认的取舍：第 7 步我按你的表述把 `archive` 放在前面（`archive-decrypted.pdf` + `contract.pdf`）。若存档希望合同在前，调换这两个参数即可。"
+    },
+    {
+      "case_id": "pdf-routing-plan",
+      "title": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划",
+      "status": "PASS",
+      "duration_ms": 15420,
+      "turns": 3,
+      "input_tokens": 18873,
+      "output_tokens": 1620,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 3,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "expect.exit_code",
+            "passed": true,
+            "evidence": "all checks passed"
+          },
+          {
+            "text": "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\pdf\\evals\\fixtures\\scripts\\check-pdf-routing-plan.sh",
+            "passed": true,
+            "evidence": "PASS: plan.json 通过 3 条用例（structure、normal-decrypt-and-merge、edge-scanned-no-text-layer）"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "without_skill",
+      "prompt": "工作目录下有 request.txt、contract-meta.json、archive-meta.json 三个文件。读完后在项目根目录写出 plan.json，把完成 request.txt 里那件事所需要的操作按执行顺序排成一份计划。\n\nplan.json 的格式固定如下（字段名照抄）：\n\n{\n  \"steps\": [\n    {\"tool\": \"工具或文档的名字\", \"args\": [\"参数1\", \"参数2\"], \"why\": \"这一步做什么，一句话\"},\n    {\"...\": \"...\"}\n  ],\n  \"ocrRequired\": false\n}\n\n要求：\n- steps 数组的顺序就是执行顺序，把完成请求所需的每一步都列进去，一步一个对象，每步都要有 tool / args / why 三个字段。\n- tool 写这一步实际要调用的工具或要查阅的文档名；args 写传给它的参数列表，必须与 request.txt 里出现的具体文件名、输出文件名、密码等信息对得上。\n- ocrRequired 是布尔值：这次请求里是否包含必须做 OCR 才能拿到内容的部分。\n- 只写这一个文件，不要修改已有的三个输入文件。\n",
+      "response": "已写出 `plan.json`，共 7 步：\n\n| # | 工具 | 做什么 |\n|---|---|---|\n| 1 | Read | 读三个输入文件，确认合同是扫描件、归档已加密 |\n| 2 | ocrmypdf | 对 `contract.pdf` 做 OCR（chi_sim+eng），输出 `contract-ocr.pdf` |\n| 3 | pdftotext | 导出 `contract.txt` |\n| 4 | Read | 从文本里取**甲方名称**和**签署日期** |\n| 5 | qpdf | 用密码 `hunter2` 解密 `archive.pdf` → `archive-decrypted.pdf` |\n| 6 | pdfunite | 合并为 `merged.pdf` |\n| 7 | pdfinfo | 校验页数为 5 页 |\n\n**`ocrRequired` 设为 `true`**，理由是 `contract-meta.json` 里三页的 `text_chars` 全是 0，且 `likely_scanned_pages` 覆盖 [1,2,3] —— 甲方名称和签署日期不在文本层里，只能靠 OCR 拿到。这是本次请求中唯一必须 OCR 的部分；`archive.pdf` 的解密是密码问题，不涉及 OCR（且它的 `pages` 为空，加密状态下连页级元数据都读不到，得先解密）。\n\n两点需要你确认的判断：\n- **合并顺序**：请求里说\"把它（archive）和 contract.pdf 合并\"，我按 archive 在前、合同在后排的。如果存档习惯是合同在前，把第 6 步的 args 调换即可。\n- **未列出阅读三个输入文件之外的操作**：我没有写\"生成中间文件清理\"这类步骤，因为请求只要求产出 `merged.pdf` 和两项合同信息。"
+    }
+  ],
+  "total_tokens": 41422,
+  "judge_tokens": 0,
+  "overall_tokens": 41422
+}

@@ -14,12 +14,14 @@
     {
       "name": "A",
       "withCapability": false,
-      "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs"
+      "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/without_skill/outputs/workspace/dedupe.mjs",
+      "artifactSha256": "3944443a81fc5143"
     },
     {
       "name": "B",
       "withCapability": true,
-      "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs"
+      "artifact": "adopted/skills/ponytail-workspace/iteration-8/ask-dedupe/with_skill/outputs/workspace/dedupe.mjs",
+      "artifactSha256": "7bbad342eb29a040"
     }
   ],
   "measures": {

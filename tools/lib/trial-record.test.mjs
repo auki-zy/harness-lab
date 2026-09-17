@@ -75,3 +75,33 @@ describe('decide：重复跑', () => {
     expect(v).toMatchObject({ decision: 'hold', confidence: 'medium' });
   });
 });
+
+// ── 区分度提示（A2）：B 全过不等于"技能有用" ──
+// 实测（react-best-practices，--repeat 3）：B 3/3 全过，**A 也 3/3 全过** —— 达标是真的，
+// 但这条题证明不了技能有用。结论里必须把这句话说出来，否则人会把它读成"技能有效"。
+describe('decide：区分度', () => {
+  const base = { passRateB: 1, totalB: 1, name: '__no_such_capability__' };
+
+  it('重复跑里 A 也全过 → 明说"这条题分不出技能的作用"', () => {
+    const v = decide({ ...base, runs: 3, totalB: 3, perfectRunsB: 3, perfectRunsA: 3 });
+    expect(v.reason).toContain('这条题分不出技能的作用');
+    expect(v.reason).toContain('换一条能区分 A/B 的用例');
+  });
+
+  it('单次运行里 A 也过 → 说"可能分不出"，并建议重复跑', () => {
+    const v = decide({ ...base, runs: 1, perfectRunsA: 1 });
+    expect(v.reason).toContain('可能分不出技能的作用');
+    expect(v.reason).toContain('重复跑几次再看');
+  });
+
+  it('A 只过了一部分 → 说"两边有区别"（这条题是有用的）', () => {
+    const v = decide({ ...base, runs: 3, totalB: 3, perfectRunsB: 3, perfectRunsA: 1 });
+    expect(v.reason).toContain('对照 A 只全过 1/3，两边有区别');
+  });
+
+  it('没有对照（A 缺失）时不提区分度', () => {
+    const v = decide({ ...base, runs: 2, totalB: 2, perfectRunsB: 2 });
+    expect(v.reason).not.toContain('分不出');
+    expect(v.reason).not.toContain('有区别');
+  });
+});

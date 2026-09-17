@@ -14,12 +14,14 @@
     {
       "name": "A",
       "withCapability": false,
-      "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx"
+      "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/without_skill/outputs/workspace/src/Dashboard.tsx",
+      "artifactSha256": "923cb95f3eaa9ad8"
     },
     {
       "name": "B",
       "withCapability": true,
-      "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx"
+      "artifact": "candidates/skills/react-best-practices-workspace/run-20260915095440/iteration-3/ask-202609150802/with_skill/outputs/workspace/src/Dashboard.tsx",
+      "artifactSha256": "9a0eecc5aec3f103"
     }
   ],
   "measures": {

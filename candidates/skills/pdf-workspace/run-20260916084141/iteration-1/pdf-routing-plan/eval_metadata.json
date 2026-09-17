@@ -1,0 +1,9 @@
+{
+  "eval_id": 0,
+  "eval_name": "验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划",
+  "prompt": "工作目录下有 request.txt、contract-meta.json、archive-meta.json 三个文件。读完后在项目根目录写出 plan.json，把完成 request.txt 里那件事所需要的操作按执行顺序排成一份计划。\n\nplan.json 的格式固定如下（字段名照抄）：\n\n{\n  \"steps\": [\n    {\"tool\": \"工具或文档的名字\", \"args\": [\"参数1\", \"参数2\"], \"why\": \"这一步做什么，一句话\"},\n    {\"...\": \"...\"}\n  ],\n  \"ocrRequired\": false\n}\n\n要求：\n- steps 数组的顺序就是执行顺序，把完成请求所需的每一步都列进去，一步一个对象，每步都要有 tool / args / why 三个字段。\n- tool 写这一步实际要调用的工具或要查阅的文档名；args 写传给它的参数列表，必须与 request.txt 里出现的具体文件名、输出文件名、密码等信息对得上。\n- ocrRequired 是布尔值：这次请求里是否包含必须做 OCR 才能拿到内容的部分。\n- 只写这一个文件，不要修改已有的三个输入文件。\n",
+  "assertions": [
+    "expect.exit_code",
+    "script: D:\\learning\\deepseek-harness-workspace\\harness-lab\\candidates\\skills\\pdf\\evals\\fixtures\\scripts\\check-pdf-routing-plan.sh"
+  ]
+}

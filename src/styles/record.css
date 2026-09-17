@@ -1121,3 +1121,83 @@
   color: var(--slate);
   font-size: 12px;
 }
+
+/* ---------- 两版产物 diff（对照板里展开） ----------
+   左 A 右 B 四列：行号 / A 的行 / 行号 / B 的行。新增绿、删除红（沿用 tone 变量）。 */
+.board__diff {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.board__diff-hint {
+  margin-left: 10px;
+  color: var(--slate);
+  font-size: 11.5px;
+}
+
+.diff {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.diff__sum {
+  margin: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.diff__note {
+  margin: 0;
+  padding: 8px 12px;
+  color: var(--slate);
+  font-size: 11.5px;
+}
+
+.diff__body {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.diff__row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px minmax(0, 1fr);
+  font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.diff__row[data-kind='add'] {
+  background: var(--petrol-wash);
+}
+
+.diff__row[data-kind='del'] {
+  background: #f6e6e2;
+}
+
+.diff__no {
+  padding: 0 6px;
+  border-right: 1px solid var(--line-soft);
+  color: var(--slate);
+  text-align: right;
+  user-select: none;
+}
+
+.diff__cell {
+  padding: 0 8px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.diff__row[data-kind='add'] .diff__cell:nth-of-type(2) {
+  color: var(--jade);
+}
+
+.diff__row[data-kind='del'] .diff__cell:nth-of-type(1) {
+  color: var(--seal);
+}

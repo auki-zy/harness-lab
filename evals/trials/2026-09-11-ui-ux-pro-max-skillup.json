@@ -14,12 +14,14 @@
     {
       "name": "A",
       "withCapability": false,
-      "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs"
+      "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/without_skill/outputs/workspace/ui-audit.mjs",
+      "artifactSha256": "ff5b8b1edd42919d"
     },
     {
       "name": "B",
       "withCapability": true,
-      "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs"
+      "artifact": "candidates/skills/ui-ux-pro-max-workspace/iteration-2/ui-audit-priority-lint/with_skill/outputs/workspace/ui-audit.mjs",
+      "artifactSha256": "cb4c21d3be36c8e7"
     }
   ],
   "measures": {

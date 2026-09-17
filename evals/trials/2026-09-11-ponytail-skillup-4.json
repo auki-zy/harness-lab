@@ -14,12 +14,14 @@
     {
       "name": "A",
       "withCapability": false,
-      "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs"
+      "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/without_skill/outputs/workspace/wc.mjs",
+      "artifactSha256": "ddb7069e36501014"
     },
     {
       "name": "B",
       "withCapability": true,
-      "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs"
+      "artifact": "adopted/skills/ponytail-workspace/iteration-6/wc-cli/with_skill/outputs/workspace/wc.mjs",
+      "artifactSha256": "99575a4b706ebd9b"
     }
   ],
   "measures": {

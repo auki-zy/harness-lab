@@ -14,12 +14,14 @@
     {
       "name": "A",
       "withCapability": false,
-      "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs"
+      "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/without_skill/outputs/workspace/triage.mjs",
+      "artifactSha256": "629f981ffef39154"
     },
     {
       "name": "B",
       "withCapability": true,
-      "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs"
+      "artifact": "candidates/skills/brainstorming-workspace/iteration-1/brainstorm-path-triage/with_skill/outputs/workspace/triage.mjs",
+      "artifactSha256": "a32a3a8b4b2e070c"
     }
   ],
   "measures": {

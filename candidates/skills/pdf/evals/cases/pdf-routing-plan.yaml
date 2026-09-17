@@ -1,0 +1,68 @@
+id: pdf-routing-plan
+title: 验 PDF 技能能否为「加密归档 + 无文本层扫描件」给出正确的工具选择与执行顺序计划
+description: request.txt 同时含一个扫描件（无文本层）和一个加密件，正确做法是先按 --meta 侦察、扫描页导出图片走 OCR 流程、加密件先解密再合并、最后核对；plan.json 里是否出现 pdf_page_image.py / ocr-extraction.md 这条扫描路径、pdf_secure.py --decrypt 这条解密路径以及 merged.pdf/hunter2 这些请求细节，正好区分'照工具手册选对了工具与顺序'和'凭常识泛泛而谈'。
+
+input:
+  prompt: |
+    工作目录下有 request.txt、contract-meta.json、archive-meta.json 三个文件。读完后在项目根目录写出 plan.json，把完成 request.txt 里那件事所需要的操作按执行顺序排成一份计划。
+
+    plan.json 的格式固定如下（字段名照抄）：
+
+    {
+      "steps": [
+        {"tool": "工具或文档的名字", "args": ["参数1", "参数2"], "why": "这一步做什么，一句话"},
+        {"...": "..."}
+      ],
+      "ocrRequired": false
+    }
+
+    要求：
+    - steps 数组的顺序就是执行顺序，把完成请求所需的每一步都列进去，一步一个对象，每步都要有 tool / args / why 三个字段。
+    - tool 写这一步实际要调用的工具或要查阅的文档名；args 写传给它的参数列表，必须与 request.txt 里出现的具体文件名、输出文件名、密码等信息对得上。
+    - ocrRequired 是布尔值：这次请求里是否包含必须做 OCR 才能拿到内容的部分。
+    - 只写这一个文件，不要修改已有的三个输入文件。
+
+context:
+  files:
+    "request.txt": |
+      手头两个文件帮我处理一下：
+      1) contract.pdf 是客户发来的合同，我想知道里面的甲方名称和签署日期。
+      2) archive.pdf 是带密码的老归档（密码我有：hunter2），我要把它和 contract.pdf 合并成一个 merged.pdf 存档。
+      先给我一份执行计划。
+
+    "contract-meta.json": |
+      {
+        "file": "contract.pdf",
+        "encrypted": false,
+        "page_count": 3,
+        "metadata": {"Title": "", "Author": ""},
+        "pages": [
+          {"page": 1, "width": 595.0, "height": 842.0, "rotation": 0, "text_chars": 0},
+          {"page": 2, "width": 595.0, "height": 842.0, "rotation": 0, "text_chars": 0},
+          {"page": 3, "width": 595.0, "height": 842.0, "rotation": 0, "text_chars": 0}
+        ],
+        "likely_scanned_pages": [1, 2, 3]
+      }
+
+    "archive-meta.json": |
+      {
+        "file": "archive.pdf",
+        "encrypted": true,
+        "page_count": 2,
+        "metadata": null,
+        "pages": [],
+        "likely_scanned_pages": []
+      }
+
+
+constraints:
+  timeout_seconds: 300
+  max_turns: 4
+
+expect:
+  exit_code: 0
+
+judge:
+  type: script
+  script_path: evals/fixtures/scripts/check-pdf-routing-plan.sh
+  timeout_seconds: 60
